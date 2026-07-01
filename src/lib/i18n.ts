@@ -26,7 +26,6 @@ export const copy = {
     intensity: '|psi|^2',
     spectrumDb: 'Spectrum (dB)',
     energy: 'Energy',
-    peak: 'Peak',
     parameterLabels: {
       alpha: 'Detuning',
       pump: 'Pump power',
@@ -70,7 +69,6 @@ export const copy = {
     intensity: '|psi|^2',
     spectrumDb: '频谱 (dB)',
     energy: '能量',
-    peak: '峰值',
     parameterLabels: {
       alpha: 'Detuning',
       pump: 'Pump power',
