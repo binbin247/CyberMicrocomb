@@ -30,6 +30,7 @@ import type {
 const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full'
 const BUSUANZI_URL = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'
 const HISTORY_LIMIT = 300
+const ENERGY_MIN_Y_SPAN = 0.05
 
 const normalizedControls = [
   ['alpha', -12, 20, 0.01, 'alphaTip'],
@@ -350,6 +351,8 @@ function App() {
             series={[{ name: labels.energy, y: trace.map((item) => item.energy) }]}
             yTitle={labels.energy}
             color="#287d5a"
+            yMinSpan={ENERGY_MIN_Y_SPAN}
+            yFloor={0}
           />
           <section className="visual-panel waterfall-panel">
             <div className="visual-header">

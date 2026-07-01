@@ -13,12 +13,16 @@ export function PlotPanel({
   series,
   yTitle,
   color,
+  yMinSpan,
+  yFloor,
 }: {
   title: string
   x: ArrayLike<number>
   series: Series[]
   yTitle: string
   color: string
+  yMinSpan?: number
+  yFloor?: number
 }) {
   const ref = useRef<HTMLDivElement | null>(null)
 
@@ -51,6 +55,7 @@ export function PlotPanel({
       },
       yaxis: {
         title: { text: yTitle },
+        range: getMinimumYRange(series, yMinSpan, yFloor),
         showgrid: false,
         zeroline: false,
       },
@@ -64,7 +69,7 @@ export function PlotPanel({
     }
 
     Plotly.react(ref.current, traces, layout, config)
-  }, [color, series, x, yTitle])
+  }, [color, series, x, yFloor, yMinSpan, yTitle])
 
   useEffect(() => {
     const node = ref.current
@@ -83,4 +88,38 @@ export function PlotPanel({
       <div ref={ref} className="plot-surface" />
     </section>
   )
+}
+
+function getMinimumYRange(
+  series: Series[],
+  yMinSpan?: number,
+  yFloor?: number,
+): [number, number] | undefined {
+  if (!yMinSpan || yMinSpan <= 0) {
+    return undefined
+  }
+
+  const values = series.flatMap((item) =>
+    Array.from(item.y).filter((value) => Number.isFinite(value)),
+  )
+  if (values.length === 0) {
+    return undefined
+  }
+
+  const minValue = Math.min(...values)
+  const maxValue = Math.max(...values)
+  const span = maxValue - minValue
+  if (span >= yMinSpan) {
+    return undefined
+  }
+
+  const center = (minValue + maxValue) / 2
+  let lower = center - yMinSpan / 2
+  let upper = center + yMinSpan / 2
+  if (yFloor !== undefined && lower < yFloor) {
+    upper += yFloor - lower
+    lower = yFloor
+  }
+
+  return [lower, upper]
 }
