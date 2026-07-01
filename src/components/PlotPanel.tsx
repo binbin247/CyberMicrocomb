@@ -73,7 +73,16 @@ export function PlotPanel({
 
   useEffect(() => {
     const node = ref.current
+    if (!node) {
+      return undefined
+    }
+    const resizeObserver = new ResizeObserver(() => {
+      void Plotly.Plots.resize(node)
+    })
+    resizeObserver.observe(node)
+
     return () => {
+      resizeObserver.disconnect()
       if (node) {
         Plotly.purge(node)
       }

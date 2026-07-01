@@ -27,7 +27,13 @@
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  min-height: 0;
 }
 
 button,
@@ -42,14 +48,19 @@ button {
 .app-shell {
   display: grid;
   grid-template-columns: 390px minmax(0, 1fr);
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .control-panel {
   background: var(--panel);
   border-right: 1px solid var(--line);
+  height: 100vh;
+  min-height: 0;
   padding: 18px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .app-header {
@@ -217,15 +228,21 @@ button {
 }
 
 .workspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  height: 100vh;
+  min-height: 0;
   min-width: 0;
-  padding: 22px;
+  overflow: hidden;
+  padding: clamp(12px, 1.4vw, 22px);
 }
 
 .metric-strip {
   display: grid;
   grid-template-columns: repeat(6, minmax(90px, 1fr));
   gap: 12px;
-  margin-bottom: 18px;
+  min-height: 0;
 }
 
 .metric {
@@ -234,7 +251,7 @@ button {
   border-radius: 8px;
   box-shadow: var(--shadow);
   min-width: 0;
-  padding: 12px;
+  padding: clamp(8px, 0.8vw, 12px);
 }
 
 .metric span {
@@ -245,7 +262,7 @@ button {
 
 .metric strong {
   display: block;
-  font-size: 18px;
+  font-size: clamp(14px, 1.25vw, 18px);
   margin-top: 5px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -255,7 +272,10 @@ button {
 .plot-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 1.2vw, 18px);
+  min-height: 0;
+  min-width: 0;
 }
 
 .visual-panel {
@@ -263,8 +283,11 @@ button {
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  min-height: 320px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
   padding: 12px;
 }
 
@@ -287,12 +310,13 @@ button {
 }
 
 .plot-surface {
-  height: 260px;
+  height: 100%;
+  min-height: 0;
   width: 100%;
 }
 
 .waterfall-panel {
-  min-height: 320px;
+  min-height: 0;
 }
 
 .waterfall-canvas {
@@ -300,8 +324,9 @@ button {
   border: 1px solid var(--line);
   border-radius: 6px;
   display: block;
-  height: 260px;
+  height: 100%;
   image-rendering: pixelated;
+  min-height: 0;
   width: 100%;
 }
 
@@ -309,22 +334,47 @@ button {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
-  margin-top: 18px;
+  min-height: 0;
   text-align: center;
 }
 
 @media (max-width: 1120px) {
+  body,
+  #root {
+    height: auto;
+    overflow: auto;
+  }
+
   .app-shell {
+    height: auto;
     grid-template-columns: 1fr;
+    overflow: visible;
   }
 
   .control-panel {
     border-bottom: 1px solid var(--line);
     border-right: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  .workspace {
+    height: auto;
+    overflow: visible;
   }
 
   .plot-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  .visual-panel {
+    min-height: 300px;
+  }
+
+  .plot-surface,
+  .waterfall-canvas {
+    height: 250px;
   }
 
   .metric-strip {
