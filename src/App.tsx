@@ -310,9 +310,6 @@ function App() {
 
       <main className="workspace">
         <section className="metric-strip">
-          <Metric label="step" value={snapshot?.step ?? 0} />
-          <Metric label="t" value={formatNumber(snapshot?.t ?? 0)} />
-          <Metric label="N" value={gridSize} />
           <Metric label="steps/s" value={formatNumber(metrics?.stepsPerSecond ?? 0)} />
           <Metric label="snap/s" value={formatNumber(metrics?.snapshotRate ?? 0)} />
           <Metric label="mem MB" value={formatNumber(metrics?.memoryMb ?? 0)} />
