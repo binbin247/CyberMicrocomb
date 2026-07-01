@@ -336,10 +336,7 @@ function App() {
           <PlotPanel
             title={labels.traces}
             x={trace.map((item) => item.step)}
-            series={[
-              { name: labels.energy, y: trace.map((item) => item.energy) },
-              { name: labels.peak, y: trace.map((item) => item.peak) },
-            ]}
+            series={[{ name: labels.energy, y: trace.map((item) => item.energy) }]}
             yTitle={labels.energy}
             color="#287d5a"
           />
