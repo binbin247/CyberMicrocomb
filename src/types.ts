@@ -17,6 +17,9 @@ export interface Metrics {
   stepsPerSecond: number
   snapshotRate: number
   memoryMb: number
+  batchMs: number
+  latencyMs: number
+  loadPercent: number
   n: number
 }
 

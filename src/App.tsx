@@ -313,6 +313,9 @@ function App() {
           <Metric label="steps/s" value={formatNumber(metrics?.stepsPerSecond ?? 0)} />
           <Metric label="snap/s" value={formatNumber(metrics?.snapshotRate ?? 0)} />
           <Metric label="mem MB" value={formatNumber(metrics?.memoryMb ?? 0)} />
+          <Metric label="batch ms" value={formatNumber(metrics?.batchMs ?? 0)} />
+          <Metric label="latency ms" value={formatNumber(metrics?.latencyMs ?? 0)} />
+          <Metric label="load %" value={formatNumber(metrics?.loadPercent ?? 0)} />
         </section>
 
         <section className="plot-grid">

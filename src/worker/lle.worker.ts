@@ -34,6 +34,10 @@ let currentN: GridSize = 512
 let currentParams: NormalizedParams | null = null
 let stepsSinceMetric = 0
 let snapshotsSinceMetric = 0
+let batchesSinceMetric = 0
+let batchTimeSinceMetric = 0
+let latencyTimeSinceMetric = 0
+let busyTimeSinceMetric = 0
 let metricStartedAt = performance.now()
 let lastSnapshotAt = 0
 
@@ -71,12 +75,12 @@ self.onmessage = async (event: MessageEvent<MainToWorkerMessage>) => {
     }
     if (message.type === 'step') {
       running = false
-      emitSnapshot(runBatch())
+      emitSnapshot(runBatch(performance.now()))
       return
     }
     if (message.type === 'reset') {
       reset()
-      emitSnapshot(snapshotOnly())
+      emitSnapshot(snapshotOnly(undefined, false))
       return
     }
     if (message.type === 'exportState') {
@@ -115,7 +119,7 @@ function configure(n: GridSize, params: NormalizedParams, resetState: boolean) {
   pyodide!.globals.set('CONFIG_JSON', JSON.stringify({ n, params, reset: resetState }))
   runPythonAsJs('solver.configure(json.loads(CONFIG_JSON))')
   configured = true
-  emitSnapshot(snapshotOnly())
+  emitSnapshot(snapshotOnly(undefined, false))
 }
 
 function updateParams(params: NormalizedParams) {
@@ -123,7 +127,7 @@ function updateParams(params: NormalizedParams) {
   pyodide!.globals.set('PARAMS_JSON', JSON.stringify(params))
   runPythonAsJs('solver.update_params(json.loads(PARAMS_JSON))')
   if (!running) {
-    emitSnapshot(snapshotOnly())
+    emitSnapshot(snapshotOnly(undefined, false))
   }
 }
 
@@ -143,7 +147,7 @@ async function runLoop() {
     advanceBatch()
     const now = performance.now()
     if (now - lastSnapshotAt >= TARGET_SNAPSHOT_INTERVAL_MS) {
-      emitSnapshot(snapshotOnly())
+      emitSnapshot(snapshotOnly(now))
       snapshotsSinceMetric += 1
       maybeEmitMetrics()
       lastSnapshotAt = now
@@ -153,23 +157,36 @@ async function runLoop() {
   loopActive = false
 }
 
-function runBatch(): Snapshot {
+function runBatch(startedAt = performance.now()): Snapshot {
   advanceBatch()
+  const snapshot = snapshotOnly(startedAt)
   snapshotsSinceMetric += 1
   maybeEmitMetrics()
-  return snapshotOnly()
+  return snapshot
 }
 
 function advanceBatch() {
   if (!configured) {
     throw new Error('Solver is not configured.')
   }
+  const startedAt = performance.now()
   pyodide!.runPython('solver.advance_steps()')
+  const batchMs = performance.now() - startedAt
   stepsSinceMetric += currentParams?.stepsPerFrame ?? 0
+  batchesSinceMetric += 1
+  batchTimeSinceMetric += batchMs
+  busyTimeSinceMetric += batchMs
 }
 
-function snapshotOnly(): Snapshot {
-  return normalizeSnapshot(runPythonAsJs('solver.snapshot()') as Snapshot)
+function snapshotOnly(startedAt = performance.now(), recordMetrics = true): Snapshot {
+  const snapshotStartedAt = performance.now()
+  const snapshot = normalizeSnapshot(runPythonAsJs('solver.snapshot()') as Snapshot)
+  const now = performance.now()
+  if (recordMetrics) {
+    busyTimeSinceMetric += now - snapshotStartedAt
+    latencyTimeSinceMetric += now - startedAt
+  }
+  return snapshot
 }
 
 function emitSnapshot(snapshot: Snapshot) {
@@ -192,11 +209,19 @@ function maybeEmitMetrics() {
     stepsPerSecond: stepsSinceMetric / elapsed,
     snapshotRate: snapshotsSinceMetric / elapsed,
     memoryMb: (n * 300 * 4 + n * 3 * 4) / 1024 / 1024,
+    batchMs: batchesSinceMetric > 0 ? batchTimeSinceMetric / batchesSinceMetric : 0,
+    latencyMs:
+      snapshotsSinceMetric > 0 ? latencyTimeSinceMetric / snapshotsSinceMetric : 0,
+    loadPercent: Math.min(100, (busyTimeSinceMetric / (elapsed * 1000)) * 100),
     n,
   }
   post({ type: 'metrics', metrics })
   stepsSinceMetric = 0
   snapshotsSinceMetric = 0
+  batchesSinceMetric = 0
+  batchTimeSinceMetric = 0
+  latencyTimeSinceMetric = 0
+  busyTimeSinceMetric = 0
   metricStartedAt = now
 }
 
