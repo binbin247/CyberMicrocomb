@@ -1,5 +1,7 @@
 # [CyberMicrocomb](https://binbin247.github.io/CyberMicrocomb/)
 
+[English](./README.md) | [中文](./README.zh-CN.md)
+
 Interactive browser-based LLE simulator for microcomb dynamics.
 
 A browser-only real-time Lugiato-Lefever equation simulator built with React,
