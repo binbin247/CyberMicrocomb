@@ -1,91 +1,86 @@
 # CyberMicrocomb https://binbin247.github.io/CyberMicrocomb/
 
-[English](./README.md) | [中文](./README.zh-CN.md)
+[中文](./README.md) | [English](./README.en.md)
 
-Interactive browser-based LLE simulator for microcomb dynamics.
+面向微梳动力学的交互式浏览器端 LLE 模拟器。
 
-A browser-only real-time Lugiato-Lefever equation simulator built with React,
-TypeScript, Vite, Pyodide, NumPy, and a Web Worker.
+CyberMicrocomb 是一个纯浏览器实时 Lugiato-Lefever 方程模拟器，基于
+React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 
-The browser owns the interface. The numerical solver runs locally in a worker
-through Pyodide, so there is no Flask/FastAPI backend and no server-side
-compute once the page has loaded.
+浏览器负责用户界面。数值求解器通过 Pyodide 在 Web Worker 中本地运行，
+因此页面加载完成后不需要 Flask/FastAPI 后端，也不需要服务器端计算。
 
-## Features
+## 功能
 
-- Normalized parameter controls.
-- English and Chinese UI toggle.
-- Fixed grids: 256, 512, 1024, 2048, and 4096 points.
-- Real-time parameter updates without resetting the current field.
-- Plotly time-domain, spectrum, energy, and peak plots.
-- Canvas waterfall history with a fixed 300-frame ring buffer.
-- Simple first-order split-step LLE solver with D2/D3/D4 and optional Raman
-  shock term.
-- Static deployment target for GitHub Pages.
+- 归一化参数控制。
+- 中英文界面切换。
+- 固定网格：256、512、1024、2048 和 4096 点。
+- 参数实时更新，不重置当前光场。
+- 使用 Plotly 绘制时域、频谱、能量和峰值曲线。
+- 使用 Canvas 绘制 waterfall 历史，并用固定 300 帧 ring buffer 保存。
+- 简单一阶分步傅里叶 LLE 求解器，支持 D2/D3/D4 和可选 Raman shock 项。
+- 面向 GitHub Pages 的纯静态部署。
 
-## Model
+## 模型
 
-The normalized model is
+归一化模型为
 
 ```text
 dpsi/dt = [-(1 + i alpha) + i Dint(mu) + i |psi|^2] psi
           + F - tauR psi d_theta |psi|^2
 ```
 
-where
+其中
 
 ```text
 Dint(mu) = d2 mu^2 / 2 + d3 mu^3 / 6 + d4 mu^4 / 24
 ```
 
-The v1 solver uses a simple first-order split-step update:
+v1 求解器使用简单一阶分步傅里叶更新：
 
-1. Time-domain Kerr/Raman update.
-2. FFT.
-3. Frequency-domain linear update.
-4. IFFT.
-5. Explicit pump update.
+1. 时域 Kerr/Raman 更新。
+2. FFT。
+3. 频域线性更新。
+4. IFFT。
+5. 显式泵浦更新。
 
-This is intended for interactive exploration, not final publication-grade
-integration.
+该版本用于交互式探索，不作为最终论文级积分结果。
 
-## Local Development
+## 本地开发
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the printed local Vite URL, normally:
+打开终端输出的本地 Vite 地址，通常是：
 
 ```text
 http://127.0.0.1:5173/
 ```
 
-The first page load needs network access to fetch Pyodide and NumPy from the
-Pyodide CDN. After the runtime is loaded, the current session keeps computing
-locally in the browser.
+首次加载页面需要联网，从 Pyodide CDN 获取 Pyodide 和 NumPy。运行时加载完成后，
+当前会话的计算会继续在浏览器本地执行。
 
-## Tests and Build
+## 测试与构建
 
 ```bash
 npm run test
 npm run build
 ```
 
-The test command runs Python NumPy solver checks for decay, grid rebuild, and
-Raman finite output.
+测试命令会运行 Python NumPy 求解器检查，包括损耗衰减、网格重建和 Raman
+输出有限性。
 
 ## GitHub Pages
 
-The included workflow builds the app as a static site and deploys it to GitHub
-Pages. In the repository settings, set Pages source to GitHub Actions, then push
-to `main`.
+仓库内置 workflow 会把应用构建成静态站点并部署到 GitHub Pages。在仓库设置中，
+将 Pages source 设置为 GitHub Actions，然后推送到 `main`。
 
-For this repository name, the production base path is:
+对于当前仓库名，生产环境 base path 为：
 
 ```text
 /CyberMicrocomb/
 ```
 
-The workflow sets `GITHUB_PAGES=true`, which makes Vite use that base path.
+workflow 会设置 `GITHUB_PAGES=true`，让 Vite 使用该 base path。
