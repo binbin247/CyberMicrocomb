@@ -361,6 +361,9 @@ function App() {
           </section>
         </section>
 
+        <footer className="site-footer">
+          © 2026 Binbin Nie. CyberMicrocomb. Code licensed under MIT License.
+        </footer>
       </main>
     </div>
   )

@@ -305,6 +305,14 @@ button {
   width: 100%;
 }
 
+.site-footer {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 18px;
+  text-align: center;
+}
+
 @media (max-width: 1120px) {
   .app-shell {
     grid-template-columns: 1fr;
