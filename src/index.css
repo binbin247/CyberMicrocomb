@@ -76,6 +76,12 @@ button {
   margin: 0;
 }
 
+.app-header .usage-counter {
+  color: var(--accent-2);
+  font-weight: 700;
+  margin-top: 5px;
+}
+
 .panel-section {
   border-top: 1px solid var(--line);
   padding: 16px 0;

@@ -28,6 +28,7 @@ import type {
 } from './types'
 
 const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full'
+const BUSUANZI_URL = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'
 const HISTORY_LIMIT = 300
 
 const normalizedControls = [
@@ -88,6 +89,17 @@ function App() {
   useEffect(() => {
     isRunningRef.current = isRunning
   }, [isRunning])
+
+  useEffect(() => {
+    if (document.getElementById('busuanzi-script')) {
+      return
+    }
+    const script = document.createElement('script')
+    script.id = 'busuanzi-script'
+    script.async = true
+    script.src = BUSUANZI_URL
+    document.body.appendChild(script)
+  }, [])
 
   useEffect(() => {
     const worker = new Worker(new URL('./worker/lle.worker.ts', import.meta.url), {
@@ -222,6 +234,10 @@ function App() {
           <div>
             <h1>{labels.title}</h1>
             <p>{labels.subtitle}</p>
+            <p className="usage-counter" id="busuanzi_container_site_pv">
+              {labels.usageCount}
+              <span id="busuanzi_value_site_pv">--</span>
+            </p>
           </div>
           <button
             type="button"

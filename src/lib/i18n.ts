@@ -4,6 +4,7 @@ export const copy = {
   en: {
     title: 'CyberMicrocomb',
     subtitle: 'Interactive browser-based LLE simulator for microcomb dynamics',
+    usageCount: 'Usage count: ',
     language: 'Language',
     grid: 'Grid',
     play: 'Play',
@@ -47,6 +48,7 @@ export const copy = {
   zh: {
     title: 'CyberMicrocomb',
     subtitle: 'Interactive browser-based LLE simulator for microcomb dynamics',
+    usageCount: '使用人次：',
     language: '语言',
     grid: '网格',
     play: '播放',
