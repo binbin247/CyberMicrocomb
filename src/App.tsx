@@ -212,7 +212,6 @@ function App() {
 
   const exportState = () => workerRef.current?.postMessage({ type: 'exportState' })
 
-  const modeParams = normalized
   const intensityX = snapshot ? indexArray(snapshot.intensity.length) : []
   const spectrumX = snapshot ? centeredModeArray(snapshot.spectrumDb.length) : []
 
@@ -346,32 +345,6 @@ function App() {
           </section>
         </section>
 
-        <section className="model-readout">
-          <div>
-            <strong>{labels.parameterLabels.alpha}</strong>
-            <span>{formatNumber(modeParams.alpha)}</span>
-          </div>
-          <div>
-            <strong>{labels.parameterLabels.pump}</strong>
-            <span>{formatNumber(modeParams.pump)}</span>
-          </div>
-          <div>
-            <strong>{labels.parameterLabels.d2}</strong>
-            <span>{formatNumber(modeParams.d2)}</span>
-          </div>
-          <div>
-            <strong>{labels.parameterLabels.d3}</strong>
-            <span>{formatNumber(modeParams.d3)}</span>
-          </div>
-          <div>
-            <strong>{labels.parameterLabels.d4}</strong>
-            <span>{formatNumber(modeParams.d4)}</span>
-          </div>
-          <div>
-            <strong>tauR</strong>
-            <span>{formatNumber(modeParams.tauR)}</span>
-          </div>
-        </section>
       </main>
     </div>
   )

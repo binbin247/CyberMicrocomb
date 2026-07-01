@@ -299,39 +299,6 @@ button {
   width: 100%;
 }
 
-.model-readout {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 1px;
-  margin-top: 18px;
-  overflow: hidden;
-}
-
-.model-readout div {
-  background: var(--panel-soft);
-  padding: 11px 12px;
-}
-
-.model-readout strong,
-.model-readout span {
-  display: block;
-}
-
-.model-readout strong {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.model-readout span {
-  font-size: 14px;
-  font-weight: 700;
-  margin-top: 3px;
-}
-
 @media (max-width: 1120px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -346,8 +313,7 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .metric-strip,
-  .model-readout {
+  .metric-strip {
     grid-template-columns: repeat(3, 1fr);
   }
 }
@@ -362,8 +328,7 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .metric-strip,
-  .model-readout {
+  .metric-strip {
     grid-template-columns: repeat(2, 1fr);
   }
 }
