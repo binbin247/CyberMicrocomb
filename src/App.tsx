@@ -40,6 +40,9 @@ const BUSUANZI_URL = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mi
 const HISTORY_LIMIT = 300
 const ENERGY_MIN_Y_SPAN = 0.05
 const MODEL_IDS: ModelId[] = ['standard', 'stokes']
+const THETA_RANGE: [number, number] = [-Math.PI, Math.PI]
+const THETA_TICK_VALUES = [-Math.PI, -Math.PI / 2, 0, Math.PI / 2, Math.PI]
+const THETA_TICK_LABELS = ['-pi', '-pi/2', '0', 'pi/2', 'pi']
 
 interface TracePoint {
   step: number
@@ -178,7 +181,7 @@ function App() {
       ? Math.max(historyRows.primary.length, historyRows.stokes.length)
       : historyRows.standard.length
 
-  const intensityX = snapshot ? indexArray(getFieldLength(snapshot)) : []
+  const intensityX = snapshot ? thetaArray(getFieldLength(snapshot)) : []
   const spectrumX = snapshot ? centeredModeArray(getSpectrumLength(snapshot)) : []
   const temporalSeries = getTemporalSeries(snapshot, labels)
   const spectrumSeries = getSpectrumSeries(snapshot, labels)
@@ -510,6 +513,10 @@ function App() {
             title={labels.timeDomain}
             x={intensityX}
             series={temporalSeries}
+            xRange={THETA_RANGE}
+            xTitle="theta"
+            xTickLabels={THETA_TICK_LABELS}
+            xTickValues={THETA_TICK_VALUES}
             yTitle={labels.intensity}
             color="#2364aa"
           />
@@ -794,8 +801,11 @@ function statusText(
   return status
 }
 
-function indexArray(length: number) {
-  return Array.from({ length }, (_, index) => index)
+function thetaArray(length: number) {
+  return Array.from(
+    { length },
+    (_, index) => -Math.PI + (2 * Math.PI * index) / length,
+  )
 }
 
 function centeredModeArray(length: number) {
@@ -839,10 +849,10 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
       },
       plots: {
         temporalField: {
-          x: indexArray(snapshot.primaryIntensity.length),
+          x: thetaArray(snapshot.primaryIntensity.length),
           primaryIntensity: Array.from(snapshot.primaryIntensity),
           stokesIntensity: Array.from(snapshot.stokesIntensity),
-          xLabel: 'sample index',
+          xLabel: 'theta (rad)',
           yLabel: '|psi|^2',
         },
         combSpectrum: {
@@ -886,9 +896,9 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
       },
       plots: {
         temporalField: {
-          x: indexArray(snapshot.intensity.length),
+          x: thetaArray(snapshot.intensity.length),
           intensity: Array.from(snapshot.intensity),
-          xLabel: 'sample index',
+          xLabel: 'theta (rad)',
           yLabel: '|psi|^2',
         },
         combSpectrum: {

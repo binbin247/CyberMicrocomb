@@ -11,6 +11,10 @@ interface Series {
 interface PlotSurfaceProps {
   x: ArrayLike<number>
   series: Series[]
+  xTitle?: string
+  xRange?: [number, number]
+  xTickLabels?: string[]
+  xTickValues?: number[]
   yTitle: string
   color: string
   yMinSpan?: number
@@ -20,6 +24,10 @@ interface PlotSurfaceProps {
 export function PlotSurface({
   x,
   series,
+  xTitle,
+  xRange,
+  xTickLabels,
+  xTickValues,
   yTitle,
   color,
   yMinSpan,
@@ -51,6 +59,11 @@ export function PlotSurface({
       plot_bgcolor: '#fbfcfd',
       font: { family: 'Inter, system-ui, sans-serif', size: 12, color: '#28313d' },
       xaxis: {
+        range: xRange,
+        tickmode: xTickValues && xTickLabels ? 'array' : undefined,
+        ticktext: xTickLabels,
+        tickvals: xTickValues,
+        title: xTitle ? { text: xTitle } : undefined,
         showgrid: false,
         zeroline: false,
       },
@@ -70,7 +83,7 @@ export function PlotSurface({
     }
 
     Plotly.react(ref.current, traces, layout, config)
-  }, [color, series, x, yFloor, yMinSpan, yTitle])
+  }, [color, series, x, xRange, xTickLabels, xTickValues, xTitle, yFloor, yMinSpan, yTitle])
 
   useEffect(() => {
     const node = ref.current
