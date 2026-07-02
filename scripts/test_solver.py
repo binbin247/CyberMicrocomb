@@ -321,7 +321,7 @@ def test_turnkey_adaptive_dt_satisfies_aliasing_bound():
 
 def configure_multicolor(solver, n=128, **params):
     base = {
-        "alphaP": 45.0,
+        "alphaP": 48.0,
         "alphaS": 25.0,
         "alphaI": 25.0,
         "pump": 17.0,

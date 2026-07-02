@@ -69,7 +69,7 @@ export const DEFAULT_TURNKEY_PARAMS: TurnkeyParams = {
 }
 
 export const DEFAULT_MULTICOLOR_PARAMS: MulticolorParams = {
-  alphaP: 45,
+  alphaP: 48,
   alphaS: 25,
   alphaI: 25,
   pump: 17,

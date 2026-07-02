@@ -163,7 +163,7 @@ describe('parameter clamping', () => {
     })
     expect(DEFAULT_MULTICOLOR_GRID_SIZE).toBe(1024)
     expect(DEFAULT_MULTICOLOR_PARAMS).toMatchObject({
-      alphaP: 45,
+      alphaP: 48,
       alphaS: 25,
       alphaI: 25,
       fsrMismatchI: 18.1,

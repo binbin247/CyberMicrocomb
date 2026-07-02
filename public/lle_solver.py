@@ -795,7 +795,7 @@ class MulticolorSolitonSolver:
         self.step = 0
         self.t = 0.0
         self.params = {
-            "alphaP": 45.0,
+            "alphaP": 48.0,
             "alphaS": 25.0,
             "alphaI": 25.0,
             "pump": 17.0,
@@ -1003,7 +1003,7 @@ class MulticolorSolitonSolver:
     @staticmethod
     def _clean_params(params):
         cleaned = {
-            "alphaP": float(params.get("alphaP", 45.0)),
+            "alphaP": float(params.get("alphaP", 48.0)),
             "alphaS": float(params.get("alphaS", 25.0)),
             "alphaI": float(params.get("alphaI", 25.0)),
             "pump": max(0.0, float(params.get("pump", 17.0))),
