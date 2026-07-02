@@ -26,7 +26,7 @@ export function clampStandardParams(params: StandardParams): StandardParams {
 export function clampStokesParams(params: StokesParams): StokesParams {
   return {
     alphaP: clamp(finiteOr(params.alphaP, DEFAULT_STOKES_PARAMS.alphaP), -20, 100),
-    alphaS: clamp(finiteOr(params.alphaS, DEFAULT_STOKES_PARAMS.alphaS), -20, 80),
+    alphaS: 0,
     pump: clamp(finiteOr(params.pump, DEFAULT_STOKES_PARAMS.pump), 0, 40),
     d2P: clamp(finiteOr(params.d2P, DEFAULT_STOKES_PARAMS.d2P), -0.25, 0.25),
     d2S: clamp(finiteOr(params.d2S, DEFAULT_STOKES_PARAMS.d2S), -0.25, 0.25),

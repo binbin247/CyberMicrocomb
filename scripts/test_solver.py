@@ -157,6 +157,13 @@ def test_stokes_defaults_follow_matlab_system_parameters():
     assert params["tauR"] == 3.3e-4
 
 
+def test_stokes_detuning_is_fixed_at_zero():
+    solver = StokesSolitonSolver()
+    configure_stokes(solver, n=128, alphaS=21.93)
+    params = solver.snapshot()["normalizedParams"]
+    assert params["alphaS"] == 0.0
+
+
 if __name__ == "__main__":
     test_zero_pump_decay()
     test_grid_rebuild()
@@ -168,4 +175,5 @@ if __name__ == "__main__":
     test_stokes_export_contains_dual_fields()
     test_stokes_adaptive_dt_satisfies_aliasing_bound()
     test_stokes_defaults_follow_matlab_system_parameters()
+    test_stokes_detuning_is_fixed_at_zero()
     print("solver tests passed")

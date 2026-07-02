@@ -101,7 +101,6 @@ const stokesControlGroups: readonly ControlGroupDefinition[] = [
   {
     titleKey: 'stokes',
     controls: [
-      { key: 'alphaS', min: -20, max: 80, step: 0.01 },
       { key: 'd2S', min: -0.25, max: 0.25, step: 0.0001 },
       { key: 'fsrMismatch', min: -1, max: 1, step: 0.0001 },
     ],

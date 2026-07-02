@@ -43,7 +43,7 @@ describe('parameter clamping', () => {
 
     expect(params).toMatchObject({
       alphaP: 20,
-      alphaS: -20,
+      alphaS: 0,
       pump: 0,
       d2P: 0.25,
       d2S: -0.25,

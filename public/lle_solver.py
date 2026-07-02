@@ -369,7 +369,7 @@ class StokesSolitonSolver:
     def _clean_params(params):
         cleaned = {
             "alphaP": float(params.get("alphaP", 20.0)),
-            "alphaS": float(params.get("alphaS", 0.0)),
+            "alphaS": 0.0,
             "pump": max(0.0, float(params.get("pump", 12.247))),
             "d2P": float(params.get("d2P", 0.02)),
             "d2S": float(params.get("d2S", 0.02)),
