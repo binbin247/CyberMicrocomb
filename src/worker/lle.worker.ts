@@ -92,6 +92,7 @@ self.onmessage = async (event: MessageEvent<MainToWorkerMessage>) => {
       return
     }
     if (message.type === 'reset') {
+      running = false
       reset()
       emitSnapshot(snapshotOnly(undefined, false))
       return

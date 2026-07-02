@@ -14,17 +14,13 @@ import { ModelDocsPanel } from './components/ModelDocsPanel'
 import { PlotPanel } from './components/PlotPanel'
 import { WaterfallCanvas } from './components/WaterfallCanvas'
 import {
-  DEFAULT_GRID_SIZE,
-  DEFAULT_MULTICOLOR_GRID_SIZE,
+  DEFAULT_GRID_BY_MODEL,
   DEFAULT_MULTICOLOR_PARAMS,
-  DEFAULT_PLATICON_GRID_SIZE,
   DEFAULT_PLATICON_PARAMS,
-  DEFAULT_RAMAN_GRID_SIZE,
   DEFAULT_RAMAN_PARAMS,
-  DEFAULT_STOKES_GRID_SIZE,
   DEFAULT_STANDARD_PARAMS,
   DEFAULT_STOKES_PARAMS,
-  DEFAULT_TURNKEY_GRID_SIZE,
+  defaultParamsForModel,
   DEFAULT_TURNKEY_PARAMS,
   GRID_SIZES,
 } from './lib/defaults'
@@ -58,6 +54,12 @@ const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full'
 const BUSUANZI_URL = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'
 const HISTORY_LIMIT = 300
 const ENERGY_MIN_Y_SPAN = 0.05
+
+interface PendingDefaultReset {
+  modelId: ModelId
+  gridSize: GridSize
+  params: SimulationParams
+}
 const THETA_RANGE: [number, number] = [-Math.PI, Math.PI]
 const THETA_TICK_VALUES = [-Math.PI, -Math.PI / 2, 0, Math.PI / 2, Math.PI]
 const THETA_TICK_LABELS = ['-pi', '-pi/2', '0', 'pi/2', 'pi']
@@ -320,14 +322,8 @@ function App() {
   const [language, setLanguage] = useState<Language>('en')
   const labels = t(language)
   const [modelId, setModelId] = useState<ModelId>('standard')
-  const [gridSizesByModel, setGridSizesByModel] = useState<Record<ModelId, GridSize>>({
-    standard: DEFAULT_GRID_SIZE,
-    platicon: DEFAULT_PLATICON_GRID_SIZE,
-    stokes: DEFAULT_STOKES_GRID_SIZE,
-    turnkey: DEFAULT_TURNKEY_GRID_SIZE,
-    multicolor: DEFAULT_MULTICOLOR_GRID_SIZE,
-    raman: DEFAULT_RAMAN_GRID_SIZE,
-  })
+  const [gridSizesByModel, setGridSizesByModel] =
+    useState<Record<ModelId, GridSize>>(DEFAULT_GRID_BY_MODEL)
   const [standardParams, setStandardParams] = useState(DEFAULT_STANDARD_PARAMS)
   const [platiconParams, setPlaticonParams] = useState(DEFAULT_PLATICON_PARAMS)
   const [stokesParams, setStokesParams] = useState(DEFAULT_STOKES_PARAMS)
@@ -358,6 +354,8 @@ function App() {
   const livePreviewRef = useRef(true)
   const isRunningRef = useRef(false)
   const previewTimerRef = useRef<number | null>(null)
+  const pendingDefaultResetRef = useRef<PendingDefaultReset | null>(null)
+  const [resetToken, setResetToken] = useState(0)
 
   const gridSize = gridSizesByModel[modelId]
 
@@ -541,6 +539,22 @@ function App() {
     if (!worker || !isReady) {
       return
     }
+    const pendingDefaultReset = pendingDefaultResetRef.current
+    if (pendingDefaultReset && pendingDefaultReset.modelId === modelId) {
+      resetLocalBuffers()
+      worker.postMessage({
+        type: 'configure',
+        modelId: pendingDefaultReset.modelId,
+        n: pendingDefaultReset.gridSize,
+        params: pendingDefaultReset.params,
+        reset: true,
+      })
+      lastGridRef.current = pendingDefaultReset.gridSize
+      lastModelRef.current = pendingDefaultReset.modelId
+      didInitialConfigureRef.current = true
+      pendingDefaultResetRef.current = null
+      return
+    }
     const reset =
       lastGridRef.current !== gridSize ||
       lastModelRef.current !== modelId ||
@@ -568,7 +582,7 @@ function App() {
         }, 35)
       }
     }
-  }, [activeParams, clearPreviewTimer, gridSize, isReady, modelId, resetLocalBuffers])
+  }, [activeParams, clearPreviewTimer, gridSize, isReady, modelId, resetLocalBuffers, resetToken])
 
   const changeModel = (nextModelId: ModelId) => {
     if (nextModelId === modelId) {
@@ -606,11 +620,32 @@ function App() {
   }
 
   const reset = () => {
+    const defaultGrid = DEFAULT_GRID_BY_MODEL[modelId]
+    const defaultParams = defaultParamsForModel(modelId)
     clearPreviewTimer()
     setIsRunning(false)
     setStatus(isReady ? 'ready' : 'loading')
+    setError(null)
+    workerRef.current?.postMessage({ type: 'pause' })
+    setGridSizesByModel((current) =>
+      current[modelId] === defaultGrid ? current : { ...current, [modelId]: defaultGrid },
+    )
+    if (modelId === 'stokes') {
+      setStokesParams(defaultParams as StokesParams)
+    } else if (modelId === 'platicon') {
+      setPlaticonParams(defaultParams as PlaticonParams)
+    } else if (modelId === 'turnkey') {
+      setTurnkeyParams(defaultParams as TurnkeyParams)
+    } else if (modelId === 'multicolor') {
+      setMulticolorParams(defaultParams as MulticolorParams)
+    } else if (modelId === 'raman') {
+      setRamanParams(defaultParams as RamanParams)
+    } else {
+      setStandardParams(defaultParams as StandardParams)
+    }
+    pendingDefaultResetRef.current = { modelId, gridSize: defaultGrid, params: defaultParams }
     resetLocalBuffers()
-    workerRef.current?.postMessage({ type: 'reset' })
+    setResetToken((value) => value + 1)
   }
 
   const exportState = () => workerRef.current?.postMessage({ type: 'exportState' })

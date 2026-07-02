@@ -3,6 +3,8 @@ import type {
   MulticolorParams,
   PlaticonParams,
   RamanParams,
+  ModelId,
+  SimulationParams,
   StandardParams,
   StokesParams,
   TurnkeyParams,
@@ -99,4 +101,32 @@ export const DEFAULT_RAMAN_PARAMS: RamanParams = {
   noise: 0.0001,
   dt: 0.00005,
   stepsPerFrame: 1000,
+}
+
+export const DEFAULT_GRID_BY_MODEL: Record<ModelId, GridSize> = {
+  standard: DEFAULT_GRID_SIZE,
+  platicon: DEFAULT_PLATICON_GRID_SIZE,
+  stokes: DEFAULT_STOKES_GRID_SIZE,
+  turnkey: DEFAULT_TURNKEY_GRID_SIZE,
+  multicolor: DEFAULT_MULTICOLOR_GRID_SIZE,
+  raman: DEFAULT_RAMAN_GRID_SIZE,
+}
+
+export function defaultParamsForModel(modelId: ModelId): SimulationParams {
+  if (modelId === 'platicon') {
+    return { ...DEFAULT_PLATICON_PARAMS }
+  }
+  if (modelId === 'stokes') {
+    return { ...DEFAULT_STOKES_PARAMS }
+  }
+  if (modelId === 'turnkey') {
+    return { ...DEFAULT_TURNKEY_PARAMS }
+  }
+  if (modelId === 'multicolor') {
+    return { ...DEFAULT_MULTICOLOR_PARAMS }
+  }
+  if (modelId === 'raman') {
+    return { ...DEFAULT_RAMAN_PARAMS }
+  }
+  return { ...DEFAULT_STANDARD_PARAMS }
 }

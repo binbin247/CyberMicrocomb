@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_GRID_BY_MODEL,
   DEFAULT_MULTICOLOR_GRID_SIZE,
   DEFAULT_MULTICOLOR_PARAMS,
   DEFAULT_PLATICON_GRID_SIZE,
@@ -11,6 +12,7 @@ import {
   DEFAULT_STOKES_PARAMS,
   DEFAULT_TURNKEY_GRID_SIZE,
   DEFAULT_TURNKEY_PARAMS,
+  defaultParamsForModel,
 } from './defaults'
 import { copy } from './i18n'
 import { MODEL_IDS } from './models'
@@ -89,6 +91,24 @@ describe('parameter clamping', () => {
       'multicolor',
       'raman',
     ])
+  })
+
+  it('keeps model reset defaults centralized and fresh', () => {
+    expect(DEFAULT_GRID_BY_MODEL).toEqual({
+      standard: 512,
+      platicon: 512,
+      stokes: 1024,
+      turnkey: 512,
+      multicolor: 1024,
+      raman: 512,
+    })
+
+    const ramanDefaults = defaultParamsForModel('raman') as { dtnNorm: number }
+    expect(ramanDefaults).toMatchObject(DEFAULT_RAMAN_PARAMS)
+    ramanDefaults.dtnNorm = 77
+    expect((defaultParamsForModel('raman') as { dtnNorm: number }).dtnNorm).toBe(
+      DEFAULT_RAMAN_PARAMS.dtnNorm,
+    )
   })
 
   it('keeps platicon controls finite and inside interactive ranges', () => {
