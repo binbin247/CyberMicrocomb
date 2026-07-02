@@ -33,6 +33,7 @@ export const copy = {
       d2: 'D2',
       d3: 'D3',
       d4: 'D4',
+      dt: 'dt',
     },
     warning:
       'This v1 uses a simple first-order split-step update for real-time exploration, not final publication-grade integration.',
@@ -42,6 +43,8 @@ export const copy = {
     d3Tip: 'Third-order integrated dispersion coefficient.',
     d4Tip: 'Fourth-order integrated dispersion coefficient.',
     tauTip: 'Normalized Raman shock strength.',
+    dtTip:
+      'Requested integration step. The solver clamps oversized values to the dispersion aliasing limit.',
     stepsTip: 'Solver steps per visualization update.',
   },
   zh: {
@@ -76,6 +79,7 @@ export const copy = {
       d2: 'D2',
       d3: 'D3',
       d4: 'D4',
+      dt: 'dt',
     },
     warning:
       '第一版使用简单一阶分步傅里叶更新，适合实时探索，不作为最终论文级积分结果。',
@@ -85,6 +89,7 @@ export const copy = {
     d3Tip: '三阶集成色散系数。',
     d4Tip: '四阶集成色散系数。',
     tauTip: '归一化 Raman shock 强度。',
+    dtTip: '期望积分步长。过大的值会被 solver 自动限制到色散 aliasing 安全上限。',
     stepsTip: '每次可视化刷新前推进的 solver 步数。',
   },
 } as const

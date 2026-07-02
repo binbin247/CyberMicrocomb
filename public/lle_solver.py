@@ -4,7 +4,8 @@ import math
 import numpy as np
 
 
-MAX_DT = 8e-4
+DEFAULT_DT = 8e-4
+MAX_REQUESTED_DT = 5e-3
 MIN_DT = 1e-12
 ALIASING_SAFETY = 0.5
 
@@ -22,7 +23,7 @@ class LLESolver:
             "d3": 0.0,
             "d4": 0.0,
             "tauR": 0.0,
-            "dt": MAX_DT,
+            "dt": DEFAULT_DT,
             "stepsPerFrame": 50,
         }
         self.mu = self._make_mu(self.n)
@@ -117,11 +118,12 @@ class LLESolver:
 
     def _refresh_adaptive_dt(self):
         max_abs_dint = float(np.max(np.abs(self._dint())))
+        requested_dt = self.params["dt"]
         if max_abs_dint > 0.0:
             alias_safe_dt = ALIASING_SAFETY * math.pi / max_abs_dint
-            self.params["dt"] = max(MIN_DT, min(MAX_DT, alias_safe_dt))
+            self.params["dt"] = max(MIN_DT, min(requested_dt, alias_safe_dt))
         else:
-            self.params["dt"] = MAX_DT
+            self.params["dt"] = requested_dt
 
     def _dint(self):
         p = self.params
@@ -148,7 +150,10 @@ class LLESolver:
             "d3": float(params.get("d3", 0.0)),
             "d4": float(params.get("d4", 0.0)),
             "tauR": float(params.get("tauR", 0.0)),
-            "dt": MAX_DT,
+            "dt": min(
+                MAX_REQUESTED_DT,
+                max(MIN_DT, float(params.get("dt", DEFAULT_DT))),
+            ),
             "stepsPerFrame": max(1, int(round(float(params.get("stepsPerFrame", 50))))),
         }
         for key, value in cleaned.items():

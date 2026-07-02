@@ -8,6 +8,7 @@ export function clampNormalizedParams(params: NormalizedParams): NormalizedParam
     d3: finiteOr(params.d3, 0),
     d4: finiteOr(params.d4, 0),
     tauR: finiteOr(params.tauR, 0),
+    dt: Math.min(0.005, Math.max(1e-12, finiteOr(params.dt, 0.0008))),
     stepsPerFrame: Math.max(1, Math.round(finiteOr(params.stepsPerFrame, 50))),
   }
 }

@@ -10,12 +10,14 @@ describe('clampNormalizedParams', () => {
       d3: 0,
       d4: 0,
       tauR: 0.01,
+      dt: Number.POSITIVE_INFINITY,
       stepsPerFrame: 10.4,
     })
 
     expect(params.alpha).toBe(0)
     expect(params.pump).toBe(0)
     expect(params.d2).toBe(-0.0444)
+    expect(params.dt).toBe(0.0008)
     expect(params.stepsPerFrame).toBe(10)
   })
 })

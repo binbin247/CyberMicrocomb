@@ -9,11 +9,8 @@ export interface NormalizedParams {
   d3: number
   d4: number
   tauR: number
-  stepsPerFrame: number
-}
-
-export interface SolverParams extends NormalizedParams {
   dt: number
+  stepsPerFrame: number
 }
 
 export interface Metrics {
@@ -34,7 +31,7 @@ export interface Snapshot {
   historyRow: Float32Array
   energy: number
   peak: number
-  normalizedParams: SolverParams
+  normalizedParams: NormalizedParams
 }
 
 export type WorkerStatus =

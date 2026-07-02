@@ -18,6 +18,7 @@ def configure(solver, n=256, **params):
         "d3": 0.0,
         "d4": 0.0,
         "tauR": 0.0,
+        "dt": 8e-4,
         "stepsPerFrame": 10,
     }
     base.update(params)
@@ -67,9 +68,17 @@ def test_adaptive_dt_satisfies_dispersion_aliasing_bound():
     assert params["dt"] < 8e-4
 
 
+def test_user_dt_is_preserved_when_aliasing_safe():
+    solver = LLESolver()
+    configure(solver, n=512, d2=0.0, d3=0.0, d4=0.0, dt=2e-4)
+    params = solver.snapshot()["normalizedParams"]
+    assert params["dt"] == 2e-4
+
+
 if __name__ == "__main__":
     test_zero_pump_decay()
     test_grid_rebuild()
     test_basic_lle_finite_with_raman_toggle()
     test_adaptive_dt_satisfies_dispersion_aliasing_bound()
+    test_user_dt_is_preserved_when_aliasing_safe()
     print("solver tests passed")

@@ -11,5 +11,6 @@ export const DEFAULT_NORMALIZED_PARAMS: NormalizedParams = {
   d3: 0,
   d4: 0,
   tauR: 0,
+  dt: 0.0008,
   stepsPerFrame: 50,
 }

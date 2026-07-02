@@ -39,6 +39,7 @@ const normalizedControls = [
   ['d3', -0.05, 0.05, 0.0001, 'd3Tip'],
   ['d4', -0.01, 0.01, 0.00001, 'd4Tip'],
   ['tauR', 0, 0.2, 0.0001, 'tauTip'],
+  ['dt', 1e-12, 0.005, 0.000001, 'dtTip'],
   ['stepsPerFrame', 1, 250, 1, 'stepsTip'],
 ] as const
 
@@ -136,6 +137,12 @@ function App() {
         const next = message.snapshot
         setError(null)
         setSnapshot(next)
+        setNormalized((current) => {
+          if (next.normalizedParams.dt >= current.dt - 1e-12) {
+            return current
+          }
+          return { ...current, dt: next.normalizedParams.dt }
+        })
         setTrace((items) => {
           const updated = [...items, { step: next.step, energy: next.energy }]
           return updated.slice(-HISTORY_LIMIT)
@@ -399,19 +406,32 @@ function ControlGrid({
               max={max}
               step={step}
               value={value}
-              onChange={(event) => onChange(key, Number(event.target.value))}
+              onChange={(event) =>
+                onChange(key, clampControlValue(Number(event.target.value), min, max))
+              }
             />
             <input
               type="number"
+              min={min}
+              max={max}
               step={step}
               value={value}
-              onChange={(event) => onChange(key, Number(event.target.value))}
+              onChange={(event) =>
+                onChange(key, clampControlValue(Number(event.target.value), min, max))
+              }
             />
           </label>
         )
       })}
     </div>
   )
+}
+
+function clampControlValue(value: number, min: number, max: number) {
+  if (!Number.isFinite(value)) {
+    return min
+  }
+  return Math.min(max, Math.max(min, value))
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {
