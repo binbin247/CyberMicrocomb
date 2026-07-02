@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_STOKES_GRID_SIZE, DEFAULT_STOKES_PARAMS } from './defaults'
+import {
+  DEFAULT_STANDARD_PARAMS,
+  DEFAULT_STOKES_GRID_SIZE,
+  DEFAULT_STOKES_PARAMS,
+} from './defaults'
 import { clampParamsForModel, clampStandardParams } from './physics'
 
 describe('parameter clamping', () => {
@@ -70,6 +74,10 @@ describe('parameter clamping', () => {
     expect(DEFAULT_STOKES_PARAMS.tauR).toBe(0.00033)
     expect(DEFAULT_STOKES_PARAMS.stepsPerFrame).toBe(1000)
     expect(DEFAULT_STOKES_GRID_SIZE).toBe(1024)
+  })
+
+  it('uses a soliton-ready default detuning for the standard model', () => {
+    expect(DEFAULT_STANDARD_PARAMS.alpha).toBe(10)
   })
 
   it('uses the Stokes default stride when Stokes steps per frame is invalid', () => {

@@ -76,6 +76,14 @@ def test_user_dt_is_preserved_when_aliasing_safe():
     assert params["dt"] == 2e-4
 
 
+def test_standard_defaults_use_soliton_ansatz_seed():
+    solver = LLESolver()
+    snap = solver.snapshot()
+    assert snap["normalizedParams"]["alpha"] == 10.0
+    assert snap["peak"] > 1.0
+    assert snap["energy"] > 0.01
+
+
 def configure_stokes(solver, n=256, **params):
     base = {
         "alphaP": 39.1,
@@ -177,6 +185,7 @@ if __name__ == "__main__":
     test_basic_lle_finite_with_raman_toggle()
     test_adaptive_dt_satisfies_dispersion_aliasing_bound()
     test_user_dt_is_preserved_when_aliasing_safe()
+    test_standard_defaults_use_soliton_ansatz_seed()
     test_stokes_solver_snapshot_is_finite()
     test_stokes_grid_rebuild_resets_both_fields()
     test_stokes_export_contains_dual_fields()

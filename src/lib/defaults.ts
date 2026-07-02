@@ -6,7 +6,7 @@ export const DEFAULT_GRID_SIZE: GridSize = 512
 export const DEFAULT_STOKES_GRID_SIZE: GridSize = 1024
 
 export const DEFAULT_STANDARD_PARAMS: StandardParams = {
-  alpha: -5,
+  alpha: 10,
   pump: 3.94,
   d2: -0.0444,
   d3: 0,

@@ -18,7 +18,7 @@ class LLESolver:
         self.step = 0
         self.t = 0.0
         self.params = {
-            "alpha": -5.0,
+            "alpha": 10.0,
             "pump": 3.94,
             "d2": -0.0444,
             "d3": 0.0,
@@ -137,8 +137,21 @@ class LLESolver:
         )
 
     def _initial_state(self, n):
-        noise = 1e-3 * (self.rng.standard_normal(n) + 1j * self.rng.standard_normal(n))
-        return noise.astype(np.complex128)
+        p = self.params
+        pump = p["pump"]
+        alpha = p["alpha"]
+        dispersion = abs(p["d2"])
+        theta = np.linspace(-math.pi, math.pi, n, endpoint=False)
+        radicand = 2.0 * alpha - 16.0 * alpha**2 / (math.pi**2 * pump**2) if pump > 0 else -1.0
+        noise = 1e-4 * (self.rng.standard_normal(n) + 1j * self.rng.standard_normal(n))
+        if pump <= 0.0 or alpha <= 0.0 or dispersion <= 0.0 or radicand < 0.0:
+            return (10.0 * noise).astype(np.complex128)
+        background = pump / alpha**2 - 1j * pump / alpha
+        pulse = (
+            4.0 * alpha / (math.pi * pump)
+            + 1j * math.sqrt(max(0.0, radicand))
+        ) / np.cosh(np.sqrt(alpha / dispersion) * theta)
+        return (background + pulse + noise).astype(np.complex128)
 
     @staticmethod
     def _make_mu(n):
@@ -147,7 +160,7 @@ class LLESolver:
     @staticmethod
     def _clean_params(params):
         cleaned = {
-            "alpha": float(params.get("alpha", 0.0)),
+            "alpha": float(params.get("alpha", 10.0)),
             "pump": max(0.0, float(params.get("pump", 0.0))),
             "d2": float(params.get("d2", 0.0)),
             "d3": float(params.get("d3", 0.0)),
