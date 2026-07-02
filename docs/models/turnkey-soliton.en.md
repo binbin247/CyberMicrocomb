@@ -5,8 +5,8 @@
 ## Simulation Equations
 
 This model describes an unisolated pump laser coupled to a microresonator through
-self-injection locking. The browser implementation follows the normalized coupled
-model in `/Users/binbin/Downloads/turnkey/Turnkey soliton/Injection_lock.m`, with
+self-injection locking. The browser implementation uses a normalized coupled
+mechanism model based on the self-injection-locking supplementary material, with
 the forward intracavity field $\psi(\phi,t)$, the backscattered field $\rho_B(t)$,
 and a feedback-controlled locked detuning.
 
@@ -73,4 +73,4 @@ simulation. It omits thermal dynamics, gain dynamics, and package-level details.
 ## References
 
 - B. Shen et al., "Integrated turnkey soliton microcombs," *Nature* **582**, 365-369 (2020). [https://doi.org/10.1038/s41586-020-2358-x](https://doi.org/10.1038/s41586-020-2358-x)
-- Supplementary information for "Integrated turnkey soliton microcombs" and the MATLAB scripts in `/Users/binbin/Downloads/turnkey/Turnkey soliton`.
+- Supplementary information for "Integrated turnkey soliton microcombs."

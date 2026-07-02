@@ -7,8 +7,7 @@
 This model demonstrates soliton self-frequency shift (SSFS) from a Raman
 convolution. It is different from the simplified Raman shock term in
 `Standard soliton`: here the delayed Raman response is represented by a response
-function and an explicit convolution. The implementation follows
-`/Users/binbin/Library/CloudStorage/OneDrive-个人/桌面/LN SSFS/Simulation/simulation2026`.
+function and an explicit convolution.
 
 The normalized LLE is
 
@@ -30,8 +29,8 @@ i\,\mathcal{F}^{-1}\left[
 \right]\Delta\phi .
 $$
 
-The default Raman response uses the damped-oscillator form from the reference
-code, controlled by `tau1Fs`, `tau2Fs`, and `fR`. The Raman strength is ramped
+The default Raman response uses a damped-oscillator form controlled by
+`tau1Fs`, `tau2Fs`, and `fR`. The Raman strength is ramped
 from zero to the requested value at startup to reduce numerical jumps.
 
 ## Physical Picture

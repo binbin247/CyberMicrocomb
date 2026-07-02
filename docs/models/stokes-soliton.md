@@ -170,4 +170,4 @@ Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
 
 - Q.-F. Yang, X. Yi, K. Y. Yang, and K. Vahala, "Stokes solitons in optical microcavities," *Nature Physics* **13**, 53-57 (2017). <https://doi.org/10.1038/nphys3875>
 - Supplementary information for "Stokes solitons in optical microcavities," *Nature Physics* (2017).
-- 本实现的默认 Stokes 参数沿用开发时参考的 MATLAB 脚本 `Ramansoliton_scan.m` 和 `Ramansoliton_splitstep.m` 中的归一化设定。
+- 本页面默认参数采用与上述补充材料一致的归一化 Stokes-soliton 机制设置。

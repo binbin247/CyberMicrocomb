@@ -6,8 +6,7 @@
 
 该模型用于演示 Raman convolution 导致的 soliton self-frequency shift (SSFS)。
 它与 `Standard soliton` 中的简化 Raman shock 项不同，这里显式使用 Raman response
-函数和卷积。实现参考
-`/Users/binbin/Library/CloudStorage/OneDrive-个人/桌面/LN SSFS/Simulation/simulation2026`。
+函数和卷积。
 
 归一化 LLE 写成
 
@@ -29,7 +28,7 @@ i\,\mathcal{F}^{-1}\left[
 \right]\Delta\phi .
 $$
 
-默认 Raman response 采用参考代码中的阻尼振荡形式，由 `tau1Fs`、`tau2Fs` 和 `fR`
+默认 Raman response 采用阻尼振荡形式，由 `tau1Fs`、`tau2Fs` 和 `fR`
 控制。运行初期会把 Raman 强度从 0 平滑 ramp 到目标值，避免一开始直接打开强 Raman
 导致数值跳变。
 
