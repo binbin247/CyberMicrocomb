@@ -4,61 +4,57 @@
 
 ## Simulation equations
 
-This is a normalized two-field coupled LLE for the primary field $P(\phi,t)$ and
-the Stokes field $S(\phi,t)$. The primary field is externally pumped. The Stokes
-field starts from a noise seed and grows through Raman gain. The frequency-domain
-linear terms are
+This model follows the two-field coupled Lugiato-Lefever equations given in
+Yang *et al.* for Stokes solitons. The primary field $E_p(\phi,t)$ is driven by
+an external continuous-wave pump. The Stokes field $E_s(\phi,t)$ grows from noise
+through Raman gain. After the adiabatic Raman approximation, Supplementary
+Eqs. S7/S8 read
 
 $$
-\left.\frac{\partial \hat P_\mu}{\partial t}\right|_{\mathrm{lin}}
-=
-\left(-1-i\alpha_P-id_{2P}\mu^2\right)\hat P_\mu,
-$$
-
-$$
-\left.\frac{\partial \hat S_\mu}{\partial t}\right|_{\mathrm{lin}}
-=
-\left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
-$$
-
-In the current UI, $\alpha_S=0$ is fixed and is not user adjustable. The
-linear terms above are the frequency-domain form used by the solver. With the
-Fourier convention $\partial_\phi\to i\mu$, the equivalent time-domain linear
-operators are
-
-$$
-\left.\frac{\partial P}{\partial t}\right|_{\mathrm{lin}}
-=-(1+i\alpha_P)P+i d_{2P}\frac{\partial^2 P}{\partial\phi^2},
+\begin{aligned}
+\frac{\partial E_p}{\partial t}
+&=
+i\frac{D_{2p}}{2}\frac{\partial^2 E_p}{\partial\phi^2}
++i\left[g_p|E_p|^2+(2-f_R)G_p|E_s|^2\right]E_p \\
+&\quad
+-iD_{1p}\tau_R E_p
+\frac{\partial\left(g_p|E_p|^2+G_p|E_s|^2\right)}{\partial\phi}
+-\left(\frac{\kappa_p}{2}+i\Delta\omega_p\right)E_p \\
+&\quad
+-\frac{\omega_p}{\omega_s}R|E_s|^2E_p
++\sqrt{\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}},
+\end{aligned}
 $$
 
 $$
-\left.\frac{\partial S}{\partial t}\right|_{\mathrm{lin}}
-=-(1+i\alpha_S)S+i d_{2S}\frac{\partial^2 S}{\partial\phi^2}
--\delta\frac{\partial S}{\partial\phi}.
+\begin{aligned}
+\frac{\partial E_s}{\partial t}
+&=
+-\delta\frac{\partial E_s}{\partial\phi}
++i\frac{D_{2s}}{2}\frac{\partial^2 E_s}{\partial\phi^2}
++i\left[g_s|E_s|^2+(2-f_R)G_s|E_p|^2\right]E_s \\
+&\quad
+-iD_{1p}\tau_R E_s
+\frac{\partial\left(g_s|E_s|^2+G_s|E_p|^2\right)}{\partial\phi}
+-\left(\frac{\kappa_s}{2}+i\Delta\omega_s\right)E_s
++R|E_p|^2E_s .
+\end{aligned}
 $$
 
-The time-domain nonlinear coefficients are
+$E_p$ and $E_s$ are the intracavity slowly varying fields for the primary and
+Stokes solitons, normalized to optical energy in the paper. $D_{1j}$ and
+$D_{2j}$ are the FSR and second-order dispersion of mode family $j=p,s$;
+$\delta=D_{1s}-D_{1p}$ is the primary/Stokes FSR mismatch; $\kappa_j$ and
+$\Delta\omega_j$ are the loss rate and cold-cavity detuning; $g_j$ and $G_j$ are
+self- and cross-phase modulation coefficients; $R$ is the Raman gain coefficient;
+and $\tau_R$ is the Raman shock time.
 
-$$
-N_P =
-i|P|^2
--i\tau_R\left(\partial_\phi |P|^2+\eta\partial_\phi |S|^2\right)
-+\eta\left[i(2-f_R)-\frac{g_P}{2}\right]|S|^2,
-$$
-
-$$
-N_S =
-ir_w|S|^2
--ir_w\tau_R\left(\eta\partial_\phi |P|^2+\partial_\phi |S|^2\right)
-+\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
-$$
-
-Equivalently, the nonlinear update is
-$\partial_t P|_{\mathrm{nl}}=N_P P+F$ and
-$\partial_t S|_{\mathrm{nl}}=N_S S+\xi$. Here $\eta$ is the mode overlap, $f_R$
-is the Raman fraction, $g_P$ is the primary Raman loss, $g_S$ is the Stokes Raman
-gain, $r_w$ is the wavelength ratio, $\delta$ is the FSR mismatch, and $\xi$ is a
-weak complex-noise seed.
+The browser solver uses a normalized interactive version of Eqs. S7/S8. The UI
+controls `Pump detuning`, `FSR mismatch`, `Primary/Stokes D2`, `Overlap`,
+`Primary Raman loss`, `Stokes Raman gain`, and `tauR` correspond to the detuning,
+FSR mismatch, second-order dispersion, spatial-mode overlap, Raman loss/gain, and
+Raman-shock terms above. The Stokes detuning is fixed to 0 in the current UI and
+is not user adjustable.
 
 ## Physical picture
 

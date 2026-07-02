@@ -4,57 +4,54 @@
 
 ## 仿真的方程
 
-这是 Primary 场 $P(\phi,t)$ 与 Stokes 场 $S(\phi,t)$ 的双场归一化 coupled LLE。Primary
-场被外部泵浦驱动，Stokes 场由噪声种子通过 Raman 增益增长。频域线性项为
+该模型对应 Yang *et al.* 的 Stokes soliton 文献中给出的双场 coupled
+Lugiato-Lefever equation。Primary 场 $E_p(\phi,t)$ 被外部连续波泵浦驱动，
+Stokes 场 $E_s(\phi,t)$ 通过 Raman 增益从噪声中增长。补充材料 Eq. S7/S8
+在 Raman 绝热近似下写为
 
 $$
-\left.\frac{\partial \hat P_\mu}{\partial t}\right|_{\mathrm{lin}}
-=
-\left(-1-i\alpha_P-id_{2P}\mu^2\right)\hat P_\mu,
-$$
-
-$$
-\left.\frac{\partial \hat S_\mu}{\partial t}\right|_{\mathrm{lin}}
-=
-\left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
-$$
-
-当前界面中 $\alpha_S=0$ 固定，不作为可调参数。上述线性项是求解器实际使用的频域形式。
-按 $\partial_\phi\to i\mu$ 的 Fourier 约定，
-它们在时域中等价于
-
-$$
-\left.\frac{\partial P}{\partial t}\right|_{\mathrm{lin}}
-=-(1+i\alpha_P)P+i d_{2P}\frac{\partial^2 P}{\partial\phi^2},
+\begin{aligned}
+\frac{\partial E_p}{\partial t}
+&=
+i\frac{D_{2p}}{2}\frac{\partial^2 E_p}{\partial\phi^2}
++i\left[g_p|E_p|^2+(2-f_R)G_p|E_s|^2\right]E_p \\
+&\quad
+-iD_{1p}\tau_R E_p
+\frac{\partial\left(g_p|E_p|^2+G_p|E_s|^2\right)}{\partial\phi}
+-\left(\frac{\kappa_p}{2}+i\Delta\omega_p\right)E_p \\
+&\quad
+-\frac{\omega_p}{\omega_s}R|E_s|^2E_p
++\sqrt{\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}},
+\end{aligned}
 $$
 
 $$
-\left.\frac{\partial S}{\partial t}\right|_{\mathrm{lin}}
-=-(1+i\alpha_S)S+i d_{2S}\frac{\partial^2 S}{\partial\phi^2}
--\delta\frac{\partial S}{\partial\phi}.
+\begin{aligned}
+\frac{\partial E_s}{\partial t}
+&=
+-\delta\frac{\partial E_s}{\partial\phi}
++i\frac{D_{2s}}{2}\frac{\partial^2 E_s}{\partial\phi^2}
++i\left[g_s|E_s|^2+(2-f_R)G_s|E_p|^2\right]E_s \\
+&\quad
+-iD_{1p}\tau_R E_s
+\frac{\partial\left(g_s|E_s|^2+G_s|E_p|^2\right)}{\partial\phi}
+-\left(\frac{\kappa_s}{2}+i\Delta\omega_s\right)E_s
++R|E_p|^2E_s .
+\end{aligned}
 $$
 
-时域非线性系数为
+$E_p,E_s$ 是 Primary 和 Stokes 腔内慢变场，并按文献归一化到 optical energy。
+$D_{1j}$ 和 $D_{2j}$ 分别是模式族 $j=p,s$ 的 FSR 和二阶色散；
+$\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR mismatch；
+$\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐；
+$g_j$ 和 $G_j$ 是 self- 与 cross-phase modulation 系数；
+$R$ 是 Raman gain 系数；$\tau_R$ 是 Raman shock time。
 
-$$
-N_P =
-i|P|^2
--i\tau_R\left(\partial_\phi |P|^2+\eta\partial_\phi |S|^2\right)
-+\eta\left[i(2-f_R)-\frac{g_P}{2}\right]|S|^2,
-$$
-
-$$
-N_S =
-ir_w|S|^2
--ir_w\tau_R\left(\eta\partial_\phi |P|^2+\partial_\phi |S|^2\right)
-+\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
-$$
-
-非线性更新近似为
-$\partial_t P|_{\mathrm{nl}}=N_P P+F$，
-$\partial_t S|_{\mathrm{nl}}=N_S S+\xi$。这里 $\eta$ 是模式重叠因子，$f_R$
-是 Raman 分数，$g_P$ 是 Primary Raman loss，$g_S$ 是 Stokes Raman gain，
-$r_w$ 是波长比，$\delta$ 是 FSR mismatch，$\xi$ 是弱复噪声种子。
+当前浏览器求解器使用 Eq. S7/S8 的归一化交互版本。界面中的 `Pump detuning`,
+`FSR mismatch`, `Primary/Stokes D2`, `Overlap`, `Primary Raman loss`,
+`Stokes Raman gain` 和 `tauR` 分别控制上式中的失谐、FSR mismatch、二阶色散、
+空间模式重叠、Raman 损耗/增益以及 Raman shock 项。当前界面中 Stokes 失谐固定为
+0，不作为用户可调参数。
 
 ## 物理图像
 
