@@ -43,6 +43,13 @@ const normalizedControls = [
   ['stepsPerFrame', 1, 250, 1, 'stepsTip'],
 ] as const
 
+interface ExportPlotSource {
+  snapshot: Snapshot | null
+  trace: Array<{ step: number; energy: number }>
+  historyRows: Float32Array[]
+  metrics: Metrics | null
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>('en')
   const labels = t(language)
@@ -59,6 +66,10 @@ function App() {
   const [trace, setTrace] = useState<Array<{ step: number; energy: number }>>([])
   const [historyRows, setHistoryRows] = useState<Float32Array[]>([])
   const workerRef = useRef<Worker | null>(null)
+  const snapshotRef = useRef<Snapshot | null>(null)
+  const metricsRef = useRef<Metrics | null>(null)
+  const traceRef = useRef<Array<{ step: number; energy: number }>>([])
+  const historyRowsRef = useRef<Float32Array[]>([])
   const lastGridRef = useRef<GridSize | null>(null)
   const didInitialConfigureRef = useRef(false)
   const livePreviewRef = useRef(true)
@@ -74,6 +85,9 @@ function App() {
     setSnapshot(null)
     setTrace([])
     setHistoryRows([])
+    snapshotRef.current = null
+    traceRef.current = []
+    historyRowsRef.current = []
   }, [])
 
   const clearPreviewTimer = useCallback(() => {
@@ -137,6 +151,7 @@ function App() {
         const next = message.snapshot
         setError(null)
         setSnapshot(next)
+        snapshotRef.current = next
         setNormalized((current) => {
           if (next.normalizedParams.dt >= current.dt - 1e-12) {
             return current
@@ -145,17 +160,29 @@ function App() {
         })
         setTrace((items) => {
           const updated = [...items, { step: next.step, energy: next.energy }]
-          return updated.slice(-HISTORY_LIMIT)
+          const clipped = updated.slice(-HISTORY_LIMIT)
+          traceRef.current = clipped
+          return clipped
         })
-        setHistoryRows((rows) => [...rows, next.historyRow].slice(-HISTORY_LIMIT))
+        setHistoryRows((rows) => {
+          const clipped = [...rows, next.historyRow].slice(-HISTORY_LIMIT)
+          historyRowsRef.current = clipped
+          return clipped
+        })
         return
       }
       if (message.type === 'metrics') {
         setMetrics(message.metrics)
+        metricsRef.current = message.metrics
         return
       }
       if (message.type === 'exportState') {
-        downloadJson(message.payload)
+        downloadJson(buildExportPayload(message.payload, {
+          snapshot: snapshotRef.current,
+          trace: traceRef.current,
+          historyRows: historyRowsRef.current,
+          metrics: metricsRef.current,
+        }))
         return
       }
       if (message.type === 'error') {
@@ -485,6 +512,61 @@ function indexArray(length: number) {
 function centeredModeArray(length: number) {
   const half = Math.floor(length / 2)
   return Array.from({ length }, (_, index) => index - half)
+}
+
+function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
+  const snapshot = source.snapshot
+  const intensity = snapshot ? Array.from(snapshot.intensity) : []
+  const spectrumDb = snapshot ? Array.from(snapshot.spectrumDb) : []
+  const waterfallRows = source.historyRows.map((row) => Array.from(row))
+  const solverStateObject = isObjectRecord(solverState) ? solverState : { solverState }
+
+  return {
+    ...solverStateObject,
+    exportSchemaVersion: 2,
+    exportedAt: new Date().toISOString(),
+    currentSnapshot: snapshot
+      ? {
+          step: snapshot.step,
+          t: snapshot.t,
+          energy: snapshot.energy,
+          peak: snapshot.peak,
+          normalizedParams: snapshot.normalizedParams,
+        }
+      : null,
+    metrics: source.metrics,
+    plots: {
+      temporalField: {
+        x: snapshot ? indexArray(snapshot.intensity.length) : [],
+        intensity,
+        xLabel: 'sample index',
+        yLabel: '|psi|^2',
+      },
+      combSpectrum: {
+        mode: snapshot ? centeredModeArray(snapshot.spectrumDb.length) : [],
+        spectrumDb,
+        xLabel: 'mode index mu',
+        yLabel: 'Spectrum (dB)',
+      },
+      intracavityEnergy: {
+        step: source.trace.map((item) => item.step),
+        energy: source.trace.map((item) => item.energy),
+        xLabel: 'solver step',
+        yLabel: 'Energy',
+      },
+      temporalEvolution: {
+        rows: waterfallRows,
+        rowCount: waterfallRows.length,
+        columnCount: waterfallRows[0]?.length ?? 0,
+        valueLabel: '10 * log10(|psi|^2 + 1e-12)',
+        maxRows: HISTORY_LIMIT,
+      },
+    },
+  }
+}
+
+function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
 function formatNumber(value: number) {
