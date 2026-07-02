@@ -157,6 +157,32 @@ self-frequency-shift 类效应。
 5. 观察 `Temporal field` 中亮孤子从噪声背景中形成，并确认 `Intracavity energy`
    最终进入稳定平台。
 
+### Demo 3：Breather soliton
+
+1. 先用默认参数得到一个稳定的 bright soliton。
+2. 保持 `D3 = 0`, `D4 = 0`, `tauR = 0`，只调节驱动参数。
+3. 将 `Detuning` 从默认值 `10` 缓慢降低到 `6` 到 `8` 附近；如果呼吸不明显，
+   可把 `Pump power` 小幅提高到 `4.5` 到 `5.5` 再继续扫描 `Detuning`。
+4. 在 `Intracavity energy` 中寻找周期性振荡，而不是单调收敛的平台。
+5. 在 `Temporal evolution` 中确认孤子条纹出现周期性变宽、变窄或亮度振荡。
+6. 如果脉冲直接消失或进入强混沌，回到上一个稳定点，减小扫描步长，并适当降低
+   `Pump power`。
+
+Breather soliton 是稳定孤子附近的振荡态。它不是新的方程，而是同一 LLE 在不同失谐和泵浦条件下的动力学状态。
+
+### Demo 4：Soliton Cherenkov radiation / dispersive wave
+
+1. 先用默认参数得到一个稳定的 bright soliton。
+2. 保持 `tauR = 0`，然后加入高阶色散微扰。一个可尝试的起点是
+   `D3 = 0.003` 到 `0.006`，或使用较小的非零 `D4`。
+3. 点击 `Play` 后观察 `Comb spectrum`。Soliton Cherenkov radiation 的典型信号是：
+   在宽的 soliton 光梳包络一侧，出现一个较窄的增强谱峰或谱肩。
+4. 改变 `D3` 的符号，观察增强谱峰是否移动到频谱另一侧。
+5. 若频谱出现明显数值噪声，先减小 `dt`，或降低 `D3`/`D4` 的绝对值。
+
+这个 demo 展示的是高阶色散导致的相位匹配辐射。时域中常表现为孤子尾部的振荡结构，
+频域中则表现为远离泵浦模式的 dispersive-wave 峰。
+
 如果结果发散或频谱出现明显数值噪声，先减小 `dt` 或降低 `Pump power`。求解器会用
 $\max |D_{\mathrm{int}}|\,dt < \pi$ 的 aliasing 条件自动限制过大的积分步长；最终定量研究仍应使用更高阶、更精确的积分器。
 

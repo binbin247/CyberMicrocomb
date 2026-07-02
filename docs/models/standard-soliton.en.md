@@ -173,6 +173,40 @@ exploration of Raman self-frequency-shift-like behavior.
 5. Watch a bright soliton form from the noisy background in `Temporal field`, and
    check that `Intracavity energy` settles onto a stable plateau.
 
+### Demo 3: breather soliton
+
+1. First use the default parameters to obtain a stable bright soliton.
+2. Keep `D3 = 0`, `D4 = 0`, and `tauR = 0`; tune only the drive parameters.
+3. Slowly lower `Detuning` from the default value `10` toward roughly `6` to `8`.
+   If the breathing is weak, increase `Pump power` moderately to about `4.5` to
+   `5.5` and continue scanning `Detuning`.
+4. Look for periodic oscillations in `Intracavity energy`, rather than a flat
+   steady plateau.
+5. In `Temporal evolution`, confirm that the soliton stripe periodically
+   broadens, narrows, or changes brightness.
+6. If the pulse disappears or enters strong chaos, return to the previous stable
+   point, reduce the scan step, and lower `Pump power` if needed.
+
+A breather soliton is an oscillatory dynamical state of the same LLE, not a new
+equation. It appears near stability boundaries of the stationary soliton branch.
+
+### Demo 4: soliton Cherenkov radiation / dispersive wave
+
+1. First use the default parameters to obtain a stable bright soliton.
+2. Keep `tauR = 0`, then add a higher-order-dispersion perturbation. A useful
+   starting point is `D3 = 0.003` to `0.006`, or a small nonzero `D4`.
+3. Click `Play` and inspect `Comb spectrum`. The signature of soliton Cherenkov
+   radiation is a relatively narrow enhanced spectral peak or shoulder on one
+   side of the broad soliton comb envelope.
+4. Reverse the sign of `D3` and check whether the enhanced spectral feature moves
+   to the opposite side of the spectrum.
+5. If the spectrum becomes numerically noisy, reduce `dt` first, or reduce the
+   magnitude of `D3`/`D4`.
+
+This demo shows phase-matched radiation induced by higher-order dispersion. In
+the time domain it often appears as an oscillatory soliton tail; in the frequency
+domain it appears as a dispersive-wave peak away from the pumped mode.
+
 If the state diverges or the spectrum becomes numerically noisy, reduce `dt` or
 lower `Pump power` first. The solver clamps oversized timesteps using
 $\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing; final
