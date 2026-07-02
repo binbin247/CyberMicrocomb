@@ -4,8 +4,8 @@
 
 ## 仿真的方程
 
-该模型是 normal-dispersion 单场 LLE，并在一个指定模式上加入局部 mode shift。
-变量定义与 `Standard soliton` 相同。
+这是 normal-dispersion 的单场 LLE，用于演示 dark pulse / platicon。它保留二阶色散和一个局部
+mode shift，不包含 Raman、$d_3$ 或 $d_4$：
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -13,7 +13,7 @@ $$
 \left[-(1+i\alpha)+iD_{\mathrm{int}}(\mu)+i|\psi|^2\right]\psi+F.
 $$
 
-色散包含二阶项和单点模式扰动：
+色散写成
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -22,37 +22,41 @@ D_{\mathrm{int}}(\mu)
 +\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
 $$
 
-其中 $d_2>0$ 对应当前归一化约定下的 normal dispersion，
-$\mu_{\mathrm{shift}}$ 是被扰动的相对模式编号，
-$\Delta_{\mathrm{shift}}$ 是归一化到 $\kappa/2$ 的模式偏移强度。当前实现只移动
-一个整数模式，不自动同时移动 $\pm\mu$ 两个模式。
+这里 $d_2>0$ 表示当前归一化约定下的 normal dispersion。
+$\mu_{\mathrm{shift}}$ 是被扰动的整数模式，$\Delta_{\mathrm{shift}}$ 是归一化到
+$\kappa/2$ 的模式偏移强度。正的 `Mode shift strength` 表示提高该模式的
+$D_{\mathrm{int}}$。当前实现只移动一个模式，不自动同时移动 $\pm\mu$。
 
 ## 物理图像
 
-在 normal dispersion 中，常规 bright soliton 不再是自然稳定的解。系统可以通过
-两个 cw 背景之间的 switching fronts 形成 flat-top 的暗脉冲结构，也就是
-dark pulse / platicon。局部 mode shift 可以改变某个模式的有效 integrated
-dispersion，类似引入 mode interaction，从而帮助系统进入 platicon 态。
+在 normal dispersion 中，bright soliton 不是自然稳定态。系统更容易形成两个连续波背景之间的
+switching fronts；这些 fronts 围成一个宽的暗缺口或平顶结构，就是 dark pulse / platicon。
 
-在时域图中，platicon 通常表现为高背景上的宽暗缺口或 flat-top switching-front
-结构；在频域中，对应 normal-dispersion comb。`Mode shift position` 决定扰动施加
-在哪个 comb mode，`Mode shift strength` 决定扰动强度。过弱的扰动可能无法稳定触发
-dark pulse，过强的扰动可能导致频谱或时域结构变得不规则。
+局部 mode shift 的作用是人为改变某个模式的 integrated dispersion，等效模拟 avoided mode
+crossing 或泵浦附近的局部模式扰动。它为 normal-dispersion 系统提供进入低噪声 dark-pulse
+态的通道。
+
+四张图可以这样读：
+
+- `Temporal field`：看高背景上是否出现宽暗缺口或 flat-top switching-front 结构。
+- `Comb spectrum`：看 normal-dispersion comb 是否形成，并注意被扰动模式附近的谱线变化。
+- `Intracavity energy`：看 dark-pulse 态是否稳定。
+- `Temporal evolution`：看暗缺口是否保持、漂移或破裂。
 
 ## Demo
 
 1. 在 `MODEL` 中选择 `Standard dark pulse (platicon)`。
-2. 使用默认参数：`grid = 512`, `Detuning = 4`, `Pump power = 3.94`,
+2. 保持默认值：`grid = 512`, `Detuning = 4`, `Pump power = 3.94`,
    `D2 = 0.02`, `Mode shift position = 0`, `Mode shift strength = 4`。
-3. 点击 `Play`。
-4. 观察 `Temporal field` 中是否出现高背景上的暗缺口或平顶结构。
-5. 保持 `D2 > 0`，扫描 `Mode shift strength`，比较 dark pulse 的深度和稳定性。
-6. 改变 `Mode shift position`，观察被扰动模式位置对频谱形状的影响。
+3. 点击 `Play`，观察时域中是否出现高背景上的暗缺口。
+4. 扫描 `Mode shift strength`：太弱可能无法触发稳定 dark pulse，太强可能引入不规则谱。
+5. 改变 `Mode shift position`，观察不同局部模式扰动对 comb spectrum 的影响。
+6. 扫描 `Detuning`，比较 platicon 宽度、能量和频谱带宽的变化。
 
-该模型不包含 Raman、$d_3$ 或 $d_4$ 项，目的是突出 normal dispersion 与局部
-mode perturbation 对 platicon 形成的作用。
+这个模型的目标是教学和快速探索：它突出 normal dispersion 与局部模式扰动的作用，不描述热效应、
+多模族动力学或完整 avoided-crossing 耦合。
 
 ## 参考文献
 
-- V. E. Lobanov, G. Lihachev, T. J. Kippenberg, and M. L. Gorodetsky, "Frequency combs and platicons in optical microresonators with normal GVD," *Optics Express* **23**, 7713 (2015). <https://doi.org/10.1364/OE.23.007713>
-- "Platicon microcomb generation using pump and additional mode perturbation," *Communications Physics* (2023). <https://www.nature.com/articles/s42005-023-01424-5>
+- V. E. Lobanov, G. Lihachev, T. J. Kippenberg, and M. L. Gorodetsky, "Frequency combs and platicons in optical microresonators with normal GVD," *Optics Express* **23**, 7713-7721 (2015). <https://doi.org/10.1364/OE.23.007713>
+- I. Rebolledo-Salgado et al., "Platicon dynamics in photonic molecules," *Communications Physics* **6**, 303 (2023). <https://www.nature.com/articles/s42005-023-01424-5>

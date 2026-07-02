@@ -4,8 +4,8 @@
 
 ## 仿真的方程
 
-该模型使用 Primary 场 $P(\phi,t)$ 和 Stokes 场 $S(\phi,t)$ 的双场归一化
-coupled LLE。线性项在频域中更新：
+这是 Primary 场 $P(\phi,t)$ 与 Stokes 场 $S(\phi,t)$ 的双场归一化 coupled LLE。Primary
+场被外部泵浦驱动，Stokes 场由噪声 seed 通过 Raman gain 增长。频域线性项为
 
 $$
 \left.\frac{\partial \hat P_\mu}{\partial t}\right|_{\mathrm{lin}}
@@ -19,7 +19,7 @@ $$
 \left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
 $$
 
-当前界面中 $\alpha_S=0$ 固定，不作为用户可调参数。非线性和 Raman 耦合在时域中更新：
+当前界面中 $\alpha_S=0$ 固定，不作为可调参数。时域非线性系数为
 
 $$
 N_P =
@@ -35,37 +35,45 @@ ir_w|S|^2
 +\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
 $$
 
-其中 $\eta$ 是 mode overlap，$f_R$ 是 Raman 分数，$g_P$ 是 Primary
-Raman loss，$g_S$ 是 Stokes Raman gain，$r_w$ 是 wavelength ratio。
-Primary 场额外受到外部泵浦 $F$ 驱动；Stokes 场由弱复噪声 seed 和 Raman gain
-放大。
+也就是说，非线性更新近似为
+$\partial_t P|_{\mathrm{nl}}=N_P P+F$，
+$\partial_t S|_{\mathrm{nl}}=N_S S+\xi$。这里 $\eta$ 是 mode overlap，$f_R$
+是 Raman 分数，$g_P$ 是 Primary Raman loss，$g_S$ 是 Stokes Raman gain，
+$r_w$ 是 wavelength ratio，$\delta$ 是 FSR mismatch，$\xi$ 是弱复噪声 seed。
 
 ## 物理图像
 
-Stokes soliton 是由 Primary soliton 通过 Raman 过程驱动出来的第二个孤子场。
-Primary soliton 先在泵浦模式族中形成强局域光场；这个局域光场为 Stokes 模式族提供
-Raman gain。Stokes 场从弱噪声开始增长，并在与 Primary 共享的光势阱中被时间俘获。
+Stokes soliton 不是把 Primary soliton 复制一遍，而是 Raman 过程产生的第二个孤子场。
+Primary soliton 先形成强局域光场；这个局域光场为 Stokes 模式族提供 Raman gain，并通过交叉相位
+调制和群速匹配把 Stokes pulse 俘获在相近的时间位置。
 
-因此，Stokes soliton 不是简单复制 Primary soliton。它的强度、频谱和漂移由 Raman
-gain/loss、overlap、FSR mismatch、Stokes dispersion 和 wavelength ratio 共同决定。
-在默认 preset 下，主要通过扫描 `Pump detuning` 可以观察 Primary soliton 形成以及
-Stokes soliton 从噪声中增长的过程。
+四张图可以这样读：
+
+- `Temporal field`：比较 Primary 和 Stokes 的时域强度，Stokes 通常更弱且由噪声增长。
+- `Comb spectrum`：比较两个模式族的谱宽、谱峰和相对强度。
+- `Intracavity energy`：看 Primary 能量是否先建立，Stokes 能量是否随后增长并稳定。
+- `Temporal evolution`：左右两图分别显示 Primary 与 Stokes 的演化，用来判断俘获、漂移或失稳。
+
+Stokes 场的强度和稳定性由 Raman gain/loss、overlap、FSR mismatch、Stokes dispersion 和
+wavelength ratio 共同决定。默认 preset 的设计目标是：主要扫描 `Pump detuning`，即可观察
+Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
 
 ## Demo
 
 1. 在 `MODEL` 中选择 `Stokes soliton`。
-2. 使用默认参数：`grid = 1024`, `Pump detuning = 39.1`, `Pump power = 12.247`,
-   `Primary D2 = 0.02`, `Stokes D2 = 0.02`, `FSR mismatch = 0`,
-   `Overlap = 0.5`, `fR = 0.18`, `Primary Raman loss = 0.126`,
-   `Stokes Raman gain = 0.126`, `Wavelength ratio = 1550/1630`,
-   `tauR = 0.00033`, `Noise seed = 0.00001`, `stepsPerFrame = 1000`。
-3. 点击 `Play`。
-4. 在 `Temporal field` 中比较 Primary 和 Stokes 的强度分布。
-5. 在 `Temporal evolution` 中观察两个场的时间演化；Stokes 场通常从弱噪声背景中增长。
-6. 主要扫描 `Pump detuning`，尝试观察 Primary soliton 到 Stokes soliton 的转换。
+2. 保持默认值：`grid = 1024`, `Pump detuning = 39.1`,
+   `Pump power = 12.247`, `Primary D2 = 0.02`, `Stokes D2 = 0.02`,
+   `FSR mismatch = 0`, `Overlap = 0.5`, `fR = 0.18`,
+   `Primary Raman loss = 0.126`, `Stokes Raman gain = 0.126`,
+   `Wavelength ratio = 1550/1630`, `tauR = 0.00033`,
+   `Noise seed = 0.00001`, `stepsPerFrame = 1000`。
+3. 点击 `Play`，先看 Primary 是否形成局域脉冲。
+4. 继续运行，观察 Stokes 是否从噪声背景中增长并被时间俘获。
+5. 主要扫描 `Pump detuning`，寻找 Primary-only、Stokes-growth 和双孤子稳定区。
+6. 如果 Stokes 始终很弱，先延长运行时间；再小幅增加 `Stokes Raman gain` 或 `Overlap`。
 
-如果 Stokes 场始终接近噪声，可以适度增加 `Stokes Raman gain` 或延长运行时间。如果仿真
-变慢，优先降低 `stepsPerFrame` 或网格点数。
+如果仿真变慢，优先降低 `stepsPerFrame` 或网格点数。该模型用于交互式理解 Stokes soliton
+机制，不包含热动力学、真实材料单位换算或完整多模族耦合。
 
 ## 参考文献
 

@@ -4,10 +4,10 @@
 
 ## Simulation equations
 
-This model is a single-field normalized Lugiato-Lefever equation (LLE). The slow
-time is $t$, the azimuthal coordinate is $\phi \in [-\pi,\pi)$, and the
-relative mode number is $\mu$. The simulated variable $\psi(\phi,t)$ is the
-normalized intracavity field envelope.
+This is a single-field normalized Lugiato-Lefever equation (LLE) for bright
+dissipative Kerr solitons in an anomalous-dispersion microresonator. The slow
+time is $t$, the azimuthal coordinate is $\phi\in[-\pi,\pi)$, the relative mode
+number is $\mu$, and the normalized intracavity field is $\psi(\phi,t)$:
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -16,7 +16,7 @@ $$
 +F+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
 $$
 
-The dispersion operator is defined in the frequency domain as
+The frequency-domain integrated dispersion is
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -26,44 +26,50 @@ D_{\mathrm{int}}(\mu)
 +\frac{d_4\mu^4}{24}.
 $$
 
-Here $\alpha$ is the normalized pump-resonance detuning, $F$ is the normalized
-pump amplitude, $d_2,d_3,d_4$ are normalized integrated-dispersion coefficients,
-and $\tau_R$ is the Raman shock coefficient. The current implementation uses a
-first-order split-step update: time-domain Kerr/Raman update, frequency-domain
-linear propagation, and explicit pump injection.
+Here $\alpha$ is the pump-resonance detuning, $F$ is the pump amplitude,
+$d_2,d_3,d_4$ are normalized integrated-dispersion coefficients, and $\tau_R$ is
+the Raman shock coefficient. The solver uses a first-order split-step update:
+Kerr/Raman terms in the time domain, loss-detuning-dispersion terms in the
+frequency domain, and explicit pump injection.
 
 ## Physical picture
 
-Standard soliton describes a bright dissipative Kerr soliton in an anomalous-
-dispersion microresonator. The steady state is set by the balance between cavity
-loss, continuous-wave pumping, Kerr nonlinear phase shift, and anomalous
-dispersion. The pump compensates loss, the Kerr effect gives an intensity-
-dependent phase, and anomalous dispersion balances that phase to form a localized
-bright pulse.
+The standard soliton is set by a compact balance: the continuous-wave pump
+compensates cavity loss, Kerr nonlinearity gives an intensity-dependent phase
+shift, and anomalous dispersion ($d_2<0$) balances that nonlinear phase to form a
+localized bright pulse.
 
-In the temporal plot, the soliton appears as a localized intensity peak. In the
-spectrum, it appears as a broad coherent comb around the pumped mode. Increasing
-detuning usually changes the pulse width and peak intensity. Nonzero $d_3$ or
-$d_4$ goes beyond the simple quadratic dispersion approximation and can create
-asymmetric spectra or dispersive-wave features. Nonzero $\tau_R$ changes the
-nonlinear phase through $i\tau_R\psi\partial_\phi|\psi|^2$, enabling interactive
+Read the four plots as follows:
+
+- `Temporal field`: check whether $|\psi|^2$ forms a narrow bright peak.
+- `Comb spectrum`: check whether a broad comb envelope appears around the pump.
+- `Intracavity energy`: check whether the mean intracavity energy settles.
+- `Temporal evolution`: check whether the pulse drifts, splits, or destabilizes.
+
+Increasing detuning usually changes the pulse width and peak intensity. Nonzero
+$d_3$ or $d_4$ adds higher-order dispersion, which can generate asymmetric
+spectra or dispersive-wave features. Nonzero $\tau_R$ changes the nonlinear
+phase through $i\tau_R\psi\partial_\phi|\psi|^2$, enabling interactive
 exploration of Raman self-frequency-shift-like behavior.
 
 ## Demo
 
 1. Select `Standard soliton` in `MODEL`.
-2. Use the defaults: `grid = 512`, `Detuning = 10`, `Pump power = 3.94`,
+2. Keep the defaults: `grid = 512`, `Detuning = 10`, `Pump power = 3.94`,
    `D2 = -0.0444`, `D3 = 0`, `D4 = 0`, `tauR = 0`.
-3. Click `Play`.
-4. Watch the localized bright pulse in `Temporal field` and the comb around the
-   pumped mode in `Comb spectrum`.
-5. Scan `Detuning` and compare pulse peak, pulse width, and `Intracavity energy`.
-6. Increase `tauR` slowly from 0 to see how the Raman shock term changes the pulse
-   and spectrum.
+3. Click `Play` and first confirm that a stable bright pulse appears in the time
+   domain.
+4. Slowly scan `Detuning` and compare the pulse width, peak intensity, and
+   energy trace.
+5. Set `D3` or `D4` to a nonzero value to observe spectral asymmetry or narrow
+   dispersive-wave-like features.
+6. Increase `tauR` slightly from 0 to inspect Raman-induced pulse and spectral
+   shifts.
 
 If the state diverges or the spectrum becomes numerically noisy, reduce `dt` or
-lower `Pump power`. The solver clamps oversized timesteps using
-$\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing.
+lower `Pump power` first. The solver clamps oversized timesteps using
+$\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing, but
+this does not replace a higher-order publication-grade integrator.
 
 ## References
 
