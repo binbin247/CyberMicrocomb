@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import { PlotPanel, PlotSurface } from './components/PlotPanel'
+import { PlotPanel } from './components/PlotPanel'
 import { WaterfallCanvas } from './components/WaterfallCanvas'
 import {
   DEFAULT_GRID_SIZE,
@@ -183,7 +183,6 @@ function App() {
   const temporalSeries = getTemporalSeries(snapshot, labels)
   const spectrumSeries = getSpectrumSeries(snapshot, labels)
   const energySeries = getEnergySeries(modelId, trace, labels)
-  const stokesEnergyPanels = getStokesEnergyPanels(trace, labels)
 
   const resetLocalBuffers = useCallback(() => {
     const emptyRows = emptyHistoryRows()
@@ -521,47 +520,15 @@ function App() {
             yTitle={labels.spectrumDb}
             color="#c43b42"
           />
-          {modelId === 'stokes' ? (
-            <section className="visual-panel energy-panel">
-              <div className="visual-header">
-                <h2>{labels.traces}</h2>
-              </div>
-              <div className="energy-pair">
-                <div className="energy-subpanel">
-                  <div className="energy-subheader">{labels.primary}</div>
-                  <PlotSurface
-                    x={trace.map((item) => item.step)}
-                    series={stokesEnergyPanels.primary}
-                    yTitle={labels.energy}
-                    color="#287d5a"
-                    yMinSpan={ENERGY_MIN_Y_SPAN}
-                    yFloor={0}
-                  />
-                </div>
-                <div className="energy-subpanel">
-                  <div className="energy-subheader">{labels.stokes}</div>
-                  <PlotSurface
-                    x={trace.map((item) => item.step)}
-                    series={stokesEnergyPanels.stokes}
-                    yTitle={labels.energy}
-                    color="#c43b42"
-                    yMinSpan={ENERGY_MIN_Y_SPAN}
-                    yFloor={0}
-                  />
-                </div>
-              </div>
-            </section>
-          ) : (
-            <PlotPanel
-              title={labels.traces}
-              x={trace.map((item) => item.step)}
-              series={energySeries}
-              yTitle={labels.energy}
-              color="#287d5a"
-              yMinSpan={ENERGY_MIN_Y_SPAN}
-              yFloor={0}
-            />
-          )}
+          <PlotPanel
+            title={labels.traces}
+            x={trace.map((item) => item.step)}
+            series={energySeries}
+            yTitle={labels.energy}
+            color="#287d5a"
+            yMinSpan={ENERGY_MIN_Y_SPAN}
+            yFloor={0}
+          />
           <section className="visual-panel waterfall-panel">
             <div className="visual-header">
               <h2>{labels.waterfall}</h2>
@@ -778,25 +745,6 @@ function getEnergySeries(
     ]
   }
   return [{ name: labels.energy, y: trace.map((item) => item.energy ?? 0) }]
-}
-
-function getStokesEnergyPanels(trace: TracePoint[], labels: ReturnType<typeof t>) {
-  return {
-    primary: [
-      {
-        name: labels.primary,
-        y: trace.map((item) => item.primaryEnergy ?? 0),
-        color: '#287d5a',
-      },
-    ],
-    stokes: [
-      {
-        name: labels.stokes,
-        y: trace.map((item) => item.stokesEnergy ?? 0),
-        color: '#c43b42',
-      },
-    ],
-  }
 }
 
 function isStokesSnapshot(snapshot: Snapshot | null): snapshot is StokesSnapshot {
