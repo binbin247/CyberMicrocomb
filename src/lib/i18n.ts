@@ -6,6 +6,8 @@ export const copy = {
     subtitle: 'Interactive browser-based LLE simulator for microcomb dynamics',
     usageCount: 'Usage count: ',
     model: 'Model',
+    docs: 'Docs',
+    close: 'Close',
     modelLabels: {
       standard: 'Standard soliton',
       platicon: 'Standard dark pulse (platicon)',
@@ -190,6 +192,8 @@ export const copy = {
     subtitle: 'Interactive browser-based LLE simulator for microcomb dynamics',
     usageCount: '使用人次：',
     model: '模型',
+    docs: '文档',
+    close: '关闭',
     modelLabels: {
       standard: 'Standard soliton',
       platicon: 'Standard dark pulse (platicon)',

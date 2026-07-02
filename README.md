@@ -27,28 +27,17 @@ React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 
 ## 模型
 
-归一化模型为
+当前页面内置三个交互式归一化模型。每个模型都有独立的方程说明、物理图像、
+Demo 操作和参考文献：
 
-```text
-dpsi/dt = [-(1 + i alpha) + i Dint(mu) + i |psi|^2] psi
-          + F + i tauR psi d_theta |psi|^2
-```
+- [Standard soliton](./docs/models/standard-soliton.md)：异常色散单场 LLE，
+  用于 bright dissipative Kerr soliton 仿真。
+- [Standard dark pulse (platicon)](./docs/models/standard-dark-pulse-platicon.md)：
+  normal-dispersion 单场 LLE 加局部 mode shift，用于 dark pulse / platicon 仿真。
+- [Stokes soliton](./docs/models/stokes-soliton.md)：Primary / Stokes 双场耦合 LLE，
+  用于 Raman 驱动的 Stokes soliton 仿真。
 
-其中
-
-```text
-Dint(mu) = d2 mu^2 / 2 + d3 mu^3 / 6 + d4 mu^4 / 24
-```
-
-v1 求解器使用简单一阶分步傅里叶更新：
-
-1. 时域 Kerr/Raman 更新。
-2. FFT。
-3. 频域线性更新。
-4. IFFT。
-5. 显式泵浦更新。
-
-该版本用于交互式探索，不作为最终论文级积分结果。
+在网页中，也可以通过 `MODEL` 区域旁边的 `文档` 按钮直接打开当前模型的说明面板。
 
 ## 本地开发
 

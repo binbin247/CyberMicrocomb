@@ -11,10 +11,15 @@
     "test": "vitest run && python3 scripts/test_solver.py"
   },
   "dependencies": {
+    "katex": "^0.17.0",
     "lucide-react": "^1.22.0",
     "plotly.js-dist-min": "^3.6.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.2",

@@ -27,31 +27,21 @@ compute once the page has loaded.
   `max(|Dint|) * dt < pi` to avoid dispersion-phase aliasing.
 - Static deployment target for GitHub Pages.
 
-## Model
+## Models
 
-The normalized model is
+The page currently includes three interactive normalized models. Each model has
+its own equation notes, physical picture, demo workflow, and references:
 
-```text
-dpsi/dt = [-(1 + i alpha) + i Dint(mu) + i |psi|^2] psi
-          + F + i tauR psi d_theta |psi|^2
-```
+- [Standard soliton](./docs/models/standard-soliton.en.md): anomalous-dispersion
+  single-field LLE for bright dissipative Kerr soliton simulations.
+- [Standard dark pulse (platicon)](./docs/models/standard-dark-pulse-platicon.en.md):
+  normal-dispersion single-field LLE with a local mode shift for dark pulse /
+  platicon simulations.
+- [Stokes soliton](./docs/models/stokes-soliton.en.md): primary / Stokes
+  two-field coupled LLE for Raman-driven Stokes soliton simulations.
 
-where
-
-```text
-Dint(mu) = d2 mu^2 / 2 + d3 mu^3 / 6 + d4 mu^4 / 24
-```
-
-The v1 solver uses a simple first-order split-step update:
-
-1. Time-domain Kerr/Raman update.
-2. FFT.
-3. Frequency-domain linear update.
-4. IFFT.
-5. Explicit pump update.
-
-This is intended for interactive exploration, not final publication-grade
-integration.
+In the web app, the `Docs` button next to the `MODEL` selector opens the
+documentation panel for the currently selected model.
 
 ## Local Development
 

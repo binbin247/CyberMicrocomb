@@ -1,5 +1,6 @@
 import {
   Activity,
+  BookOpen,
   Download,
   Languages,
   Pause,
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { ModelDocsPanel } from './components/ModelDocsPanel'
 import { PlotPanel } from './components/PlotPanel'
 import { WaterfallCanvas } from './components/WaterfallCanvas'
 import {
@@ -204,6 +206,7 @@ function App() {
   const [isReady, setIsReady] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
   const [livePreview, setLivePreview] = useState(true)
+  const [isDocsOpen, setIsDocsOpen] = useState(false)
   const [trace, setTrace] = useState<TracePoint[]>([])
   const [historyRows, setHistoryRows] = useState<ModelHistoryRows>(emptyHistoryRows)
   const workerRef = useRef<Worker | null>(null)
@@ -465,19 +468,29 @@ function App() {
               {labels.usageCount}
               <span id="busuanzi_value_site_pv">--</span>
             </p>
-            <label className="model-selector">
-              <span>{labels.model}</span>
-              <select
-                value={modelId}
-                onChange={(event) => changeModel(event.target.value as ModelId)}
+            <div className="model-tools">
+              <label className="model-selector">
+                <span>{labels.model}</span>
+                <select
+                  value={modelId}
+                  onChange={(event) => changeModel(event.target.value as ModelId)}
+                >
+                  {MODEL_IDS.map((id) => (
+                    <option key={id} value={id}>
+                      {labels.modelLabels[id]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className="docs-button"
+                onClick={() => setIsDocsOpen(true)}
               >
-                {MODEL_IDS.map((id) => (
-                  <option key={id} value={id}>
-                    {labels.modelLabels[id]}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <BookOpen size={17} />
+                <span>{labels.docs}</span>
+              </button>
+            </div>
           </div>
           <button
             type="button"
@@ -634,6 +647,14 @@ function App() {
           © 2026 Binbin Nie. CyberMicrocomb. Code licensed under MIT License.
         </footer>
       </main>
+      <ModelDocsPanel
+        open={isDocsOpen}
+        modelId={modelId}
+        modelLabel={labels.modelLabels[modelId]}
+        language={language}
+        closeLabel={labels.close}
+        onClose={() => setIsDocsOpen(false)}
+      />
     </div>
   )
 }
