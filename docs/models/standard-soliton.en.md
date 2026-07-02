@@ -9,15 +9,45 @@ dissipative Kerr solitons in an anomalous-dispersion microresonator. The slow
 time is $t$, the azimuthal coordinate is $\phi\in[-\pi,\pi)$, the relative mode
 number is $\mu$, and the normalized intracavity field is $\psi(\phi,t)$:
 
+The classic second-order LLE keeps only loss, detuning, second-order dispersion,
+Kerr nonlinearity, and continuous-wave pumping:
+
 $$
 \frac{\partial \psi}{\partial t}
 =
 [-(1+i\alpha)+i|\psi|^2]\psi
 -\frac{i d_2}{2}\frac{\partial^2\psi}{\partial\phi^2}
--\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
-+\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4}
-+F+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
++F.
 $$
+
+Higher-order dispersion and Raman effects can be added as perturbations to the
+classic equation:
+
+$$
+\frac{\partial \psi}{\partial t}
+=
+\left.\frac{\partial \psi}{\partial t}\right|_{\mathrm{classic}}
++\mathcal{P}_{\mathrm{HOD}}
++\mathcal{P}_{\mathrm{Raman}},
+$$
+
+with
+
+$$
+\mathcal{P}_{\mathrm{HOD}}
+=
+-\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
++\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4},
+$$
+
+$$
+\mathcal{P}_{\mathrm{Raman}}
+=
+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
+$$
+
+Setting $d_3=d_4=\tau_R=0$ recovers the pure second-order LLE without Raman
+response.
 
 Equivalently, the dispersion operator is $iD_{\mathrm{int}}(-i\partial_\phi)\psi$.
 With the Fourier convention $\partial_\phi\to i\mu$, the frequency-domain

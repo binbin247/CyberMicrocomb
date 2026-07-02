@@ -8,15 +8,42 @@
 孤子。慢时间为 $t$，环向坐标为 $\phi\in[-\pi,\pi)$，相对模式编号为
 $\mu$，腔内归一化场为 $\psi(\phi,t)$：
 
+最经典的二阶 LLE 只保留损耗、失谐、二阶色散、Kerr 非线性和连续波泵浦：
+
 $$
 \frac{\partial \psi}{\partial t}
 =
 [-(1+i\alpha)+i|\psi|^2]\psi
 -\frac{i d_2}{2}\frac{\partial^2\psi}{\partial\phi^2}
--\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
-+\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4}
-+F+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
++F.
 $$
+
+当需要考虑高阶色散或 Raman 效应时，可以在经典 LLE 上加入微扰项：
+
+$$
+\frac{\partial \psi}{\partial t}
+=
+\left.\frac{\partial \psi}{\partial t}\right|_{\mathrm{classic}}
++\mathcal{P}_{\mathrm{HOD}}
++\mathcal{P}_{\mathrm{Raman}},
+$$
+
+其中
+
+$$
+\mathcal{P}_{\mathrm{HOD}}
+=
+-\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
++\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4},
+$$
+
+$$
+\mathcal{P}_{\mathrm{Raman}}
+=
+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
+$$
+
+因此令 $d_3=d_4=\tau_R=0$ 时，模型回到纯二阶、无 Raman 的经典 LLE。
 
 色散项也可以写成紧凑算子 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前
 Fourier 约定下，$\partial_\phi\to i\mu$，对应的频域积分色散为
