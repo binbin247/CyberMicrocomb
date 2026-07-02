@@ -30,5 +30,5 @@ export const DEFAULT_STOKES_PARAMS: StokesParams = {
   tauR: 0.00033,
   noise: 0.00001,
   dt: 0.00005,
-  stepsPerFrame: 320,
+  stepsPerFrame: 5000,
 }

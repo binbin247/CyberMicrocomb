@@ -19,7 +19,10 @@ export function clampStandardParams(params: StandardParams): StandardParams {
     d4: finiteOr(params.d4, 0),
     tauR: finiteOr(params.tauR, 0),
     dt: clamp(finiteOr(params.dt, DEFAULT_STANDARD_PARAMS.dt), 1e-12, 0.005),
-    stepsPerFrame: Math.max(1, Math.round(finiteOr(params.stepsPerFrame, 50))),
+    stepsPerFrame: Math.max(
+      1,
+      Math.round(finiteOr(params.stepsPerFrame, DEFAULT_STANDARD_PARAMS.stepsPerFrame)),
+    ),
   }
 }
 
@@ -55,7 +58,10 @@ export function clampStokesParams(params: StokesParams): StokesParams {
     tauR: clamp(finiteOr(params.tauR, DEFAULT_STOKES_PARAMS.tauR), 0, 0.02),
     noise: clamp(finiteOr(params.noise, DEFAULT_STOKES_PARAMS.noise), 0, 0.001),
     dt: clamp(finiteOr(params.dt, DEFAULT_STOKES_PARAMS.dt), 1e-12, 0.005),
-    stepsPerFrame: Math.max(1, Math.round(finiteOr(params.stepsPerFrame, 50))),
+    stepsPerFrame: Math.max(
+      1,
+      Math.round(finiteOr(params.stepsPerFrame, DEFAULT_STOKES_PARAMS.stepsPerFrame)),
+    ),
   }
 }
 

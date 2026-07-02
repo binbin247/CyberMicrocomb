@@ -105,7 +105,7 @@ export const copy = {
       alphaP: [
         'Normalized pump detuning of the primary soliton mode family.',
         'It appears in the primary linear operator as -1 - i alphaP.',
-        'The Stokes preset keeps the system constants from the MATLAB scan; the original Fig. S1 scan uses a much longer slow detuning sweep.',
+        'With the default Stokes preset, scanning this control is the intended route for the Fig. S1 primary-to-Stokes soliton transition.',
       ],
       alphaS: [
         'Normalized detuning of the Stokes mode family.',
@@ -272,7 +272,7 @@ export const copy = {
       alphaP: [
         'Primary 模式族的归一化泵浦失谐。',
         '它在线性算子中以 -1 - i alphaP 的形式出现。',
-        'Stokes preset 的系统常数沿用 MATLAB 扫描脚本；原始 Fig. S1 使用的是更长时间的慢失谐扫描。',
+        '在默认 Stokes preset 下，只扫描这个参数就是复现 Fig. S1 中 primary 到 Stokes soliton 转换的预期操作。',
       ],
       alphaS: [
         'Stokes 模式族的归一化失谐。',

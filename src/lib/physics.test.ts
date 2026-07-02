@@ -67,5 +67,15 @@ describe('parameter clamping', () => {
     expect(DEFAULT_STOKES_PARAMS.ramanGainS).toBeCloseTo(0.35 * 0.18 * 2)
     expect(DEFAULT_STOKES_PARAMS.wavelengthRatio).toBeCloseTo(1550 / 1630)
     expect(DEFAULT_STOKES_PARAMS.tauR).toBe(0.00033)
+    expect(DEFAULT_STOKES_PARAMS.stepsPerFrame).toBe(5000)
+  })
+
+  it('uses the Stokes default stride when Stokes steps per frame is invalid', () => {
+    const params = clampParamsForModel('stokes', {
+      ...DEFAULT_STOKES_PARAMS,
+      stepsPerFrame: Number.NaN,
+    })
+
+    expect(params.stepsPerFrame).toBe(5000)
   })
 })
