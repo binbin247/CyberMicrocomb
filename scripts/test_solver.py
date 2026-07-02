@@ -10,6 +10,9 @@ exec(solver_source.read_text(encoding="utf-8"), namespace)
 LLESolver = namespace["LLESolver"]
 PlaticonSolver = namespace["PlaticonSolver"]
 StokesSolitonSolver = namespace["StokesSolitonSolver"]
+TurnkeySolitonSolver = namespace["TurnkeySolitonSolver"]
+MulticolorSolitonSolver = namespace["MulticolorSolitonSolver"]
+RamanSsfSolver = namespace["RamanSsfSolver"]
 
 
 def configure(solver, n=256, **params):
@@ -262,6 +265,164 @@ def test_stokes_detuning_is_fixed_at_zero():
     assert params["alphaS"] == 0.0
 
 
+def configure_turnkey(solver, n=128, **params):
+    base = {
+        "laserDetuning": 5.0,
+        "pump": math.sqrt(3.0),
+        "d2": 0.015,
+        "beta": 0.5,
+        "lockingBandwidth": 15.0,
+        "feedbackPhase": 0.3 * math.pi,
+        "noise": 1e-5,
+        "dt": 5e-4,
+        "stepsPerFrame": 10,
+    }
+    base.update(params)
+    solver.configure({"n": n, "params": base, "reset": True})
+    return base
+
+
+def test_turnkey_solver_snapshot_and_export_are_finite():
+    solver = TurnkeySolitonSolver()
+    configure_turnkey(solver)
+    for _ in range(3):
+        snap = solver.run_steps()
+    assert snap["modelId"] == "turnkey"
+    assert len(snap["primaryIntensity"]) == 128
+    assert len(snap["backwardIntensity"]) == 128
+    assert math.isfinite(snap["lockedDetuning"])
+    assert np.all(np.isfinite(snap["primaryIntensity"]))
+    state = solver.export_state()
+    assert len(state["psiP_real"]) == 128
+    assert isinstance(state["rhoB_real"], float)
+
+
+def test_turnkey_locked_detuning_responds_to_feedback_parameters():
+    solver = TurnkeySolitonSolver()
+    configure_turnkey(solver, lockingBandwidth=0.0)
+    for _ in range(3):
+        solver.run_steps()
+    unlocked = solver.snapshot()["lockedDetuning"]
+    configure_turnkey(solver, lockingBandwidth=15.0, feedbackPhase=0.3 * math.pi)
+    for _ in range(3):
+        solver.run_steps()
+    locked = solver.snapshot()["lockedDetuning"]
+    assert math.isfinite(locked)
+    assert abs(locked - unlocked) > 1e-9
+
+
+def test_turnkey_adaptive_dt_satisfies_aliasing_bound():
+    solver = TurnkeySolitonSolver()
+    configure_turnkey(solver, n=4096, d2=0.25, dt=0.005)
+    params = solver.snapshot()["normalizedParams"]
+    max_phase_per_step = float(np.max(np.abs(params["d2"] * solver.mu**2)) * params["dt"])
+    assert max_phase_per_step < math.pi, max_phase_per_step
+
+
+def configure_multicolor(solver, n=128, **params):
+    base = {
+        "alphaP": 45.0,
+        "alphaS": 25.0,
+        "alphaI": 25.0,
+        "pump": 17.0,
+        "d2P": 0.201,
+        "d2S": 0.0905,
+        "d2I": -0.0877,
+        "fsrMismatchS": 0.0,
+        "fsrMismatchI": 18.1,
+        "xpm": 1.73 / 4.33,
+        "fwmRe": 1.73 / 4.33,
+        "fwmIm": 0.0,
+        "noise": 1e-5,
+        "dt": 2e-5,
+        "stepsPerFrame": 10,
+    }
+    base.update(params)
+    solver.configure({"n": n, "params": base, "reset": True})
+    return base
+
+
+def test_multicolor_solver_snapshot_and_export_are_finite():
+    solver = MulticolorSolitonSolver()
+    configure_multicolor(solver)
+    for _ in range(3):
+        snap = solver.run_steps()
+    assert snap["modelId"] == "multicolor"
+    assert len(snap["primaryIntensity"]) == 128
+    assert len(snap["signalIntensity"]) == 128
+    assert len(snap["idlerIntensity"]) == 128
+    assert np.all(np.isfinite(snap["primaryIntensity"]))
+    assert np.all(np.isfinite(snap["signalIntensity"]))
+    assert np.all(np.isfinite(snap["idlerIntensity"]))
+    state = solver.export_state()
+    assert len(state["psiP_real"]) == 128
+    assert len(state["psiS_real"]) == 128
+    assert len(state["psiI_real"]) == 128
+
+
+def test_multicolor_adaptive_dt_satisfies_aliasing_bound():
+    solver = MulticolorSolitonSolver()
+    configure_multicolor(
+        solver,
+        n=4096,
+        d2P=1.0,
+        d2S=-1.0,
+        d2I=1.0,
+        fsrMismatchI=40.0,
+        dt=0.005,
+    )
+    params = solver.snapshot()["normalizedParams"]
+    primary_phase = np.abs(params["d2P"] * solver.mu**2 / 2.0)
+    signal_phase = np.abs(params["fsrMismatchS"] * solver.mu + params["d2S"] * solver.mu**2 / 2.0)
+    idler_phase = np.abs(params["fsrMismatchI"] * solver.mu + params["d2I"] * solver.mu**2 / 2.0)
+    max_phase_per_step = float(max(np.max(primary_phase), np.max(signal_phase), np.max(idler_phase)) * params["dt"])
+    assert max_phase_per_step < math.pi, max_phase_per_step
+
+
+def configure_raman(solver, n=128, **params):
+    base = {
+        "dtnNorm": 25.092981044961256,
+        "ffNorm": 20.754698290532414,
+        "d2Norm": 1.65414364640884,
+        "fR": 0.02,
+        "tau1Fs": 11.1,
+        "tau2Fs": 35.0,
+        "fsrGHz": 1000.0,
+        "qMillion": 4.0,
+        "wavelengthNm": 1550.0,
+        "noise": 1e-4,
+        "dt": 5e-5,
+        "stepsPerFrame": 10,
+    }
+    base.update(params)
+    solver.configure({"n": n, "params": base, "reset": True})
+    return base
+
+
+def test_raman_solver_snapshot_metrics_and_export_are_finite():
+    solver = RamanSsfSolver()
+    configure_raman(solver)
+    for _ in range(3):
+        snap = solver.run_steps()
+    assert snap["modelId"] == "raman"
+    assert len(snap["intensity"]) == 128
+    assert np.all(np.isfinite(snap["intensity"]))
+    assert math.isfinite(snap["pulseWidthFs"])
+    assert math.isfinite(snap["selfFrequencyShiftThz"])
+    assert snap["referenceParams"]["fsrGHz"] == 1000.0
+    state = solver.export_state()
+    assert len(state["psi_real"]) == 128
+    assert "referenceParams" in state
+
+
+def test_raman_adaptive_dt_satisfies_aliasing_bound():
+    solver = RamanSsfSolver()
+    configure_raman(solver, n=4096, d2Norm=8.0, dt=0.005)
+    params = solver.snapshot()["normalizedParams"]
+    max_phase_per_step = float(np.max(np.abs(params["d2Norm"] * solver.mu**2 / 2.0)) * params["dt"])
+    assert max_phase_per_step < math.pi, max_phase_per_step
+
+
 if __name__ == "__main__":
     test_zero_pump_decay()
     test_grid_rebuild()
@@ -282,4 +443,11 @@ if __name__ == "__main__":
     test_stokes_defaults_follow_matlab_system_parameters()
     test_stokes_default_uses_fast_fig_s1_scan_stride()
     test_stokes_detuning_is_fixed_at_zero()
+    test_turnkey_solver_snapshot_and_export_are_finite()
+    test_turnkey_locked_detuning_responds_to_feedback_parameters()
+    test_turnkey_adaptive_dt_satisfies_aliasing_bound()
+    test_multicolor_solver_snapshot_and_export_are_finite()
+    test_multicolor_adaptive_dt_satisfies_aliasing_bound()
+    test_raman_solver_snapshot_metrics_and_export_are_finite()
+    test_raman_adaptive_dt_satisfies_aliasing_bound()
     print("solver tests passed")

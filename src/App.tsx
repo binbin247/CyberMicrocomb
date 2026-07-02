@@ -15,11 +15,17 @@ import { PlotPanel } from './components/PlotPanel'
 import { WaterfallCanvas } from './components/WaterfallCanvas'
 import {
   DEFAULT_GRID_SIZE,
+  DEFAULT_MULTICOLOR_GRID_SIZE,
+  DEFAULT_MULTICOLOR_PARAMS,
   DEFAULT_PLATICON_GRID_SIZE,
   DEFAULT_PLATICON_PARAMS,
+  DEFAULT_RAMAN_GRID_SIZE,
+  DEFAULT_RAMAN_PARAMS,
   DEFAULT_STOKES_GRID_SIZE,
   DEFAULT_STANDARD_PARAMS,
   DEFAULT_STOKES_PARAMS,
+  DEFAULT_TURNKEY_GRID_SIZE,
+  DEFAULT_TURNKEY_PARAMS,
   GRID_SIZES,
 } from './lib/defaults'
 import { t } from './lib/i18n'
@@ -30,14 +36,20 @@ import type {
   Language,
   Metrics,
   ModelId,
+  MulticolorParams,
+  MulticolorSnapshot,
   PlaticonParams,
   PlaticonSnapshot,
+  RamanParams,
+  RamanSnapshot,
   SimulationParams,
   Snapshot,
   StandardParams,
   StandardSnapshot,
   StokesParams,
   StokesSnapshot,
+  TurnkeyParams,
+  TurnkeySnapshot,
   WorkerStatus,
   WorkerToMainMessage,
 } from './types'
@@ -59,12 +71,20 @@ interface TracePoint {
   energy?: number
   primaryEnergy?: number
   stokesEnergy?: number
+  backwardEnergy?: number
+  signalEnergy?: number
+  idlerEnergy?: number
+  pulseWidthFs?: number
+  selfFrequencyShiftThz?: number
 }
 
 interface ModelHistoryRows {
   standard: Float32Array[]
   primary: Float32Array[]
   stokes: Float32Array[]
+  backward: Float32Array[]
+  signal: Float32Array[]
+  idler: Float32Array[]
 }
 
 interface ExportPlotSource {
@@ -186,6 +206,116 @@ const stokesControlGroups: readonly ControlGroupDefinition[] = [
   },
 ]
 
+const turnkeyControlGroups: readonly ControlGroupDefinition[] = [
+  {
+    titleKey: 'drive',
+    controls: [
+      { key: 'laserDetuning', min: -20, max: 40, step: 0.01 },
+      { key: 'pump', min: 0, max: 8, step: 0.01 },
+    ],
+  },
+  {
+    titleKey: 'dispersion',
+    controls: [
+      { key: 'd2', min: -0.25, max: 0.25, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'selfInjection',
+    controls: [
+      { key: 'beta', min: 0, max: 3, step: 0.01 },
+      { key: 'lockingBandwidth', min: 0, max: 40, step: 0.01 },
+      { key: 'feedbackPhase', min: -Math.PI, max: Math.PI, step: 0.001 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
+      { key: 'noise', min: 0, max: 0.001, step: 0.000001 },
+      { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
+      { key: 'stepsPerFrame', min: 1, max: 5000, step: 1 },
+    ],
+  },
+]
+
+const multicolorControlGroups: readonly ControlGroupDefinition[] = [
+  {
+    titleKey: 'primary',
+    controls: [
+      { key: 'alphaP', min: -20, max: 100, step: 0.01 },
+      { key: 'pump', min: 0, max: 40, step: 0.01 },
+      { key: 'd2P', min: -1, max: 1, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'signal',
+    controls: [
+      { key: 'alphaS', min: -20, max: 100, step: 0.01 },
+      { key: 'd2S', min: -1, max: 1, step: 0.0001 },
+      { key: 'fsrMismatchS', min: -40, max: 40, step: 0.001 },
+    ],
+  },
+  {
+    titleKey: 'idler',
+    controls: [
+      { key: 'alphaI', min: -20, max: 100, step: 0.01 },
+      { key: 'd2I', min: -1, max: 1, step: 0.0001 },
+      { key: 'fsrMismatchI', min: -40, max: 40, step: 0.001 },
+    ],
+  },
+  {
+    titleKey: 'fwm',
+    controls: [
+      { key: 'xpm', min: 0, max: 4, step: 0.001 },
+      { key: 'fwmRe', min: -4, max: 4, step: 0.001 },
+      { key: 'fwmIm', min: -4, max: 4, step: 0.001 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
+      { key: 'noise', min: 0, max: 0.001, step: 0.000001 },
+      { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
+      { key: 'stepsPerFrame', min: 1, max: 10000, step: 1 },
+    ],
+  },
+]
+
+const ramanControlGroups: readonly ControlGroupDefinition[] = [
+  {
+    titleKey: 'drive',
+    controls: [
+      { key: 'dtnNorm', min: 0.1, max: 80, step: 0.01 },
+      { key: 'ffNorm', min: 0, max: 150, step: 0.01 },
+    ],
+  },
+  {
+    titleKey: 'dispersion',
+    controls: [
+      { key: 'd2Norm', min: 0.001, max: 8, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'ramanResponse',
+    controls: [
+      { key: 'fR', min: 0, max: 1, step: 0.001 },
+      { key: 'tau1Fs', min: 0.1, max: 200, step: 0.1 },
+      { key: 'tau2Fs', min: 0.1, max: 1000, step: 0.1 },
+      { key: 'fsrGHz', min: 10, max: 3000, step: 1 },
+      { key: 'qMillion', min: 0.1, max: 100, step: 0.1 },
+      { key: 'wavelengthNm', min: 1000, max: 2500, step: 1 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
+      { key: 'noise', min: 0, max: 0.001, step: 0.000001 },
+      { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
+      { key: 'stepsPerFrame', min: 1, max: 10000, step: 1 },
+    ],
+  },
+]
+
 function App() {
   const [language, setLanguage] = useState<Language>('en')
   const labels = t(language)
@@ -194,10 +324,16 @@ function App() {
     standard: DEFAULT_GRID_SIZE,
     platicon: DEFAULT_PLATICON_GRID_SIZE,
     stokes: DEFAULT_STOKES_GRID_SIZE,
+    turnkey: DEFAULT_TURNKEY_GRID_SIZE,
+    multicolor: DEFAULT_MULTICOLOR_GRID_SIZE,
+    raman: DEFAULT_RAMAN_GRID_SIZE,
   })
   const [standardParams, setStandardParams] = useState(DEFAULT_STANDARD_PARAMS)
   const [platiconParams, setPlaticonParams] = useState(DEFAULT_PLATICON_PARAMS)
   const [stokesParams, setStokesParams] = useState(DEFAULT_STOKES_PARAMS)
+  const [turnkeyParams, setTurnkeyParams] = useState(DEFAULT_TURNKEY_PARAMS)
+  const [multicolorParams, setMulticolorParams] = useState(DEFAULT_MULTICOLOR_PARAMS)
+  const [ramanParams, setRamanParams] = useState(DEFAULT_RAMAN_PARAMS)
   const [status, setStatus] = useState<WorkerStatus>('idle')
   const [loadingMessage, setLoadingMessage] = useState('')
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
@@ -233,22 +369,31 @@ function App() {
       if (modelId === 'platicon') {
         return clampPlaticonParams(platiconParams, gridSize)
       }
+      if (modelId === 'turnkey') {
+        return clampParamsForModel('turnkey', turnkeyParams) as TurnkeyParams
+      }
+      if (modelId === 'multicolor') {
+        return clampParamsForModel('multicolor', multicolorParams) as MulticolorParams
+      }
+      if (modelId === 'raman') {
+        return clampParamsForModel('raman', ramanParams) as RamanParams
+      }
       return clampParamsForModel('standard', standardParams) as StandardParams
     },
-    [gridSize, modelId, platiconParams, standardParams, stokesParams],
+    [
+      gridSize,
+      modelId,
+      multicolorParams,
+      platiconParams,
+      ramanParams,
+      standardParams,
+      stokesParams,
+      turnkeyParams,
+    ],
   )
 
-  const activeControlGroups =
-    modelId === 'stokes'
-      ? stokesControlGroups
-      : modelId === 'platicon'
-        ? platiconControlGroups
-        : standardControlGroups
-  const activeHistoryRows = historyRows.standard
-  const activeWaterfallCount =
-    modelId === 'stokes'
-      ? Math.max(historyRows.primary.length, historyRows.stokes.length)
-      : historyRows.standard.length
+  const activeControlGroups = getControlGroups(modelId)
+  const activeWaterfallCount = getWaterfallCount(modelId, historyRows)
 
   const intensityX = snapshot ? thetaArray(getFieldLength(snapshot)) : []
   const spectrumX = snapshot ? centeredModeArray(getSpectrumLength(snapshot)) : []
@@ -333,7 +478,14 @@ function App() {
         setError(null)
         setSnapshot(next)
         snapshotRef.current = next
-        syncClampedDt(next, setStandardParams, setPlaticonParams, setStokesParams)
+        syncClampedDt(next, {
+          standard: setStandardParams,
+          platicon: setPlaticonParams,
+          stokes: setStokesParams,
+          turnkey: setTurnkeyParams,
+          multicolor: setMulticolorParams,
+          raman: setRamanParams,
+        })
         setTrace((items) => {
           const clipped = [...items, tracePointFromSnapshot(next)].slice(-HISTORY_LIMIT)
           traceRef.current = clipped
@@ -535,6 +687,16 @@ function App() {
                 setPlaticonParams(
                   (current) => ({ ...current, [key]: value }) as PlaticonParams,
                 )
+              } else if (modelId === 'turnkey') {
+                setTurnkeyParams(
+                  (current) => ({ ...current, [key]: value }) as TurnkeyParams,
+                )
+              } else if (modelId === 'multicolor') {
+                setMulticolorParams(
+                  (current) => ({ ...current, [key]: value }) as MulticolorParams,
+                )
+              } else if (modelId === 'raman') {
+                setRamanParams((current) => ({ ...current, [key]: value }) as RamanParams)
               } else {
                 setStandardParams(
                   (current) => ({ ...current, [key]: value }) as StandardParams,
@@ -591,6 +753,7 @@ function App() {
           <Metric label="latency ms" value={formatNumber(metrics?.latencyMs ?? 0)} />
           <Metric label="load %" value={formatNumber(metrics?.loadPercent ?? 0)} />
         </section>
+        <DiagnosticMetrics snapshot={snapshot} labels={labels} />
 
         <section className="plot-grid">
           <PlotPanel
@@ -626,20 +789,7 @@ function App() {
               <h2>{labels.waterfall}</h2>
               <span>{activeWaterfallCount}/{HISTORY_LIMIT}</span>
             </div>
-            {modelId === 'stokes' ? (
-              <div className="waterfall-pair">
-                <div className="waterfall-subpanel">
-                  <div className="waterfall-subheader">{labels.primary}</div>
-                  <WaterfallCanvas rows={historyRows.primary} label={labels.primary} />
-                </div>
-                <div className="waterfall-subpanel">
-                  <div className="waterfall-subheader">{labels.stokes}</div>
-                  <WaterfallCanvas rows={historyRows.stokes} label={labels.stokes} />
-                </div>
-              </div>
-            ) : (
-              <WaterfallCanvas rows={activeHistoryRows} />
-            )}
+            <WaterfallPanels modelId={modelId} rows={historyRows} labels={labels} />
           </section>
         </section>
 
@@ -657,6 +807,112 @@ function App() {
         onLanguageChange={setLanguage}
         onClose={() => setIsDocsOpen(false)}
       />
+    </div>
+  )
+}
+
+function getControlGroups(modelId: ModelId) {
+  if (modelId === 'stokes') {
+    return stokesControlGroups
+  }
+  if (modelId === 'platicon') {
+    return platiconControlGroups
+  }
+  if (modelId === 'turnkey') {
+    return turnkeyControlGroups
+  }
+  if (modelId === 'multicolor') {
+    return multicolorControlGroups
+  }
+  if (modelId === 'raman') {
+    return ramanControlGroups
+  }
+  return standardControlGroups
+}
+
+function getWaterfallCount(modelId: ModelId, rows: ModelHistoryRows) {
+  if (modelId === 'stokes') {
+    return Math.max(rows.primary.length, rows.stokes.length)
+  }
+  if (modelId === 'turnkey') {
+    return Math.max(rows.primary.length, rows.backward.length)
+  }
+  if (modelId === 'multicolor') {
+    return Math.max(rows.primary.length, rows.signal.length, rows.idler.length)
+  }
+  return rows.standard.length
+}
+
+function DiagnosticMetrics({
+  snapshot,
+  labels,
+}: {
+  snapshot: Snapshot | null
+  labels: ReturnType<typeof t>
+}) {
+  if (isTurnkeySnapshot(snapshot)) {
+    return (
+      <section className="metric-strip diagnostic-strip">
+        <Metric label={labels.lockedDetuning} value={formatNumber(snapshot.lockedDetuning)} />
+      </section>
+    )
+  }
+  if (isRamanSnapshot(snapshot)) {
+    return (
+      <section className="metric-strip diagnostic-strip">
+        <Metric label={labels.pulseWidth} value={formatNumber(snapshot.pulseWidthFs)} />
+        <Metric
+          label={labels.selfFrequencyShift}
+          value={formatNumber(snapshot.selfFrequencyShiftThz)}
+        />
+      </section>
+    )
+  }
+  return null
+}
+
+function WaterfallPanels({
+  modelId,
+  rows,
+  labels,
+}: {
+  modelId: ModelId
+  rows: ModelHistoryRows
+  labels: ReturnType<typeof t>
+}) {
+  if (modelId === 'stokes') {
+    return (
+      <div className="waterfall-pair">
+        <WaterfallSubpanel title={labels.primary} rows={rows.primary} />
+        <WaterfallSubpanel title={labels.stokes} rows={rows.stokes} />
+      </div>
+    )
+  }
+  if (modelId === 'turnkey') {
+    return (
+      <div className="waterfall-pair">
+        <WaterfallSubpanel title={labels.primary} rows={rows.primary} />
+        <WaterfallSubpanel title={labels.backward} rows={rows.backward} />
+      </div>
+    )
+  }
+  if (modelId === 'multicolor') {
+    return (
+      <div className="waterfall-pair waterfall-triple">
+        <WaterfallSubpanel title={labels.primary} rows={rows.primary} />
+        <WaterfallSubpanel title={labels.signal} rows={rows.signal} />
+        <WaterfallSubpanel title={labels.idler} rows={rows.idler} />
+      </div>
+    )
+  }
+  return <WaterfallCanvas rows={rows.standard} />
+}
+
+function WaterfallSubpanel({ title, rows }: { title: string; rows: Float32Array[] }) {
+  return (
+    <div className="waterfall-subpanel">
+      <div className="waterfall-subheader">{title}</div>
+      <WaterfallCanvas rows={rows} label={title} />
     </div>
   )
 }
@@ -745,12 +1001,17 @@ function ControlGrid({
 
 function syncClampedDt(
   snapshot: Snapshot,
-  setStandardParams: Dispatch<SetStateAction<StandardParams>>,
-  setPlaticonParams: Dispatch<SetStateAction<PlaticonParams>>,
-  setStokesParams: Dispatch<SetStateAction<StokesParams>>,
+  setters: {
+    standard: Dispatch<SetStateAction<StandardParams>>
+    platicon: Dispatch<SetStateAction<PlaticonParams>>
+    stokes: Dispatch<SetStateAction<StokesParams>>
+    turnkey: Dispatch<SetStateAction<TurnkeyParams>>
+    multicolor: Dispatch<SetStateAction<MulticolorParams>>
+    raman: Dispatch<SetStateAction<RamanParams>>
+  },
 ) {
   if (snapshot.modelId === 'stokes') {
-    setStokesParams((current) =>
+    setters.stokes((current) =>
       snapshot.normalizedParams.dt < current.dt - 1e-12
         ? { ...current, dt: snapshot.normalizedParams.dt }
         : current,
@@ -758,14 +1019,38 @@ function syncClampedDt(
     return
   }
   if (snapshot.modelId === 'platicon') {
-    setPlaticonParams((current) =>
+    setters.platicon((current) =>
       snapshot.normalizedParams.dt < current.dt - 1e-12
         ? { ...current, dt: snapshot.normalizedParams.dt }
         : current,
     )
     return
   }
-  setStandardParams((current) =>
+  if (snapshot.modelId === 'turnkey') {
+    setters.turnkey((current) =>
+      snapshot.normalizedParams.dt < current.dt - 1e-12
+        ? { ...current, dt: snapshot.normalizedParams.dt }
+        : current,
+    )
+    return
+  }
+  if (snapshot.modelId === 'multicolor') {
+    setters.multicolor((current) =>
+      snapshot.normalizedParams.dt < current.dt - 1e-12
+        ? { ...current, dt: snapshot.normalizedParams.dt }
+        : current,
+    )
+    return
+  }
+  if (snapshot.modelId === 'raman') {
+    setters.raman((current) =>
+      snapshot.normalizedParams.dt < current.dt - 1e-12
+        ? { ...current, dt: snapshot.normalizedParams.dt }
+        : current,
+    )
+    return
+  }
+  setters.standard((current) =>
     snapshot.normalizedParams.dt < current.dt - 1e-12
       ? { ...current, dt: snapshot.normalizedParams.dt }
       : current,
@@ -780,6 +1065,29 @@ function tracePointFromSnapshot(snapshot: Snapshot): TracePoint {
       stokesEnergy: snapshot.stokesEnergy,
     }
   }
+  if (snapshot.modelId === 'turnkey') {
+    return {
+      step: snapshot.step,
+      primaryEnergy: snapshot.primaryEnergy,
+      backwardEnergy: snapshot.backwardEnergy,
+    }
+  }
+  if (snapshot.modelId === 'multicolor') {
+    return {
+      step: snapshot.step,
+      primaryEnergy: snapshot.primaryEnergy,
+      signalEnergy: snapshot.signalEnergy,
+      idlerEnergy: snapshot.idlerEnergy,
+    }
+  }
+  if (snapshot.modelId === 'raman') {
+    return {
+      step: snapshot.step,
+      energy: snapshot.energy,
+      pulseWidthFs: snapshot.pulseWidthFs,
+      selfFrequencyShiftThz: snapshot.selfFrequencyShiftThz,
+    }
+  }
   return { step: snapshot.step, energy: snapshot.energy }
 }
 
@@ -789,27 +1097,53 @@ function appendHistoryRows(rows: ModelHistoryRows, snapshot: Snapshot): ModelHis
       standard: [],
       primary: [...rows.primary, snapshot.primaryHistoryRow].slice(-HISTORY_LIMIT),
       stokes: [...rows.stokes, snapshot.stokesHistoryRow].slice(-HISTORY_LIMIT),
+      backward: [],
+      signal: [],
+      idler: [],
+    }
+  }
+  if (snapshot.modelId === 'turnkey') {
+    return {
+      standard: [],
+      primary: [...rows.primary, snapshot.primaryHistoryRow].slice(-HISTORY_LIMIT),
+      stokes: [],
+      backward: [...rows.backward, snapshot.backwardHistoryRow].slice(-HISTORY_LIMIT),
+      signal: [],
+      idler: [],
+    }
+  }
+  if (snapshot.modelId === 'multicolor') {
+    return {
+      standard: [],
+      primary: [...rows.primary, snapshot.primaryHistoryRow].slice(-HISTORY_LIMIT),
+      stokes: [],
+      backward: [],
+      signal: [...rows.signal, snapshot.signalHistoryRow].slice(-HISTORY_LIMIT),
+      idler: [...rows.idler, snapshot.idlerHistoryRow].slice(-HISTORY_LIMIT),
     }
   }
   return {
     standard: [...rows.standard, snapshot.historyRow].slice(-HISTORY_LIMIT),
     primary: [],
     stokes: [],
+    backward: [],
+    signal: [],
+    idler: [],
   }
 }
 
 function emptyHistoryRows(): ModelHistoryRows {
-  return { standard: [], primary: [], stokes: [] }
+  return { standard: [], primary: [], stokes: [], backward: [], signal: [], idler: [] }
 }
 
 function getFieldLength(snapshot: Snapshot) {
-  return snapshot.modelId === 'stokes'
+  return isTwoFieldSnapshot(snapshot) || snapshot.modelId === 'multicolor'
     ? snapshot.primaryIntensity.length
     : snapshot.intensity.length
 }
 
 function getSpectrumLength(snapshot: Snapshot) {
-  return snapshot.modelId === 'stokes'
+  return isTwoFieldSnapshot(snapshot) || snapshot.modelId === 'multicolor'
     ? snapshot.primarySpectrumDb.length
     : snapshot.spectrumDb.length
 }
@@ -824,6 +1158,19 @@ function getTemporalSeries(snapshot: Snapshot | null, labels: ReturnType<typeof 
       { name: `${labels.stokes} |S|^2`, y: snapshot.stokesIntensity, color: '#c43b42' },
     ]
   }
+  if (snapshot.modelId === 'turnkey') {
+    return [
+      { name: `${labels.primary} |P|^2`, y: snapshot.primaryIntensity, color: '#2364aa' },
+      { name: `${labels.backward} |B|^2`, y: snapshot.backwardIntensity, color: '#c43b42' },
+    ]
+  }
+  if (snapshot.modelId === 'multicolor') {
+    return [
+      { name: `${labels.primary} |P|^2`, y: snapshot.primaryIntensity, color: '#2364aa' },
+      { name: `${labels.signal} |S|^2`, y: snapshot.signalIntensity, color: '#c43b42' },
+      { name: `${labels.idler} |I|^2`, y: snapshot.idlerIntensity, color: '#7a5cff' },
+    ]
+  }
   return [{ name: labels.intensity, y: snapshot.intensity }]
 }
 
@@ -835,6 +1182,19 @@ function getSpectrumSeries(snapshot: Snapshot | null, labels: ReturnType<typeof 
     return [
       { name: labels.primary, y: snapshot.primarySpectrumDb, color: '#2364aa' },
       { name: labels.stokes, y: snapshot.stokesSpectrumDb, color: '#c43b42' },
+    ]
+  }
+  if (snapshot.modelId === 'turnkey') {
+    return [
+      { name: labels.primary, y: snapshot.primarySpectrumDb, color: '#2364aa' },
+      { name: labels.backward, y: snapshot.backwardSpectrumDb, color: '#c43b42' },
+    ]
+  }
+  if (snapshot.modelId === 'multicolor') {
+    return [
+      { name: labels.primary, y: snapshot.primarySpectrumDb, color: '#2364aa' },
+      { name: labels.signal, y: snapshot.signalSpectrumDb, color: '#c43b42' },
+      { name: labels.idler, y: snapshot.idlerSpectrumDb, color: '#7a5cff' },
     ]
   }
   return [{ name: labels.spectrumDb, y: snapshot.spectrumDb }]
@@ -859,6 +1219,39 @@ function getEnergySeries(
       },
     ]
   }
+  if (modelId === 'turnkey') {
+    return [
+      {
+        name: labels.primary,
+        y: trace.map((item) => item.primaryEnergy ?? 0),
+        color: '#287d5a',
+      },
+      {
+        name: labels.backward,
+        y: trace.map((item) => item.backwardEnergy ?? 0),
+        color: '#c43b42',
+      },
+    ]
+  }
+  if (modelId === 'multicolor') {
+    return [
+      {
+        name: labels.primary,
+        y: trace.map((item) => item.primaryEnergy ?? 0),
+        color: '#287d5a',
+      },
+      {
+        name: labels.signal,
+        y: trace.map((item) => item.signalEnergy ?? 0),
+        color: '#c43b42',
+      },
+      {
+        name: labels.idler,
+        y: trace.map((item) => item.idlerEnergy ?? 0),
+        color: '#7a5cff',
+      },
+    ]
+  }
   return [{ name: labels.energy, y: trace.map((item) => item.energy ?? 0) }]
 }
 
@@ -866,10 +1259,32 @@ function isStokesSnapshot(snapshot: Snapshot | null): snapshot is StokesSnapshot
   return snapshot?.modelId === 'stokes'
 }
 
+function isTurnkeySnapshot(snapshot: Snapshot | null): snapshot is TurnkeySnapshot {
+  return snapshot?.modelId === 'turnkey'
+}
+
+function isMulticolorSnapshot(snapshot: Snapshot | null): snapshot is MulticolorSnapshot {
+  return snapshot?.modelId === 'multicolor'
+}
+
+function isRamanSnapshot(snapshot: Snapshot | null): snapshot is RamanSnapshot {
+  return snapshot?.modelId === 'raman'
+}
+
+function isTwoFieldSnapshot(
+  snapshot: Snapshot,
+): snapshot is StokesSnapshot | TurnkeySnapshot {
+  return snapshot.modelId === 'stokes' || snapshot.modelId === 'turnkey'
+}
+
 function isSingleFieldSnapshot(
   snapshot: Snapshot | null,
-): snapshot is StandardSnapshot | PlaticonSnapshot {
-  return snapshot?.modelId === 'standard' || snapshot?.modelId === 'platicon'
+): snapshot is StandardSnapshot | PlaticonSnapshot | RamanSnapshot {
+  return (
+    snapshot?.modelId === 'standard' ||
+    snapshot?.modelId === 'platicon' ||
+    snapshot?.modelId === 'raman'
+  )
 }
 
 function clampControlValue(value: number, min: number, max: number) {
@@ -1001,6 +1416,134 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
     }
   }
 
+  if (isTurnkeySnapshot(snapshot)) {
+    const primaryRows = source.historyRows.primary.map((row) => Array.from(row))
+    const backwardRows = source.historyRows.backward.map((row) => Array.from(row))
+    const primaryEnergy = source.trace.map((item) => item.primaryEnergy ?? 0)
+    const backwardEnergy = source.trace.map((item) => item.backwardEnergy ?? 0)
+    return {
+      ...base,
+      fields: {
+        psiP_real: asNumberArray(solverStateObject.psiP_real),
+        psiP_imag: asNumberArray(solverStateObject.psiP_imag),
+        rhoB_real: typeof solverStateObject.rhoB_real === 'number'
+          ? solverStateObject.rhoB_real
+          : 0,
+        rhoB_imag: typeof solverStateObject.rhoB_imag === 'number'
+          ? solverStateObject.rhoB_imag
+          : 0,
+      },
+      currentSnapshot: {
+        step: snapshot.step,
+        t: snapshot.t,
+        primaryEnergy: snapshot.primaryEnergy,
+        backwardEnergy: snapshot.backwardEnergy,
+        primaryPeak: snapshot.primaryPeak,
+        backwardPeak: snapshot.backwardPeak,
+        lockedDetuning: snapshot.lockedDetuning,
+        normalizedParams: snapshot.normalizedParams,
+      },
+      plots: {
+        temporalField: {
+          x: thetaArray(snapshot.primaryIntensity.length),
+          primaryIntensity: Array.from(snapshot.primaryIntensity),
+          backwardIntensity: Array.from(snapshot.backwardIntensity),
+          xLabel: TEMPORAL_X_TITLE,
+          yLabel: TEMPORAL_Y_LABEL,
+        },
+        combSpectrum: {
+          mode: centeredModeArray(snapshot.primarySpectrumDb.length),
+          primarySpectrumDb: Array.from(snapshot.primarySpectrumDb),
+          backwardSpectrumDb: Array.from(snapshot.backwardSpectrumDb),
+          xLabel: SPECTRUM_X_TITLE,
+          yLabel: 'Spectrum (dB)',
+        },
+        intracavityEnergy: {
+          step: source.trace.map((item) => item.step),
+          primary: primaryEnergy,
+          backward: backwardEnergy,
+          xLabel: 'solver step',
+          yLabel: 'Energy',
+        },
+        temporalEvolution: {
+          primaryRows,
+          backwardRows,
+          rowCount: Math.max(primaryRows.length, backwardRows.length),
+          columnCount: primaryRows[0]?.length ?? backwardRows[0]?.length ?? 0,
+          valueLabel: '10 * log10(|psi|^2 + 1e-12)',
+          maxRows: HISTORY_LIMIT,
+        },
+      },
+    }
+  }
+
+  if (isMulticolorSnapshot(snapshot)) {
+    const primaryRows = source.historyRows.primary.map((row) => Array.from(row))
+    const signalRows = source.historyRows.signal.map((row) => Array.from(row))
+    const idlerRows = source.historyRows.idler.map((row) => Array.from(row))
+    const primaryEnergy = source.trace.map((item) => item.primaryEnergy ?? 0)
+    const signalEnergy = source.trace.map((item) => item.signalEnergy ?? 0)
+    const idlerEnergy = source.trace.map((item) => item.idlerEnergy ?? 0)
+    return {
+      ...base,
+      fields: {
+        psiP_real: asNumberArray(solverStateObject.psiP_real),
+        psiP_imag: asNumberArray(solverStateObject.psiP_imag),
+        psiS_real: asNumberArray(solverStateObject.psiS_real),
+        psiS_imag: asNumberArray(solverStateObject.psiS_imag),
+        psiI_real: asNumberArray(solverStateObject.psiI_real),
+        psiI_imag: asNumberArray(solverStateObject.psiI_imag),
+      },
+      currentSnapshot: {
+        step: snapshot.step,
+        t: snapshot.t,
+        primaryEnergy: snapshot.primaryEnergy,
+        signalEnergy: snapshot.signalEnergy,
+        idlerEnergy: snapshot.idlerEnergy,
+        primaryPeak: snapshot.primaryPeak,
+        signalPeak: snapshot.signalPeak,
+        idlerPeak: snapshot.idlerPeak,
+        normalizedParams: snapshot.normalizedParams,
+      },
+      plots: {
+        temporalField: {
+          x: thetaArray(snapshot.primaryIntensity.length),
+          primaryIntensity: Array.from(snapshot.primaryIntensity),
+          signalIntensity: Array.from(snapshot.signalIntensity),
+          idlerIntensity: Array.from(snapshot.idlerIntensity),
+          xLabel: TEMPORAL_X_TITLE,
+          yLabel: TEMPORAL_Y_LABEL,
+        },
+        combSpectrum: {
+          mode: centeredModeArray(snapshot.primarySpectrumDb.length),
+          primarySpectrumDb: Array.from(snapshot.primarySpectrumDb),
+          signalSpectrumDb: Array.from(snapshot.signalSpectrumDb),
+          idlerSpectrumDb: Array.from(snapshot.idlerSpectrumDb),
+          xLabel: SPECTRUM_X_TITLE,
+          yLabel: 'Spectrum (dB)',
+        },
+        intracavityEnergy: {
+          step: source.trace.map((item) => item.step),
+          primary: primaryEnergy,
+          signal: signalEnergy,
+          idler: idlerEnergy,
+          xLabel: 'solver step',
+          yLabel: 'Energy',
+        },
+        temporalEvolution: {
+          primaryRows,
+          signalRows,
+          idlerRows,
+          rowCount: Math.max(primaryRows.length, signalRows.length, idlerRows.length),
+          columnCount:
+            primaryRows[0]?.length ?? signalRows[0]?.length ?? idlerRows[0]?.length ?? 0,
+          valueLabel: '10 * log10(|psi|^2 + 1e-12)',
+          maxRows: HISTORY_LIMIT,
+        },
+      },
+    }
+  }
+
   if (isSingleFieldSnapshot(snapshot)) {
     const waterfallRows = source.historyRows.standard.map((row) => Array.from(row))
     return {
@@ -1014,7 +1557,15 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
         t: snapshot.t,
         energy: snapshot.energy,
         peak: snapshot.peak,
+        pulseWidthFs: isRamanSnapshot(snapshot) ? snapshot.pulseWidthFs : undefined,
+        selfFrequencyShiftThz: isRamanSnapshot(snapshot)
+          ? snapshot.selfFrequencyShiftThz
+          : undefined,
+        selfFrequencyShiftMu: isRamanSnapshot(snapshot)
+          ? snapshot.selfFrequencyShiftMu
+          : undefined,
         normalizedParams: snapshot.normalizedParams,
+        referenceParams: isRamanSnapshot(snapshot) ? snapshot.referenceParams : undefined,
       },
       plots: {
         temporalField: {
@@ -1042,6 +1593,15 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
           valueLabel: '10 * log10(|psi|^2 + 1e-12)',
           maxRows: HISTORY_LIMIT,
         },
+        diagnostics: isRamanSnapshot(snapshot)
+          ? {
+              step: source.trace.map((item) => item.step),
+              pulseWidthFs: source.trace.map((item) => item.pulseWidthFs ?? 0),
+              selfFrequencyShiftThz: source.trace.map(
+                (item) => item.selfFrequencyShiftThz ?? 0,
+              ),
+            }
+          : undefined,
       },
     }
   }

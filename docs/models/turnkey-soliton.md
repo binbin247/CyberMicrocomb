@@ -1,0 +1,70 @@
+# Turnkey soliton (self-injection locking)
+
+[English](./turnkey-soliton.en.md)
+
+## 仿真的方程
+
+该模型描述未隔离泵浦激光器和微腔之间的自注入锁定。浏览器实现采用
+`/Users/binbin/Downloads/turnkey/Turnkey soliton/Injection_lock.m` 中的归一化
+coupled model，包含腔内主传播场 $\psi(\phi,t)$、反向散射场 $\rho_B(t)$ 和由反馈决定的锁定失谐。
+
+主场方程写成
+
+$$
+\frac{\partial \psi}{\partial t} =
+-(1+i\alpha)\psi
++ i\frac{d_2}{2}\frac{\partial^2\psi}{\partial \phi^2}
++ i\left(|\psi|^2+2|\rho_B|^2\right)\psi
++ i\beta\rho_B + F .
+$$
+
+反向场和锁定失谐用简化的归一化动力学表示：
+
+$$
+\frac{d\rho_B}{dt}
+=-\left(1+i\alpha-2iP-i|\rho_B|^2\right)\rho_B
++ i\beta \langle\psi\rangle ,
+$$
+
+$$
+\alpha(t)\approx \alpha_L
++K\,\mathrm{Im}\left[
+\frac{e^{i\phi_\mathrm{fb}}\rho_B}{i\beta F}
+\right].
+$$
+
+这里 $\alpha_L$ 是自由运行激光与腔模的失谐，$\beta$ 是归一化后向散射强度，
+$K$ 是反馈锁定带宽，$\phi_\mathrm{fb}$ 是反馈相位，$F$ 是泵浦幅度。
+
+## 物理图像
+
+Turnkey soliton 的核心是：腔内后向散射光返回激光器，改变激光的有效频率。
+当反馈相位和锁定带宽合适时，激光会被拉到能直接进入 soliton existence range 的工作点。
+因此系统不需要传统的快速扫频或主动反馈，也能在打开泵浦后进入孤子态。
+
+四张图可以这样读：
+
+- `Temporal field`：比较主场和反向场强度。
+- `Comb spectrum`：确认主场 comb 是否变宽并形成 soliton-like spectrum。
+- `Intracavity energy`：检查能量是否锁定到稳定平台。
+- `Temporal evolution`：观察 turn-on 后是否直接进入稳定孤子，而不是长期混沌。
+
+额外状态卡 `locked detuning` 显示当前反馈锁定后的有效失谐。
+
+## Demo
+
+1. 在 `MODEL` 中选择 `Turnkey soliton (self-injection locking)`。
+2. 保持默认值：`grid = 512`, `Pump power = sqrt(3)`, `D2 = 0.015`,
+   `beta = 0.5`, `lockingBandwidth = 15`, `feedbackPhase = 0.3*pi`,
+   `laserDetuning = 5`。
+3. 点击 `Play`，观察主场是否形成稳定局域脉冲。
+4. 扫描 `laserDetuning`，比较自由激光失谐变化对 locked detuning 和孤子进入过程的影响。
+5. 扫描 `feedbackPhase` 或 `lockingBandwidth`，寻找 turnkey access 较稳定的区域。
+
+该模型用于交互式理解 self-injection locking 机制。它不是完整的半导体激光器速率方程模型，
+也没有包含热效应、激光增益动态和器件封装细节。
+
+## 参考文献
+
+- B. Shen et al., "Integrated turnkey soliton microcombs," *Nature* **582**, 365-369 (2020). [https://doi.org/10.1038/s41586-020-2358-x](https://doi.org/10.1038/s41586-020-2358-x)
+- Supplementary information for "Integrated turnkey soliton microcombs" and the MATLAB scripts in `/Users/binbin/Downloads/turnkey/Turnkey soliton`.

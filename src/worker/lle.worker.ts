@@ -6,10 +6,13 @@ import type {
   Metrics,
   ModelId,
   PlaticonSnapshot,
+  RamanSnapshot,
   SimulationParams,
   Snapshot,
   StandardSnapshot,
   StokesSnapshot,
+  MulticolorSnapshot,
+  TurnkeySnapshot,
   WorkerToMainMessage,
 } from '../types'
 
@@ -213,20 +216,44 @@ function snapshotOnly(startedAt = performance.now(), recordMetrics = true): Snap
 }
 
 function emitSnapshot(snapshot: Snapshot) {
-  const transfer = snapshot.modelId === 'stokes'
-    ? [
-        snapshot.primaryIntensity.buffer,
-        snapshot.stokesIntensity.buffer,
-        snapshot.primarySpectrumDb.buffer,
-        snapshot.stokesSpectrumDb.buffer,
-        snapshot.primaryHistoryRow.buffer,
-        snapshot.stokesHistoryRow.buffer,
-      ]
-    : [
-        snapshot.intensity.buffer,
-        snapshot.spectrumDb.buffer,
-        snapshot.historyRow.buffer,
-      ]
+  let transfer: Transferable[]
+  if (snapshot.modelId === 'stokes') {
+    transfer = [
+      snapshot.primaryIntensity.buffer,
+      snapshot.stokesIntensity.buffer,
+      snapshot.primarySpectrumDb.buffer,
+      snapshot.stokesSpectrumDb.buffer,
+      snapshot.primaryHistoryRow.buffer,
+      snapshot.stokesHistoryRow.buffer,
+    ]
+  } else if (snapshot.modelId === 'turnkey') {
+    transfer = [
+      snapshot.primaryIntensity.buffer,
+      snapshot.backwardIntensity.buffer,
+      snapshot.primarySpectrumDb.buffer,
+      snapshot.backwardSpectrumDb.buffer,
+      snapshot.primaryHistoryRow.buffer,
+      snapshot.backwardHistoryRow.buffer,
+    ]
+  } else if (snapshot.modelId === 'multicolor') {
+    transfer = [
+      snapshot.primaryIntensity.buffer,
+      snapshot.signalIntensity.buffer,
+      snapshot.idlerIntensity.buffer,
+      snapshot.primarySpectrumDb.buffer,
+      snapshot.signalSpectrumDb.buffer,
+      snapshot.idlerSpectrumDb.buffer,
+      snapshot.primaryHistoryRow.buffer,
+      snapshot.signalHistoryRow.buffer,
+      snapshot.idlerHistoryRow.buffer,
+    ]
+  } else {
+    transfer = [
+      snapshot.intensity.buffer,
+      snapshot.spectrumDb.buffer,
+      snapshot.historyRow.buffer,
+    ]
+  }
   post({ type: 'snapshot', snapshot }, transfer)
 }
 
@@ -283,7 +310,34 @@ function normalizeSnapshot(snapshot: Snapshot): Snapshot {
       stokesHistoryRow: toFloat32Array(stokesSnapshot.stokesHistoryRow),
     }
   }
-  const standardSnapshot = snapshot as StandardSnapshot | PlaticonSnapshot
+  if (snapshot.modelId === 'turnkey') {
+    const turnkeySnapshot = snapshot as TurnkeySnapshot
+    return {
+      ...turnkeySnapshot,
+      primaryIntensity: toFloat32Array(turnkeySnapshot.primaryIntensity),
+      backwardIntensity: toFloat32Array(turnkeySnapshot.backwardIntensity),
+      primarySpectrumDb: toFloat32Array(turnkeySnapshot.primarySpectrumDb),
+      backwardSpectrumDb: toFloat32Array(turnkeySnapshot.backwardSpectrumDb),
+      primaryHistoryRow: toFloat32Array(turnkeySnapshot.primaryHistoryRow),
+      backwardHistoryRow: toFloat32Array(turnkeySnapshot.backwardHistoryRow),
+    }
+  }
+  if (snapshot.modelId === 'multicolor') {
+    const multicolorSnapshot = snapshot as MulticolorSnapshot
+    return {
+      ...multicolorSnapshot,
+      primaryIntensity: toFloat32Array(multicolorSnapshot.primaryIntensity),
+      signalIntensity: toFloat32Array(multicolorSnapshot.signalIntensity),
+      idlerIntensity: toFloat32Array(multicolorSnapshot.idlerIntensity),
+      primarySpectrumDb: toFloat32Array(multicolorSnapshot.primarySpectrumDb),
+      signalSpectrumDb: toFloat32Array(multicolorSnapshot.signalSpectrumDb),
+      idlerSpectrumDb: toFloat32Array(multicolorSnapshot.idlerSpectrumDb),
+      primaryHistoryRow: toFloat32Array(multicolorSnapshot.primaryHistoryRow),
+      signalHistoryRow: toFloat32Array(multicolorSnapshot.signalHistoryRow),
+      idlerHistoryRow: toFloat32Array(multicolorSnapshot.idlerHistoryRow),
+    }
+  }
+  const standardSnapshot = snapshot as StandardSnapshot | PlaticonSnapshot | RamanSnapshot
   return {
     ...standardSnapshot,
     intensity: toFloat32Array(standardSnapshot.intensity),

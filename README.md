@@ -27,7 +27,7 @@ React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 
 ## 模型
 
-当前页面内置三个交互式归一化模型。每个模型都有独立的方程说明、物理图像、
+当前页面内置六个交互式归一化模型。每个模型都有独立的方程说明、物理图像、
 Demo 操作和参考文献：
 
 - [Standard soliton](./docs/models/standard-soliton.md)：反常色散单场 LLE，
@@ -36,6 +36,12 @@ Demo 操作和参考文献：
   正常色散单场 LLE 加局部模式偏移，用于暗脉冲 / platicon 仿真。
 - [Stokes soliton](./docs/models/stokes-soliton.md)：Primary / Stokes 双场耦合 LLE，
   用于 Raman 驱动的 Stokes soliton 仿真。
+- [Turnkey soliton (self-injection locking)](./docs/models/turnkey-soliton.md)：
+  带后向散射反馈的 self-injection-locking 归一化模型。
+- [Multicolor soliton](./docs/models/multicolor-soliton.md)：Primary / signal / idler
+  三场耦合 LLE，用于 multicolor interband soliton 机制演示。
+- [Raman soliton SSFS (convolution)](./docs/models/raman-soliton-ssfs.md)：
+  使用 Raman response 卷积的 soliton self-frequency shift 仿真。
 
 在网页中，也可以通过 `MODEL` 区域旁边的 `文档` 按钮直接打开当前模型的说明面板。
 

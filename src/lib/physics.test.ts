@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
+  DEFAULT_MULTICOLOR_GRID_SIZE,
+  DEFAULT_MULTICOLOR_PARAMS,
   DEFAULT_PLATICON_GRID_SIZE,
   DEFAULT_PLATICON_PARAMS,
+  DEFAULT_RAMAN_GRID_SIZE,
+  DEFAULT_RAMAN_PARAMS,
   DEFAULT_STANDARD_PARAMS,
   DEFAULT_STOKES_GRID_SIZE,
   DEFAULT_STOKES_PARAMS,
+  DEFAULT_TURNKEY_GRID_SIZE,
+  DEFAULT_TURNKEY_PARAMS,
 } from './defaults'
 import { MODEL_IDS } from './models'
 import { clampParamsForModel, clampPlaticonParams, clampStandardParams } from './physics'
@@ -67,8 +73,15 @@ describe('parameter clamping', () => {
     })
   })
 
-  it('orders models with platicon between standard and Stokes', () => {
-    expect(MODEL_IDS).toEqual(['standard', 'platicon', 'stokes'])
+  it('orders models according to the model selector contract', () => {
+    expect(MODEL_IDS).toEqual([
+      'standard',
+      'platicon',
+      'stokes',
+      'turnkey',
+      'multicolor',
+      'raman',
+    ])
   })
 
   it('keeps platicon controls finite and inside interactive ranges', () => {
@@ -137,5 +150,74 @@ describe('parameter clamping', () => {
     })
 
     expect(params.stepsPerFrame).toBe(1000)
+  })
+
+  it('keeps new model defaults aligned with the implementation plan', () => {
+    expect(DEFAULT_TURNKEY_GRID_SIZE).toBe(512)
+    expect(DEFAULT_TURNKEY_PARAMS).toMatchObject({
+      laserDetuning: 5,
+      d2: 0.015,
+      beta: 0.5,
+      lockingBandwidth: 15,
+      stepsPerFrame: 200,
+    })
+    expect(DEFAULT_MULTICOLOR_GRID_SIZE).toBe(1024)
+    expect(DEFAULT_MULTICOLOR_PARAMS).toMatchObject({
+      alphaP: 45,
+      alphaS: 25,
+      alphaI: 25,
+      fsrMismatchI: 18.1,
+      stepsPerFrame: 500,
+    })
+    expect(DEFAULT_RAMAN_GRID_SIZE).toBe(512)
+    expect(DEFAULT_RAMAN_PARAMS).toMatchObject({
+      dtnNorm: 25.092981044961256,
+      ffNorm: 20.754698290532414,
+      fR: 0.02,
+      tau1Fs: 11.1,
+      tau2Fs: 35,
+      stepsPerFrame: 1000,
+    })
+  })
+
+  it('clamps the new model controls to finite interactive ranges', () => {
+    expect(
+      clampParamsForModel('turnkey', {
+        ...DEFAULT_TURNKEY_PARAMS,
+        beta: -1,
+        feedbackPhase: 99,
+        dt: Number.POSITIVE_INFINITY,
+      }),
+    ).toMatchObject({
+      beta: 0,
+      feedbackPhase: Math.PI,
+      dt: DEFAULT_TURNKEY_PARAMS.dt,
+    })
+
+    expect(
+      clampParamsForModel('multicolor', {
+        ...DEFAULT_MULTICOLOR_PARAMS,
+        alphaP: Number.POSITIVE_INFINITY,
+        xpm: -1,
+        fwmRe: 99,
+      }),
+    ).toMatchObject({
+      alphaP: DEFAULT_MULTICOLOR_PARAMS.alphaP,
+      xpm: 0,
+      fwmRe: 4,
+    })
+
+    expect(
+      clampParamsForModel('raman', {
+        ...DEFAULT_RAMAN_PARAMS,
+        dtnNorm: -1,
+        fR: 2,
+        fsrGHz: Number.NaN,
+      }),
+    ).toMatchObject({
+      dtnNorm: 0.1,
+      fR: 1,
+      fsrGHz: DEFAULT_RAMAN_PARAMS.fsrGHz,
+    })
   })
 })

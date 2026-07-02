@@ -414,6 +414,11 @@ button {
   min-height: 0;
 }
 
+.diagnostic-strip {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-top: -4px;
+}
+
 .metric {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -495,6 +500,10 @@ button {
   height: 100%;
   min-height: 0;
   min-width: 0;
+}
+
+.waterfall-triple {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .waterfall-subpanel {

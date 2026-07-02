@@ -29,7 +29,7 @@ compute once the page has loaded.
 
 ## Models
 
-The page currently includes three interactive normalized models. Each model has
+The page currently includes six interactive normalized models. Each model has
 its own equation notes, physical picture, demo workflow, and references:
 
 - [Standard soliton](./docs/models/standard-soliton.en.md): anomalous-dispersion
@@ -39,6 +39,12 @@ its own equation notes, physical picture, demo workflow, and references:
   platicon simulations.
 - [Stokes soliton](./docs/models/stokes-soliton.en.md): primary / Stokes
   two-field coupled LLE for Raman-driven Stokes soliton simulations.
+- [Turnkey soliton (self-injection locking)](./docs/models/turnkey-soliton.en.md):
+  a normalized self-injection-locking model with backscattered feedback.
+- [Multicolor soliton](./docs/models/multicolor-soliton.en.md): primary / signal /
+  idler three-field coupled LLE for multicolor interband soliton dynamics.
+- [Raman soliton SSFS (convolution)](./docs/models/raman-soliton-ssfs.en.md):
+  soliton self-frequency shift with an explicit Raman-response convolution.
 
 In the web app, the `Docs` button next to the `MODEL` selector opens the
 documentation panel for the currently selected model.

@@ -2,7 +2,13 @@ export type Language = 'en' | 'zh'
 
 export type GridSize = 256 | 512 | 1024 | 2048 | 4096
 
-export type ModelId = 'standard' | 'platicon' | 'stokes'
+export type ModelId =
+  | 'standard'
+  | 'platicon'
+  | 'stokes'
+  | 'turnkey'
+  | 'multicolor'
+  | 'raman'
 
 export interface StandardParams {
   alpha: number
@@ -43,7 +49,58 @@ export interface StokesParams {
   stepsPerFrame: number
 }
 
-export type SimulationParams = StandardParams | PlaticonParams | StokesParams
+export interface TurnkeyParams {
+  laserDetuning: number
+  pump: number
+  d2: number
+  beta: number
+  lockingBandwidth: number
+  feedbackPhase: number
+  noise: number
+  dt: number
+  stepsPerFrame: number
+}
+
+export interface MulticolorParams {
+  alphaP: number
+  alphaS: number
+  alphaI: number
+  pump: number
+  d2P: number
+  d2S: number
+  d2I: number
+  fsrMismatchS: number
+  fsrMismatchI: number
+  xpm: number
+  fwmRe: number
+  fwmIm: number
+  noise: number
+  dt: number
+  stepsPerFrame: number
+}
+
+export interface RamanParams {
+  dtnNorm: number
+  ffNorm: number
+  d2Norm: number
+  fR: number
+  tau1Fs: number
+  tau2Fs: number
+  fsrGHz: number
+  qMillion: number
+  wavelengthNm: number
+  noise: number
+  dt: number
+  stepsPerFrame: number
+}
+
+export type SimulationParams =
+  | StandardParams
+  | PlaticonParams
+  | StokesParams
+  | TurnkeyParams
+  | MulticolorParams
+  | RamanParams
 
 export interface Metrics {
   stepsPerSecond: number
@@ -96,7 +153,74 @@ export interface StokesSnapshot {
   normalizedParams: StokesParams
 }
 
-export type Snapshot = StandardSnapshot | PlaticonSnapshot | StokesSnapshot
+export interface TurnkeySnapshot {
+  modelId: 'turnkey'
+  step: number
+  t: number
+  primaryIntensity: Float32Array
+  backwardIntensity: Float32Array
+  primarySpectrumDb: Float32Array
+  backwardSpectrumDb: Float32Array
+  primaryHistoryRow: Float32Array
+  backwardHistoryRow: Float32Array
+  primaryEnergy: number
+  backwardEnergy: number
+  primaryPeak: number
+  backwardPeak: number
+  lockedDetuning: number
+  normalizedParams: TurnkeyParams
+}
+
+export interface MulticolorSnapshot {
+  modelId: 'multicolor'
+  step: number
+  t: number
+  primaryIntensity: Float32Array
+  signalIntensity: Float32Array
+  idlerIntensity: Float32Array
+  primarySpectrumDb: Float32Array
+  signalSpectrumDb: Float32Array
+  idlerSpectrumDb: Float32Array
+  primaryHistoryRow: Float32Array
+  signalHistoryRow: Float32Array
+  idlerHistoryRow: Float32Array
+  primaryEnergy: number
+  signalEnergy: number
+  idlerEnergy: number
+  primaryPeak: number
+  signalPeak: number
+  idlerPeak: number
+  normalizedParams: MulticolorParams
+}
+
+export interface RamanSnapshot {
+  modelId: 'raman'
+  step: number
+  t: number
+  intensity: Float32Array
+  spectrumDb: Float32Array
+  historyRow: Float32Array
+  energy: number
+  peak: number
+  pulseWidthFs: number
+  selfFrequencyShiftThz: number
+  selfFrequencyShiftMu: number
+  normalizedParams: RamanParams
+  referenceParams: {
+    wavelengthNm: number
+    fsrGHz: number
+    qMillion: number
+    d2Khz: number
+  }
+}
+
+export type Snapshot =
+  | StandardSnapshot
+  | PlaticonSnapshot
+  | StokesSnapshot
+  | TurnkeySnapshot
+  | MulticolorSnapshot
+  | RamanSnapshot
 
 export type WorkerStatus =
   | 'idle'
