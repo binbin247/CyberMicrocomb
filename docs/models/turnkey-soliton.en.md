@@ -10,6 +10,16 @@ mechanism model based on the self-injection-locking supplementary material, with
 the forward intracavity field $\psi(\phi,t)$, an internal backscattering variable
 $\rho_B(t)$, and a feedback-controlled locked detuning.
 
+At the dimensional level, the model still starts from the microresonator
+input-output equation: the forward intracavity field $A$ decays at the loaded
+rate $\kappa$, is driven by $\sqrt{\kappa_{\mathrm{ext}}}s_{\mathrm{in}}$, and
+produces a backscattered field that returns to the laser. Self-injection locking
+does not introduce a separately plotted backward soliton in this UI. Instead,
+the returned light changes the laser frequency, so the effective pump-resonance
+detuning $\delta_{\mathrm{lock}}$ depends on intracavity power and feedback
+phase. The page uses the loss-half-linewidth normalization
+$t=\kappa T/2$ and $\psi=\sqrt{2g/\kappa}\,A$.
+
 The forward field is modeled as
 
 $$
@@ -36,6 +46,7 @@ $$
 \right].
 $$
 
+$P=\langle|\psi|^2\rangle$ is the normalized intracavity power,
 $\alpha_L$ is the free-running laser detuning, $\beta$ is the normalized
 backscattering amplitude, $K$ is the feedback locking bandwidth, $\phi_\mathrm{fb}$
 is the feedback phase, and $F$ is the pump amplitude. The current UI does not
@@ -53,7 +64,8 @@ Read the panels as follows:
 
 - `Temporal field`: inspect whether the forward field $|\psi|^2$ forms a localized pulse.
 - `Comb spectrum`: check whether the forward comb broadens into a soliton-like spectrum.
-- `Intracavity energy`: look for a stable forward-field energy plateau.
+- `Intracavity energy`: look for a stable normalized forward-field intracavity
+  power plateau, represented by $\langle|\psi|^2\rangle$.
 - `Soliton state`: shows the Kerr-tilted response, locking equilibrium, and the
   current operating point. The black dot is the real-time locked detuning and
   normalized intracavity power.

@@ -6,6 +6,10 @@
 
 这是正常色散单场 LLE，用于演示暗脉冲 / platicon。它与 `Standard soliton` 使用同一套
 单场归一化，但只保留二阶色散和一个局部模式偏移，不包含 Raman、$d_3$ 或 $d_4$。
+这里同样采用光子数归一化的腔内慢变场 $A$，总损耗
+$\kappa=\kappa_0+\kappa_{\mathrm{ext}}$，输入场
+$|s_{\mathrm{in}}|^2=P_{\mathrm{in}}/\hbar\omega_p$，以及失谐
+$\delta_0=\omega_0-\omega_p$。
 
 ### 真实物理量方程
 
@@ -23,8 +27,9 @@ $$
 +\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
 $$
 
-其中 $\Delta\Omega_{\mathrm{shift}}$ 是被扰动模式的物理频率偏移。等价地，物理量
-integrated dispersion 为
+其中 $\Delta\Omega_{\mathrm{shift}}$ 是被扰动模式的物理频率偏移。它表示局部模式相对
+未扰动模式网格的频率偏移，可用来近似 avoided mode crossing 或局部模式耦合对
+integrated dispersion 的影响。等价地，物理量 integrated dispersion 为
 
 $$
 D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
@@ -91,7 +96,7 @@ $\Delta_{\mathrm{shift}}$ 是归一化到 $\kappa/2$ 的模式偏移强度。正
 
 - `Temporal field`：看高背景上是否出现宽暗缺口或 flat-top switching-front 结构。
 - `Comb spectrum`：看正常色散光梳是否形成，并注意被扰动模式附近的谱线变化。
-- `Intracavity energy`：看暗脉冲态是否稳定。
+- `Intracavity energy`：看 $\langle|\psi|^2\rangle$ 表示的归一化平均腔内光子数/功率是否稳定。
 - `Temporal evolution`：看暗缺口是否保持、漂移或破裂。
 
 ## Demo

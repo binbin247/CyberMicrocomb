@@ -9,6 +9,14 @@ convolution. It is different from the simplified Raman shock term in
 `Standard soliton`: here the delayed Raman response is represented by a response
 function and an explicit convolution.
 
+At the dimensional level, this is the single-field LLE with the instantaneous
+Kerr term $i g|A|^2A$ replaced by
+$i g A[(1-f_R)|A|^2+f_R h_R*|A|^2]$. Here $h_R$ is the normalized Raman response
+and the convolution is taken along the azimuthal coordinate, equivalently the
+fast time. The page still uses the loss-half-linewidth normalization
+$t=\kappa T/2$; `Detuning` is $\alpha=2\delta_0/\kappa$, `Pump ratio` is $F^2$,
+and the solver injects the pump amplitude $F=\sqrt{\texttt{Pump ratio}}$.
+
 The normalized LLE is
 
 $$
@@ -16,7 +24,7 @@ $$
 =-(1+i\alpha)\psi
 +i\frac{d_2}{2}\frac{\partial^2\psi}{\partial\phi^2}
 +i(1-f_R)|\psi|^2\psi
-+\psi\, f_R\int h_R(\phi-\phi')|\psi(\phi')|^2\,d\phi'
++i\psi\, f_R\int h_R(\phi-\phi')|\psi(\phi')|^2\,d\phi'
 +F .
 $$
 
@@ -39,10 +47,12 @@ The Raman response is delayed rather than instantaneous. A soliton intensity pea
 drives a delayed nonlinear response, breaking spectral symmetry and shifting the
 spectral centroid. This is the soliton self-frequency shift.
 
-In addition to the four standard plots, this model shows:
+In addition to the four standard plots, this model shows two derived quantities:
 
-- `pulse width fs`: the time-domain intensity FWHM converted with the selected `FSR`.
-- `SSFS THz`: a spectral-power-centroid estimate of the self-frequency shift.
+- `pulse width fs`: shown in the `Temporal field` panel; it is the intensity FWHM
+  converted with the selected `FSR`.
+- `SSFS THz`: shown in the `Comb spectrum` panel; it is a spectral-power-centroid
+  estimate of the self-frequency shift.
 
 ## Demo
 

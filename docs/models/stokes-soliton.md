@@ -6,7 +6,8 @@
 
 该模型对应 Yang *et al.* 的 Stokes soliton 文献中给出的双场 coupled
 Lugiato-Lefever equation。Primary 场被外部连续波泵浦驱动，Stokes 场通过 Raman
-增益从噪声中增长。
+增益从噪声中增长。为避免和单场模型混淆，本文档把物理量方程、页面归一化方程和
+MATLAB 脚本中使用的色散 ratio 分开说明。
 
 ### 真实物理量方程
 
@@ -44,7 +45,8 @@ $$
 \end{aligned}
 $$
 
-文献中 $E_p,E_s$ 按 optical energy 归一化。$D_{1j}$ 和 $D_{2j}$ 分别是模式族
+文献中 $E_p,E_s$ 不是电场强度本身，而是按 optical energy 归一化后的腔内慢变场。
+$D_{1j}$ 和 $D_{2j}$ 分别是模式族
 $j=p,s$ 的 FSR 和二阶色散；$\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR
 mismatch；$\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐；$g_j$ 和 $G_j$
 是 self- 与 cross-phase modulation 系数；$R$ 是 Raman gain 系数；$\tau_R$
@@ -64,9 +66,7 @@ $$
 
 $$
 \alpha_p=\frac{2\Delta\omega_p}{\kappa_p},\qquad
-\alpha_s=\frac{2\Delta\omega_s}{\kappa_s},\qquad
-d_{2p}=\frac{D_{2p}}{\kappa_p},\qquad
-d_{2s}\approx\frac{D_{2s}}{\kappa_s},
+\alpha_s=\frac{2\Delta\omega_s}{\kappa_s}.
 $$
 
 $$
@@ -74,6 +74,12 @@ $$
 F=\sqrt{\frac{8g_p\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}}
 {\hbar\omega_p\kappa_p^3}} .
 $$
+
+`Primary D2` 和 `Stokes D2` 沿用参考 MATLAB 脚本中的 ratio 定义，近似为
+$D_{2p}/\kappa_p$ 和 $D_{2s}/\kappa_s$，因此页面方程中写作
+$i d_{2j}\partial_\phi^2$，在频域中对应 $-i d_{2j}\mu^2$。这与
+`Standard soliton` 中 $d_2=2D_2/\kappa$、色散项写成
+$-i d_2\partial_\phi^2/2$ 的口径不同。
 
 `Overlap` 记作 $\eta$，`Wavelength ratio` 记作 $\rho$，`Primary Raman loss` 和
 `Stokes Raman gain` 分别记作 $g_{Rp}$ 和 $g_{Rs}$。当前页面把 Stokes 失谐
@@ -131,7 +137,7 @@ Primary soliton 先形成强局域光场；该光场为 Stokes 模式族提供 R
 
 - `Temporal field`：比较 Primary 和 Stokes 的时域强度，Stokes 通常更弱并由噪声增长。
 - `Comb spectrum`：比较两个模式族的谱宽、谱峰和相对强度。
-- `Intracavity energy`：看 Primary 能量是否先建立，Stokes 能量是否随后增长并稳定。
+- `Intracavity energy`：看 Primary 的归一化平均腔内功率是否先建立，Stokes 是否随后增长并稳定。
 - `Temporal evolution`：左右两图分别显示 Primary 与 Stokes 的演化，用来判断俘获、漂移或失稳。
 
 Stokes 场的强度和稳定性由 Raman 增益/损耗、模式重叠、FSR mismatch、Stokes 色散和

@@ -8,6 +8,10 @@ This is a normal-dispersion single-field LLE for dark-pulse / platicon dynamics.
 It uses the same single-field normalization as `Standard soliton`, keeps
 second-order dispersion and one local mode shift, and intentionally omits Raman,
 $d_3$, and $d_4$.
+It uses the same photon-number-normalized intracavity field $A$, loaded loss
+$\kappa=\kappa_0+\kappa_{\mathrm{ex}}$, input field
+$|s_{\mathrm{in}}|^2=P_{\mathrm{in}}/\hbar\omega_p$, and detuning
+$\delta_0=\omega_0-\omega_p$ as the standard soliton model.
 
 ### Dimensional physical equation
 
@@ -27,7 +31,9 @@ $$
 $$
 
 Here $\Delta\Omega_{\mathrm{shift}}$ is the physical frequency shift of the
-perturbed mode. Equivalently, the dimensional integrated dispersion is
+perturbed mode relative to the unperturbed modal grid. It approximates how an
+avoided mode crossing or a local mode-coupling perturbation modifies the
+integrated dispersion. Equivalently, the dimensional integrated dispersion is
 
 $$
 D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
@@ -102,7 +108,8 @@ Read the four plots as follows:
   on a high background.
 - `Comb spectrum`: check the normal-dispersion comb and the lines near the
   shifted mode.
-- `Intracavity energy`: check whether the dark-pulse state settles.
+- `Intracavity energy`: check whether the normalized mean intracavity photon number / power proxy
+  $\langle|\psi|^2\rangle$ settles.
 - `Temporal evolution`: check whether the notch remains, drifts, or breaks up.
 
 ## Demo

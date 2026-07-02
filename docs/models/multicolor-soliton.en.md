@@ -8,6 +8,15 @@ This model follows supplementary Eqs. S1-S3 of *Multicolor interband solitons in
 microcombs*. It uses three fields: primary $E_p(\phi,t)$, signal $E_s(\phi,t)$,
 and idler $E_i(\phi,t)$. The browser implementation uses a loss-normalized form.
 
+At the dimensional level, this is a three-mode-family coupled LLE. Each family
+has its own loss rate $\kappa_j$, detuning $\delta_j$, second-order dispersion
+$D_{2j}$, and slowly varying intracavity field $A_j$. The primary family is
+externally pumped; the signal and idler families grow through Kerr four-wave
+mixing from noise or weak seeds. The inter-family coupling contains self-phase
+modulation (SPM), cross-phase modulation (XPM), and coherent four-wave mixing
+(FWM). The page uses the loss-half-linewidth normalization
+$t=\kappa_pT/2$ and dimensionless field amplitudes.
+
 The normalized model keeps self-phase modulation, cross-phase modulation,
 four-wave mixing, FSR mismatch, and the primary pump:
 
@@ -38,10 +47,11 @@ $$
 +i\gamma E_p^2E_s^* .
 $$
 
-$\eta$ is the XPM coefficient, $\gamma$ is the FWM coupling coefficient, and
-$\Delta_s,\Delta_i$ are the signal/idler FSR mismatch terms relative to the
-primary family. The defaults are loss-normalized estimates from the supplementary
-simulation parameters.
+$\eta$ is the relative XPM strength, $\gamma$ is the complex FWM coupling
+coefficient, and $\Delta_s,\Delta_i$ are the signal/idler FSR-mismatch terms
+relative to the primary family. The first-derivative terms represent group
+velocity or FSR mismatch between the mode families. The defaults are
+loss-normalized estimates from the supplementary simulation parameters.
 
 ## Physical Picture
 
@@ -55,7 +65,8 @@ Read the panels as follows:
 
 - `Temporal field`: check whether primary, signal, and idler pulses overlap in $\phi$.
 - `Comb spectrum`: compare bandwidth, spectral peaks, and relative intensity.
-- `Intracavity energy`: see whether the three fields build up and stabilize.
+- `Intracavity energy`: see whether the normalized mean intracavity powers of
+  the three mode families build up and stabilize.
 - `Temporal evolution`: check synchronization, drift, breakup, or instability.
 
 ## Demo

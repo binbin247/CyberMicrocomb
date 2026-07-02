@@ -9,6 +9,14 @@ equation solved by the page. $T$ is the physical slow time,
 $\phi\in[-\pi,\pi)$ is the azimuthal coordinate, and $\mu$ is the relative mode
 number.
 
+The notation follows the input-output convention used in the Feishu knowledge
+base: the intracavity slow field is first written as a photon-number-normalized
+amplitude $A$, so $|A|^2$ is the intracavity photon number;
+$\kappa=\kappa_0+\kappa_{\mathrm{ex}}$ is the loaded loss rate; and
+$|s_{\mathrm{in}}|^2=P_{\mathrm{in}}/\hbar\omega_p$. The detuning is defined as
+$\delta_0=\omega_0-\omega_p$, i.e. the cold-cavity resonance frequency relative
+to the pump. The UI control `Detuning` is $\alpha=2\delta_0/\kappa$.
+
 ### Dimensional physical equation
 
 Let $A(\phi,T)$ be the slowly varying intracavity field, with $|A|^2$ measured as
@@ -22,9 +30,8 @@ $$
 +\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
 $$
 
-Here $\kappa$ is the total loss rate, $\delta_0=\omega_p-\omega_0$ is the pump
-detuning from the cold-cavity resonance, $g$ is the single-photon Kerr shift, and
-$s_{\mathrm{in}}=\sqrt{P_{\mathrm{in}}/\hbar\omega_p}$. The classic
+Here $\kappa$ is the total loss rate, $\kappa_{\mathrm{ex}}$ is the external
+coupling loss rate, and $g$ is the single-photon Kerr shift. The classic
 second-order LLE keeps only $D_2$:
 
 $$
@@ -138,7 +145,8 @@ Read the four plots as follows:
 
 - `Temporal field`: check whether $|\psi|^2$ forms a narrow bright peak.
 - `Comb spectrum`: check whether a broad comb envelope appears around the pump.
-- `Intracavity energy`: check whether the mean intracavity energy settles.
+- `Intracavity energy`: check whether the normalized mean intracavity photon number / power proxy
+  $\langle|\psi|^2\rangle$ settles.
 - `Temporal evolution`: check whether the pulse drifts, splits, or destabilizes.
 
 Increasing detuning usually changes the pulse width and peak intensity. Nonzero

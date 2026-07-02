@@ -8,6 +8,9 @@ This model follows the two-field coupled Lugiato-Lefever equations given in
 Yang *et al.* for Stokes solitons. The primary field $E_p(\phi,T)$ is driven by
 an external continuous-wave pump. The Stokes field $E_s(\phi,T)$ grows from noise
 through Raman gain.
+To avoid mixing conventions, this document separates the dimensional equations,
+the normalized browser equations, and the dispersion ratio used in the MATLAB
+reference scripts.
 
 ### Dimensional physical equation
 
@@ -46,7 +49,8 @@ $$
 \end{aligned}
 $$
 
-In the paper, $E_p$ and $E_s$ are normalized to optical energy. $D_{1j}$ and
+In the paper, $E_p$ and $E_s$ are not raw electric fields; they are slowly
+varying intracavity fields normalized to optical energy. $D_{1j}$ and
 $D_{2j}$ are the FSR and second-order dispersion of mode family $j=p,s$;
 $\delta=D_{1s}-D_{1p}$ is the primary/Stokes FSR mismatch; $\kappa_j$ and
 $\Delta\omega_j$ are the loss rate and cold-cavity detuning; $g_j$ and $G_j$ are
@@ -68,9 +72,7 @@ The main dimensionless parameters are
 
 $$
 \alpha_p=\frac{2\Delta\omega_p}{\kappa_p},\qquad
-\alpha_s=\frac{2\Delta\omega_s}{\kappa_s},\qquad
-d_{2p}=\frac{D_{2p}}{\kappa_p},\qquad
-d_{2s}\approx\frac{D_{2s}}{\kappa_s},
+\alpha_s=\frac{2\Delta\omega_s}{\kappa_s}.
 $$
 
 $$
@@ -78,6 +80,13 @@ $$
 F=\sqrt{\frac{8g_p\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}}
 {\hbar\omega_p\kappa_p^3}} .
 $$
+
+`Primary D2` and `Stokes D2` follow the `ratio = D2 / kappa` convention used in
+the reference MATLAB scripts. Therefore the page writes the dispersion term as
+$i d_{2j}\partial_\phi^2$, which corresponds to $-i d_{2j}\mu^2$ in Fourier
+space. This is intentionally different from the `Standard soliton` convention,
+where $d_2=2D_2/\kappa$ and the time-domain term is
+$-i d_2\partial_\phi^2/2$.
 
 `Overlap` is denoted by $\eta$, `Wavelength ratio` by $\rho$, and
 `Primary Raman loss` / `Stokes Raman gain` by $g_{Rp}$ / $g_{Rs}$. The current
@@ -142,8 +151,8 @@ Read the four plots as follows:
   often weaker and grows from noise.
 - `Comb spectrum`: compare spectral width, spectral peaks, and relative power of
   the two mode families.
-- `Intracavity energy`: check whether primary energy builds first and Stokes
-  energy then grows and settles.
+- `Intracavity energy`: check whether the normalized mean primary intracavity
+  power builds first and the Stokes contribution then grows and settles.
 - `Temporal evolution`: use the two side-by-side panels to inspect trapping,
   drift, and instability in the primary and Stokes fields.
 
