@@ -43,7 +43,7 @@ its own equation notes, physical picture, demo workflow, and references:
   a normalized self-injection-locking model with backscattered feedback.
 - [Multicolor soliton](./docs/models/multicolor-soliton.en.md): primary / signal /
   idler three-field coupled LLE for multicolor interband soliton dynamics.
-- [Raman soliton SSFS (convolution)](./docs/models/raman-soliton-ssfs.en.md):
+- [Raman soliton self-frequency shift](./docs/models/raman-soliton-ssfs.en.md):
   soliton self-frequency shift with an explicit Raman-response convolution.
 
 In the web app, the `Docs` button next to the `MODEL` selector opens the

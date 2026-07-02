@@ -15,7 +15,7 @@ export const copy = {
       stokes: 'Stokes soliton',
       turnkey: 'Turnkey soliton (self-injection locking)',
       multicolor: 'Multicolor soliton',
-      raman: 'Raman soliton SSFS (convolution)',
+      raman: 'Raman soliton self-frequency shift',
     },
     controlGroups: {
       drive: 'Drive',
@@ -351,7 +351,7 @@ export const copy = {
       stokes: 'Stokes soliton',
       turnkey: 'Turnkey soliton (self-injection locking)',
       multicolor: 'Multicolor soliton',
-      raman: 'Raman soliton SSFS (convolution)',
+      raman: 'Raman soliton self-frequency shift',
     },
     controlGroups: {
       drive: '驱动',

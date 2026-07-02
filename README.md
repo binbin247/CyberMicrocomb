@@ -40,7 +40,7 @@ Demo 操作和参考文献：
   带后向散射反馈的 self-injection-locking 归一化模型。
 - [Multicolor soliton](./docs/models/multicolor-soliton.md)：Primary / signal / idler
   三场耦合 LLE，用于 multicolor interband soliton 机制演示。
-- [Raman soliton SSFS (convolution)](./docs/models/raman-soliton-ssfs.md)：
+- [Raman soliton self-frequency shift](./docs/models/raman-soliton-ssfs.md)：
   使用 Raman response 卷积的 soliton self-frequency shift 仿真。
 
 在网页中，也可以通过 `MODEL` 区域旁边的 `文档` 按钮直接打开当前模型的说明面板。

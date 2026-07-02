@@ -1,4 +1,4 @@
-# Raman soliton SSFS (convolution)
+# Raman soliton self-frequency shift
 
 [中文](./raman-soliton-ssfs.md)
 
@@ -47,7 +47,7 @@ In addition to the four standard plots, this model shows:
 
 ## Demo
 
-1. Select `Raman soliton SSFS (convolution)` in `MODEL`.
+1. Select `Raman soliton self-frequency shift` in `MODEL`.
 2. Keep the defaults: `grid = 512`, `ffNorm ≈ 20.8`, `dtnNorm ≈ 25.09`,
    `fR = 0.020`, `tau1Fs = 11.1`, `tau2Fs = 35`, `FSR = 1000 GHz`,
    `Q = 4e6`.
