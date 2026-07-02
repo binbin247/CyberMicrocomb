@@ -679,6 +679,7 @@ function App() {
             groups={activeControlGroups}
             gridSize={gridSize}
             labels={labels}
+            modelId={modelId}
             values={activeParams}
             onChange={(key, value) => {
               if (modelId === 'stokes') {
@@ -921,12 +922,14 @@ function ControlGrid({
   groups,
   gridSize,
   labels,
+  modelId,
   values,
   onChange,
 }: {
   groups: readonly ControlGroupDefinition[]
   gridSize: GridSize
   labels: ReturnType<typeof t>
+  modelId: ModelId
   values: SimulationParams
   onChange: (key: string, value: number) => void
 }) {
@@ -945,14 +948,13 @@ function ControlGrid({
               const { key, step } = control
               const { min, max } = controlRange(control, gridSize)
               const value = valuesByKey[key] ?? 0
-              const help = labels.parameterHelp[key as keyof typeof labels.parameterHelp]
+              const label = parameterLabel(labels, modelId, key)
+              const help = parameterHelp(labels, modelId, key)
               const helpId = `parameter-help-${key}`
               return (
                 <label key={key} className="control-row">
                   <span className="control-label">
-                    <span className="control-label-text">
-                      {labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key}
-                    </span>
+                    <span className="control-label-text">{label}</span>
                     {help && (
                       <span id={helpId} className="parameter-tooltip" role="tooltip">
                         {help.map((line) => (
@@ -967,9 +969,7 @@ function ControlGrid({
                     max={max}
                     step={step}
                     value={value}
-                    aria-label={
-                      labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key
-                    }
+                    aria-label={label}
                     aria-describedby={help ? helpId : undefined}
                     onChange={(event) =>
                       onChange(key, clampControlValue(Number(event.target.value), min, max))
@@ -981,9 +981,7 @@ function ControlGrid({
                     max={max}
                     step={step}
                     value={value}
-                    aria-label={
-                      labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key
-                    }
+                    aria-label={label}
                     aria-describedby={help ? helpId : undefined}
                     onChange={(event) =>
                       onChange(key, clampControlValue(Number(event.target.value), min, max))
@@ -997,6 +995,30 @@ function ControlGrid({
       ))}
     </div>
   )
+}
+
+function parameterLabel(labels: ReturnType<typeof t>, modelId: ModelId, key: string) {
+  if (modelId === 'multicolor') {
+    const modelLabels = labels.modelParameterLabels.multicolor
+    return modelLabels[key as keyof typeof modelLabels] ?? parameterLabelFallback(labels, key)
+  }
+  return parameterLabelFallback(labels, key)
+}
+
+function parameterLabelFallback(labels: ReturnType<typeof t>, key: string) {
+  return labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key
+}
+
+function parameterHelp(labels: ReturnType<typeof t>, modelId: ModelId, key: string) {
+  if (modelId === 'multicolor') {
+    const modelHelp = labels.modelParameterHelp.multicolor
+    return modelHelp[key as keyof typeof modelHelp] ?? parameterHelpFallback(labels, key)
+  }
+  return parameterHelpFallback(labels, key)
+}
+
+function parameterHelpFallback(labels: ReturnType<typeof t>, key: string) {
+  return labels.parameterHelp[key as keyof typeof labels.parameterHelp]
 }
 
 function syncClampedDt(

@@ -105,6 +105,12 @@ export const copy = {
       qMillion: 'Q million',
       wavelengthNm: 'Wavelength nm',
     },
+    modelParameterLabels: {
+      multicolor: {
+        alphaS: 'Signal detuning',
+        d2S: 'Signal D2',
+      },
+    },
     parameterHelp: {
       alpha: [
         'Normalized pump-resonance detuning alpha.',
@@ -307,6 +313,20 @@ export const copy = {
         'It is exported with the Raman model metadata.',
       ],
     },
+    modelParameterHelp: {
+      multicolor: {
+        alphaS: [
+          'Normalized detuning of the signal mode family.',
+          'It is scaled by the cavity half-linewidth.',
+          'Together with idler detuning it sets the parametric phase-matching window.',
+        ],
+        d2S: [
+          'Normalized second-order dispersion for the signal mode family.',
+          'It enters the signal linear operator with the same Fourier convention as the paper model.',
+          'Use it to tune the signal pulse width and temporal overlap with the primary field.',
+        ],
+      },
+    },
     alphaTip: 'Pump-resonance detuning alpha.',
     pumpTip: 'Normalized pump amplitude F.',
     d2Tip: 'Second-order integrated dispersion coefficient.',
@@ -420,6 +440,12 @@ export const copy = {
       fsrGHz: 'FSR GHz',
       qMillion: 'Q million',
       wavelengthNm: 'Wavelength nm',
+    },
+    modelParameterLabels: {
+      multicolor: {
+        alphaS: 'Signal detuning',
+        d2S: 'Signal D2',
+      },
     },
     parameterHelp: {
       alpha: [
@@ -622,6 +648,20 @@ export const copy = {
         '默认 1550 nm。',
         '它会随 Raman model metadata 一起导出。',
       ],
+    },
+    modelParameterHelp: {
+      multicolor: {
+        alphaS: [
+          'Signal 模式族的归一化失谐。',
+          '它用腔半线宽归一化。',
+          '它和 idler detuning 一起决定参量相位匹配窗口。',
+        ],
+        d2S: [
+          'Signal 模式族的归一化二阶色散。',
+          '它按照论文模型的 Fourier 约定进入 signal 线性算子。',
+          '用于调节 signal pulse 宽度以及它和 primary 场的时域重合。',
+        ],
+      },
     },
     alphaTip: '泵浦-谐振失谐 alpha。',
     pumpTip: '归一化泵浦幅度 F。',
