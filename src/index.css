@@ -575,6 +575,12 @@ button {
   margin: 0;
 }
 
+.docs-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
 .docs-content {
   color: var(--ink);
   font-size: 14px;
@@ -620,6 +626,17 @@ button {
 .docs-content a {
   color: var(--accent);
   font-weight: 600;
+}
+
+.docs-inline-link {
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  display: inline;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  text-decoration: underline;
 }
 
 .docs-content code {

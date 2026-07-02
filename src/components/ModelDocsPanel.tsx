@@ -12,7 +12,9 @@ interface ModelDocsPanelProps {
   modelId: ModelId
   modelLabel: string
   language: Language
+  titleLabel: string
   closeLabel: string
+  onLanguageChange: (language: Language) => void
   onClose: () => void
 }
 
@@ -21,7 +23,9 @@ export function ModelDocsPanel({
   modelId,
   modelLabel,
   language,
+  titleLabel,
   closeLabel,
+  onLanguageChange,
   onClose,
 }: ModelDocsPanelProps) {
   if (!open) {
@@ -39,24 +43,47 @@ export function ModelDocsPanel({
       >
         <header className="docs-header">
           <div>
-            <span>Model docs</span>
+            <span>{titleLabel}</span>
             <h2>{modelLabel}</h2>
           </div>
-          <button type="button" className="icon-button" onClick={onClose}>
-            <X size={18} />
-            <span>{closeLabel}</span>
-          </button>
+          <div className="docs-actions">
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => onLanguageChange(language === 'en' ? 'zh' : 'en')}
+            >
+              <span>{language === 'en' ? '中文' : 'EN'}</span>
+            </button>
+            <button type="button" className="icon-button" onClick={onClose}>
+              <X size={18} />
+              <span>{closeLabel}</span>
+            </button>
+          </div>
         </header>
         <div className="docs-content">
           <ReactMarkdown
             remarkPlugins={[remarkGfm, remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
-              a: ({ children, ...props }) => (
-                <a {...props} target="_blank" rel="noreferrer">
-                  {children}
-                </a>
-              ),
+              a: ({ children, href, ...props }) => {
+                const targetLanguage = languageFromDocsHref(href)
+                if (targetLanguage) {
+                  return (
+                    <button
+                      type="button"
+                      className="docs-inline-link"
+                      onClick={() => onLanguageChange(targetLanguage)}
+                    >
+                      {children}
+                    </button>
+                  )
+                }
+                return (
+                  <a {...props} href={href} target="_blank" rel="noreferrer">
+                    {children}
+                  </a>
+                )
+              },
             }}
           >
             {modelDocs[language][modelId]}
@@ -65,4 +92,11 @@ export function ModelDocsPanel({
       </aside>
     </div>
   )
+}
+
+function languageFromDocsHref(href: string | undefined): Language | null {
+  if (!href?.startsWith('./') || !href.endsWith('.md')) {
+    return null
+  }
+  return href.endsWith('.en.md') ? 'en' : 'zh'
 }

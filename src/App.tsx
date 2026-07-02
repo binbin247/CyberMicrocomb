@@ -652,7 +652,9 @@ function App() {
         modelId={modelId}
         modelLabel={labels.modelLabels[modelId]}
         language={language}
+        titleLabel={labels.modelDocs}
         closeLabel={labels.close}
+        onLanguageChange={setLanguage}
         onClose={() => setIsDocsOpen(false)}
       />
     </div>

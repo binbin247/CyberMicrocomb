@@ -7,6 +7,7 @@ export const copy = {
     usageCount: 'Usage count: ',
     model: 'Model',
     docs: 'Docs',
+    modelDocs: 'Model docs',
     close: 'Close',
     modelLabels: {
       standard: 'Standard soliton',
@@ -193,6 +194,7 @@ export const copy = {
     usageCount: '使用人次：',
     model: '模型',
     docs: '文档',
+    modelDocs: '模型文档',
     close: '关闭',
     modelLabels: {
       standard: 'Standard soliton',
