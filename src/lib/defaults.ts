@@ -89,8 +89,8 @@ export const DEFAULT_MULTICOLOR_PARAMS: MulticolorParams = {
 }
 
 export const DEFAULT_RAMAN_PARAMS: RamanParams = {
-  dtnNorm: 11.829136663739904,
-  ffNorm: 9.784017373364096,
+  dtnNorm: 70,
+  ffNorm: 105,
   d2Norm: 1.65414364640884,
   fR: 0.02,
   tau1Fs: 11.1,

@@ -381,8 +381,8 @@ def test_multicolor_adaptive_dt_satisfies_aliasing_bound():
 
 def configure_raman(solver, n=128, **params):
     base = {
-        "dtnNorm": 11.829136663739904,
-        "ffNorm": 9.784017373364096,
+        "dtnNorm": 70.0,
+        "ffNorm": 105.0,
         "d2Norm": 1.65414364640884,
         "fR": 0.02,
         "tau1Fs": 11.1,
@@ -413,6 +413,16 @@ def test_raman_solver_snapshot_metrics_and_export_are_finite():
     state = solver.export_state()
     assert len(state["psi_real"]) == 128
     assert "referenceParams" in state
+
+
+def test_raman_default_reaches_sub_35_fs_pulse():
+    solver = RamanSsfSolver()
+    configure_raman(solver, n=512, stepsPerFrame=1000)
+    for _ in range(20):
+        snap = solver.run_steps()
+    assert snap["pulseWidthFs"] < 35.0, snap["pulseWidthFs"]
+    assert snap["energy"] > 1.0
+    assert snap["peak"] > 40.0
 
 
 def test_raman_adaptive_dt_satisfies_aliasing_bound():
@@ -449,5 +459,6 @@ if __name__ == "__main__":
     test_multicolor_solver_snapshot_and_export_are_finite()
     test_multicolor_adaptive_dt_satisfies_aliasing_bound()
     test_raman_solver_snapshot_metrics_and_export_are_finite()
+    test_raman_default_reaches_sub_35_fs_pulse()
     test_raman_adaptive_dt_satisfies_aliasing_bound()
     print("solver tests passed")
