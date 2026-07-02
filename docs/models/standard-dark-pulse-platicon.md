@@ -5,7 +5,7 @@
 ## 仿真的方程
 
 这是正常色散单场 LLE，用于演示暗脉冲 / platicon。它与 `Standard soliton` 使用同一套
-单场归一化，但只保留二阶色散和一个局部模式偏移，不包含 Raman、$d_3$ 或 $d_4$。
+单场归一化，但只保留二阶色散和一个局部模式偏移，不包含 Raman、 $d_3$ 或 $d_4$。
 这里同样采用光子数归一化的腔内慢变场 $A$，总损耗
 $\kappa=\kappa_0+\kappa_{\mathrm{ext}}$，输入场
 $|s_{\mathrm{in}}|^2=P_{\mathrm{in}}/\hbar\omega_p$，以及失谐
@@ -79,7 +79,7 @@ D_{\mathrm{int}}(\mu)
 +\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
 $$
 
-$d_2>0$ 表示当前归一化约定下的正常色散。$\mu_{\mathrm{shift}}$ 是被扰动的整数模式，
+$d_2>0$ 表示当前归一化约定下的正常色散。 $\mu_{\mathrm{shift}}$ 是被扰动的整数模式，
 $\Delta_{\mathrm{shift}}$ 是归一化到 $\kappa/2$ 的模式偏移强度。正的
 `Mode shift strength` 表示增大该模式的 $D_{\mathrm{int}}$。当前实现只移动一个模式，
 不自动同时移动 $\pm\mu$。

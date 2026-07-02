@@ -6,7 +6,7 @@
 
 该模型参考 *Multicolor interband solitons in microcombs* 的 supplementary
 equations S1-S3，使用 primary、signal 和 idler 三个场：
-$E_p(\phi,t)$、$E_s(\phi,t)$、$E_i(\phi,t)$。浏览器中使用损耗归一化形式。
+$E_p(\phi,t)$、 $E_s(\phi,t)$、 $E_i(\phi,t)$。浏览器中使用损耗归一化形式。
 
 物理量层面，这是三个模式族的 coupled LLE。每个模式族都有自己的损耗
 $\kappa_j$、失谐 $\delta_j$、二阶色散 $D_{2j}$ 和腔内慢变场 $A_j$；primary
@@ -45,7 +45,7 @@ $$
 +i\gamma E_p^2E_s^* .
 $$
 
-$\eta$ 是 XPM 相对强度，$\gamma$ 是复数 FWM 耦合系数，$\Delta_s$ 和 $\Delta_i$
+$\eta$ 是 XPM 相对强度， $\gamma$ 是复数 FWM 耦合系数， $\Delta_s$ 和 $\Delta_i$
 描述 signal/idler 相对 primary 的 FSR mismatch；这些一阶导数项表示不同模式族
 的群速度或 FSR 不完全匹配。默认参数来自 supplementary simulation parameters 的损耗归一化估计。
 

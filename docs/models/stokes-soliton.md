@@ -47,9 +47,9 @@ $$
 
 文献中 $E_p,E_s$ 不是电场强度本身，而是按 optical energy 归一化后的腔内慢变场。
 $D_{1j}$ 和 $D_{2j}$ 分别是模式族
-$j=p,s$ 的 FSR 和二阶色散；$\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR
-mismatch；$\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐；$g_j$ 和 $G_j$
-是 self- 与 cross-phase modulation 系数；$R$ 是 Raman gain 系数；$\tau_R$
+$j=p,s$ 的 FSR 和二阶色散； $\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR
+mismatch； $\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐； $g_j$ 和 $G_j$
+是 self- 与 cross-phase modulation 系数； $R$ 是 Raman gain 系数； $\tau_R$
 是 Raman shock time。
 
 ### 归一化
@@ -85,7 +85,7 @@ $-i d_2\partial_\phi^2/2$ 的口径不同。
 `Stokes Raman gain` 分别记作 $g_{Rp}$ 和 $g_{Rs}$。当前页面把 Stokes 失谐
 $\alpha_s$ 固定为 0，并把 Stokes 损耗也写成同样的归一化损耗 `-1`，这是为了保持交互模型简洁。
 `FSR mismatch` 的符号按页面方程定义：它是 $-\Delta_{\mathrm{FSR}}\partial_\phi S$
-前的系数。$\rho$ 对应 Stokes 与 Primary 的频率比，近似等于 $\lambda_p/\lambda_s$。
+前的系数。 $\rho$ 对应 Stokes 与 Primary 的频率比，近似等于 $\lambda_p/\lambda_s$。
 
 ### 页面求解的归一化方程
 
@@ -125,7 +125,7 @@ $$
 $\xi_s$ 是由 `Noise seed` 控制的弱随机 Stokes 种子。界面中的 `Pump detuning`,
 `FSR mismatch`, `Primary/Stokes D2`, `Overlap`, `Primary Raman loss`,
 `Stokes Raman gain`, `Wavelength ratio` 和 `tauR` 分别对应上式中的
-$\alpha_p$、$\Delta_{\mathrm{FSR}}$、$d_{2p/s}$、$\eta$、$g_{Rp}$、$g_{Rs}$、
+$\alpha_p$、 $\Delta_{\mathrm{FSR}}$、 $d_{2p/s}$、 $\eta$、 $g_{Rp}$、 $g_{Rs}$、
 $\rho$ 和 $\tau_R$。
 
 ## 物理图像
