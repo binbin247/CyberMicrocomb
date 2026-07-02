@@ -73,8 +73,8 @@ exploration of Raman self-frequency-shift-like behavior.
 
 If the state diverges or the spectrum becomes numerically noisy, reduce `dt` or
 lower `Pump power` first. The solver clamps oversized timesteps using
-$\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing, but
-this does not replace a higher-order publication-grade integrator.
+$\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing; final
+quantitative studies should still use a higher-order integrator.
 
 ## References
 

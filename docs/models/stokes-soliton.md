@@ -5,7 +5,7 @@
 ## 仿真的方程
 
 这是 Primary 场 $P(\phi,t)$ 与 Stokes 场 $S(\phi,t)$ 的双场归一化 coupled LLE。Primary
-场被外部泵浦驱动，Stokes 场由噪声 seed 通过 Raman gain 增长。频域线性项为
+场被外部泵浦驱动，Stokes 场由噪声种子通过 Raman 增益增长。频域线性项为
 
 $$
 \left.\frac{\partial \hat P_\mu}{\partial t}\right|_{\mathrm{lin}}
@@ -50,27 +50,26 @@ ir_w|S|^2
 +\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
 $$
 
-也就是说，非线性更新近似为
+非线性更新近似为
 $\partial_t P|_{\mathrm{nl}}=N_P P+F$，
-$\partial_t S|_{\mathrm{nl}}=N_S S+\xi$。这里 $\eta$ 是 mode overlap，$f_R$
+$\partial_t S|_{\mathrm{nl}}=N_S S+\xi$。这里 $\eta$ 是模式重叠因子，$f_R$
 是 Raman 分数，$g_P$ 是 Primary Raman loss，$g_S$ 是 Stokes Raman gain，
-$r_w$ 是 wavelength ratio，$\delta$ 是 FSR mismatch，$\xi$ 是弱复噪声 seed。
+$r_w$ 是波长比，$\delta$ 是 FSR mismatch，$\xi$ 是弱复噪声种子。
 
 ## 物理图像
 
-Stokes soliton 不是把 Primary soliton 复制一遍，而是 Raman 过程产生的第二个孤子场。
-Primary soliton 先形成强局域光场；这个局域光场为 Stokes 模式族提供 Raman gain，并通过交叉相位
-调制和群速匹配把 Stokes pulse 俘获在相近的时间位置。
+Stokes soliton 不是 Primary soliton 的简单复制，而是 Raman 过程产生的第二个孤子场。
+Primary soliton 先形成强局域光场；该光场为 Stokes 模式族提供 Raman 增益，并通过交叉相位调制和群速匹配把 Stokes 脉冲俘获在相近的时间位置。
 
 四张图可以这样读：
 
-- `Temporal field`：比较 Primary 和 Stokes 的时域强度，Stokes 通常更弱且由噪声增长。
+- `Temporal field`：比较 Primary 和 Stokes 的时域强度，Stokes 通常更弱并由噪声增长。
 - `Comb spectrum`：比较两个模式族的谱宽、谱峰和相对强度。
 - `Intracavity energy`：看 Primary 能量是否先建立，Stokes 能量是否随后增长并稳定。
 - `Temporal evolution`：左右两图分别显示 Primary 与 Stokes 的演化，用来判断俘获、漂移或失稳。
 
-Stokes 场的强度和稳定性由 Raman gain/loss、overlap、FSR mismatch、Stokes dispersion 和
-wavelength ratio 共同决定。默认 preset 的设计目标是：主要扫描 `Pump detuning`，即可观察
+Stokes 场的强度和稳定性由 Raman 增益/损耗、模式重叠、FSR mismatch、Stokes 色散和
+波长比共同决定。默认参数的设计目标是：主要扫描 `Pump detuning`，即可观察
 Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
 
 ## Demo

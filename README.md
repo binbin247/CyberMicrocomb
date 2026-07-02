@@ -30,10 +30,10 @@ React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 当前页面内置三个交互式归一化模型。每个模型都有独立的方程说明、物理图像、
 Demo 操作和参考文献：
 
-- [Standard soliton](./docs/models/standard-soliton.md)：异常色散单场 LLE，
-  用于 bright dissipative Kerr soliton 仿真。
+- [Standard soliton](./docs/models/standard-soliton.md)：反常色散单场 LLE，
+  用于亮耗散 Kerr 孤子仿真。
 - [Standard dark pulse (platicon)](./docs/models/standard-dark-pulse-platicon.md)：
-  normal-dispersion 单场 LLE 加局部 mode shift，用于 dark pulse / platicon 仿真。
+  正常色散单场 LLE 加局部模式偏移，用于暗脉冲 / platicon 仿真。
 - [Stokes soliton](./docs/models/stokes-soliton.md)：Primary / Stokes 双场耦合 LLE，
   用于 Raman 驱动的 Stokes soliton 仿真。
 

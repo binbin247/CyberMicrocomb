@@ -4,8 +4,8 @@
 
 ## 仿真的方程
 
-这是单场、归一化的 Lugiato-Lefever equation (LLE)，用于描述异常色散微腔中的 bright
-dissipative Kerr soliton。慢时间为 $t$，环向坐标为 $\phi\in[-\pi,\pi)$，相对模式编号为
+这是单场、归一化的 Lugiato-Lefever equation (LLE)，用于描述反常色散微腔中的亮耗散 Kerr
+孤子。慢时间为 $t$，环向坐标为 $\phi\in[-\pi,\pi)$，相对模式编号为
 $\mu$，腔内归一化场为 $\psi(\phi,t)$：
 
 $$
@@ -18,8 +18,8 @@ $$
 +F+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
 $$
 
-也可以把色散部分写成紧凑算子 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前
-Fourier 约定下，$\partial_\phi\to i\mu$，因此频域 integrated dispersion 为
+色散项也可以写成紧凑算子 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前
+Fourier 约定下，$\partial_\phi\to i\mu$，对应的频域积分色散为
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -29,19 +29,19 @@ D_{\mathrm{int}}(\mu)
 +\frac{d_4\mu^4}{24}.
 $$
 
-参数含义很直接：$\alpha$ 是泵浦-腔模失谐，$F$ 是泵浦幅度，$d_2,d_3,d_4$ 是归一化
-integrated dispersion，$\tau_R$ 是 Raman shock 系数。当前求解器采用一阶 split-step：
-时域更新 Kerr/Raman 项，频域更新损耗、失谐和色散项，最后显式加入泵浦。
+其中 $\alpha$ 是泵浦-腔模失谐，$F$ 是泵浦幅度，$d_2,d_3,d_4$ 是归一化积分色散系数，
+$\tau_R$ 是 Raman shock 系数。当前求解器采用一阶分步傅里叶方法：时域更新 Kerr/Raman
+项，频域更新损耗、失谐和色散项，最后显式加入泵浦。
 
 ## 物理图像
 
 Standard soliton 的核心平衡是：连续波泵浦补偿腔损耗，Kerr 非线性提供强度相关相移，
-异常色散 $d_2<0$ 平衡该非线性相移，从而形成局域亮脉冲。
+反常色散 $d_2<0$ 平衡该非线性相移，从而形成局域亮脉冲。
 
 四张图可以这样读：
 
 - `Temporal field`：看 $|\psi|^2$ 是否形成窄的亮峰。
-- `Comb spectrum`：看泵浦附近是否出现宽而连续的 comb envelope。
+- `Comb spectrum`：看泵浦附近是否出现宽而连续的光梳包络。
 - `Intracavity energy`：看腔内平均能量是否趋于稳定。
 - `Temporal evolution`：看孤子是否漂移、分裂或进入不稳定状态。
 
@@ -61,8 +61,7 @@ self-frequency-shift 类效应。
 6. 将 `tauR` 从 0 小幅增加，观察脉冲和频谱的偏移趋势。
 
 如果结果发散或频谱出现明显数值噪声，先减小 `dt` 或降低 `Pump power`。求解器会用
-$\max |D_{\mathrm{int}}|\,dt < \pi$ 的 aliasing 条件自动限制过大的积分步长，但这不能替代
-更高阶、更精确的积分器。
+$\max |D_{\mathrm{int}}|\,dt < \pi$ 的 aliasing 条件自动限制过大的积分步长；最终定量研究仍应使用更高阶、更精确的积分器。
 
 ## 参考文献
 
