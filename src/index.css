@@ -98,7 +98,7 @@ button {
   align-items: end;
   display: grid;
   gap: 8px;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
   margin-top: 14px;
   max-width: none;
   width: 100%;
