@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { DEFAULT_STOKES_PARAMS } from './defaults'
 import { clampParamsForModel, clampStandardParams } from './physics'
 
 describe('parameter clamping', () => {
@@ -57,5 +58,14 @@ describe('parameter clamping', () => {
       dt: 0.00005,
       stepsPerFrame: 10,
     })
+  })
+
+  it('keeps Stokes system defaults aligned with the MATLAB scan script', () => {
+    expect(DEFAULT_STOKES_PARAMS.overlap).toBe(0.5)
+    expect(DEFAULT_STOKES_PARAMS.fR).toBe(0.18)
+    expect(DEFAULT_STOKES_PARAMS.ramanGainP).toBeCloseTo(0.35 * 0.18 * 2)
+    expect(DEFAULT_STOKES_PARAMS.ramanGainS).toBeCloseTo(0.35 * 0.18 * 2)
+    expect(DEFAULT_STOKES_PARAMS.wavelengthRatio).toBeCloseTo(1550 / 1630)
+    expect(DEFAULT_STOKES_PARAMS.tauR).toBe(0.00033)
   })
 })

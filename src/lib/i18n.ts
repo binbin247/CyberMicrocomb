@@ -105,7 +105,7 @@ export const copy = {
       alphaP: [
         'Normalized pump detuning of the primary soliton mode family.',
         'It appears in the primary linear operator as -1 - i alphaP.',
-        'With the default Stokes preset, scan this control upward to reproduce a Fig. S1-style primary-to-Stokes transition.',
+        'The Stokes preset keeps the system constants from the MATLAB scan; the original Fig. S1 scan uses a much longer slow detuning sweep.',
       ],
       alphaS: [
         'Normalized detuning of the Stokes mode family.',
@@ -130,7 +130,7 @@ export const copy = {
       overlap: [
         'Spatial-mode overlap factor between primary and Stokes families.',
         'It scales cross-phase modulation and Raman coupling terms.',
-        'Larger overlap strengthens trapping and Raman exchange.',
+        'The default value follows Ramansoliton_scan.m.',
       ],
       fR: [
         'Fractional Raman contribution used in the coupled normalized model.',
@@ -140,17 +140,17 @@ export const copy = {
       ramanGainP: [
         'Raman-mediated loss term applied to the primary field from Stokes growth.',
         'It enters the primary nonlinear coefficient with a negative real part.',
-        'Increase carefully because it can deplete or destabilize the primary pulse.',
+        'The default value follows gs = gp = 0.35 * 0.18 * 2 in Ramansoliton_scan.m.',
       ],
       ramanGainS: [
         'Raman gain term applied to the Stokes field from the primary pulse.',
         'It provides the thresholded Stokes amplification described in the paper.',
-        'Higher values make Stokes oscillation easier but can reduce numerical stability.',
+        'The default value follows gs = gp = 0.35 * 0.18 * 2 in Ramansoliton_scan.m.',
       ],
       wavelengthRatio: [
         'Frequency or wavelength scaling factor between the primary and Stokes families.',
         'It scales the Stokes nonlinear and Raman-coupling terms.',
-        'A value of 1 matches the normalized reference script.',
+        'The default value follows wsp = 1550 / 1630 in Ramansoliton_scan.m.',
       ],
       noise: [
         'Complex noise seed added to the Stokes field.',
@@ -272,7 +272,7 @@ export const copy = {
       alphaP: [
         'Primary 模式族的归一化泵浦失谐。',
         '它在线性算子中以 -1 - i alphaP 的形式出现。',
-        '在默认 Stokes preset 下，向上扫描这个参数可得到类似 Fig. S1 的 primary 到 Stokes 转换。',
+        'Stokes preset 的系统常数沿用 MATLAB 扫描脚本；原始 Fig. S1 使用的是更长时间的慢失谐扫描。',
       ],
       alphaS: [
         'Stokes 模式族的归一化失谐。',
@@ -297,7 +297,7 @@ export const copy = {
       overlap: [
         'Primary 与 Stokes 空间模式的重叠因子。',
         '它同时缩放 cross-phase modulation 和 Raman coupling 项。',
-        '越大表示 trapping 和 Raman 交换越强。',
+        '默认值沿用 Ramansoliton_scan.m。',
       ],
       fR: [
         '耦合归一化模型中的 Raman 分数。',
@@ -307,17 +307,17 @@ export const copy = {
       ramanGainP: [
         'Stokes 增长对 Primary 场造成的 Raman-mediated loss 项。',
         '它以负实部形式进入 Primary 非线性系数。',
-        '增大时要谨慎，过大会导致 Primary 被过度耗尽或数值不稳定。',
+        '默认值沿用 Ramansoliton_scan.m 中的 gs = gp = 0.35 * 0.18 * 2。',
       ],
       ramanGainS: [
         'Primary pulse 给 Stokes 场提供的 Raman gain 项。',
         '它对应论文中 Stokes soliton 的阈值放大机制。',
-        '增大后 Stokes 更容易起振，但数值稳定性可能下降。',
+        '默认值沿用 Ramansoliton_scan.m 中的 gs = gp = 0.35 * 0.18 * 2。',
       ],
       wavelengthRatio: [
         'Primary 与 Stokes 模式族之间的频率或波长缩放因子。',
         '它缩放 Stokes 非线性和 Raman coupling 项。',
-        '取 1 时对应归一化参考脚本。',
+        '默认值沿用 Ramansoliton_scan.m 中的 wsp = 1550 / 1630。',
       ],
       noise: [
         '加入到 Stokes 场中的复噪声种子。',
