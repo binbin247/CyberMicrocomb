@@ -7,8 +7,8 @@
 This model describes an unisolated pump laser coupled to a microresonator through
 self-injection locking. The browser implementation uses a normalized coupled
 mechanism model based on the self-injection-locking supplementary material, with
-the forward intracavity field $\psi(\phi,t)$, the backscattered field $\rho_B(t)$,
-and a feedback-controlled locked detuning.
+the forward intracavity field $\psi(\phi,t)$, an internal backscattering variable
+$\rho_B(t)$, and a feedback-controlled locked detuning.
 
 The forward field is modeled as
 
@@ -20,7 +20,7 @@ $$
 + i\beta\rho_B + F .
 $$
 
-The backscattered field and locked detuning are represented by the normalized
+The backscattering variable and locked detuning are represented by the normalized
 feedback dynamics
 
 $$
@@ -38,7 +38,9 @@ $$
 
 $\alpha_L$ is the free-running laser detuning, $\beta$ is the normalized
 backscattering amplitude, $K$ is the feedback locking bandwidth, $\phi_\mathrm{fb}$
-is the feedback phase, and $F$ is the pump amplitude.
+is the feedback phase, and $F$ is the pump amplitude. The current UI does not
+plot $\rho_B$ as a separate field; it is an internal variable that changes the
+locked detuning and the forward-field dynamics.
 
 ## Physical Picture
 
@@ -49,12 +51,15 @@ after turn-on without a conventional fast frequency scan or active feedback loop
 
 Read the panels as follows:
 
-- `Temporal field`: compare the forward and backward intensities.
+- `Temporal field`: inspect whether the forward field $|\psi|^2$ forms a localized pulse.
 - `Comb spectrum`: check whether the forward comb broadens into a soliton-like spectrum.
-- `Intracavity energy`: look for a stable locked energy plateau.
-- `Temporal evolution`: verify direct access rather than long chaotic transients.
+- `Intracavity energy`: look for a stable forward-field energy plateau.
+- `Soliton state`: shows the Kerr-tilted response, locking equilibrium, and the
+  current operating point. The black dot is the real-time locked detuning and
+  normalized intracavity power.
 
-The `locked detuning` card reports the current feedback-controlled effective detuning.
+The red dashed curve uses the same self-injection-locking equilibrium equation as
+the solver; the black curve is the Kerr tilt.
 
 ## Demo
 

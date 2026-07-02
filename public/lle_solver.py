@@ -767,11 +767,11 @@ class TurnkeySolitonSolver:
     def _refresh_linear(self):
         self._refresh_adaptive_dt()
         p = self.params
-        linear = -1.0 - 1j * self.locked_detuning - 1j * p["d2"] * self.mu**2
+        linear = -1.0 - 1j * self.locked_detuning - 0.5j * p["d2"] * self.mu**2
         self._linear = np.exp(linear * p["dt"])
 
     def _refresh_adaptive_dt(self):
-        max_abs_phase = float(np.max(np.abs(self.params["d2"] * self.mu**2)))
+        max_abs_phase = float(np.max(np.abs(self.params["d2"] * self.mu**2 / 2.0)))
         requested_dt = self.params["dt"]
         if max_abs_phase > 0.0:
             alias_safe_dt = ALIASING_SAFETY * math.pi / max_abs_phase

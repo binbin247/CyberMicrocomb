@@ -17,6 +17,7 @@ import {
 import { copy } from './i18n'
 import { MODEL_IDS } from './models'
 import { clampParamsForModel, clampPlaticonParams, clampStandardParams } from './physics'
+import { buildTurnkeyStateDiagramData, turnkeyLockingEquation } from './turnkeyDiagram'
 
 describe('localized UI copy', () => {
   it('does not mix Chinese text into English UI copy', () => {
@@ -246,5 +247,21 @@ describe('parameter clamping', () => {
       fR: 1,
       fsrGHz: DEFAULT_RAMAN_PARAMS.fsrGHz,
     })
+  })
+
+  it('builds the Turnkey locking curve from the solver equilibrium equation', () => {
+    const diagram = buildTurnkeyStateDiagramData(DEFAULT_TURNKEY_PARAMS, 2.674, 0.9954)
+    expect(diagram.lockingEquilibrium.length).toBeGreaterThan(20)
+
+    const sampled = diagram.lockingEquilibrium
+      .filter((_, index) => index % 30 === 0)
+      .concat(diagram.lockingEquilibrium.at(-1)!)
+    for (const point of sampled) {
+      expect(Math.abs(turnkeyLockingEquation(
+        point.x,
+        point.y,
+        DEFAULT_TURNKEY_PARAMS,
+      ))).toBeLessThan(1e-5)
+    }
   })
 })

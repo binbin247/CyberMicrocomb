@@ -315,8 +315,16 @@ def test_turnkey_adaptive_dt_satisfies_aliasing_bound():
     solver = TurnkeySolitonSolver()
     configure_turnkey(solver, n=4096, d2=0.25, dt=0.005)
     params = solver.snapshot()["normalizedParams"]
-    max_phase_per_step = float(np.max(np.abs(params["d2"] * solver.mu**2)) * params["dt"])
+    max_phase_per_step = float(np.max(np.abs(params["d2"] * solver.mu**2 / 2.0)) * params["dt"])
     assert max_phase_per_step < math.pi, max_phase_per_step
+
+
+def test_turnkey_linear_dispersion_uses_half_d2_convention():
+    solver = TurnkeySolitonSolver()
+    configure_turnkey(solver, n=8, laserDetuning=0.0, d2=0.2, dt=1e-4)
+    index = int(np.where(solver.mu == 1)[0][0])
+    expected = np.exp((-1.0 - 0.5j * 0.2) * solver.params["dt"])
+    assert np.allclose(solver._linear[index], expected)
 
 
 def configure_multicolor(solver, n=128, **params):
@@ -456,6 +464,7 @@ if __name__ == "__main__":
     test_turnkey_solver_snapshot_and_export_are_finite()
     test_turnkey_locked_detuning_responds_to_feedback_parameters()
     test_turnkey_adaptive_dt_satisfies_aliasing_bound()
+    test_turnkey_linear_dispersion_uses_half_d2_convention()
     test_multicolor_solver_snapshot_and_export_are_finite()
     test_multicolor_adaptive_dt_satisfies_aliasing_bound()
     test_raman_solver_snapshot_metrics_and_export_are_finite()

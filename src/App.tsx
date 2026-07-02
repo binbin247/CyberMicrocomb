@@ -27,6 +27,7 @@ import {
 import { t } from './lib/i18n'
 import { MODEL_IDS } from './lib/models'
 import { clampParamsForModel, clampPlaticonParams, modeShiftBounds } from './lib/physics'
+import { buildTurnkeyStateDiagramData, type ChartPoint } from './lib/turnkeyDiagram'
 import type {
   GridSize,
   Language,
@@ -67,7 +68,6 @@ const TEMPORAL_X_TITLE = 'Azimuthal coordinate φ'
 const SPECTRUM_X_TITLE = 'Mode number μ'
 const TEMPORAL_Y_TITLE = 'Field intensity |ψ|<sup>2</sup>'
 const TEMPORAL_Y_LABEL = 'Field intensity |ψ|^2'
-const TURNKEY_LOCKING_SLOPE = 1.5
 
 interface TracePoint {
   step: number
@@ -109,11 +109,6 @@ interface ControlDefinition {
 interface ControlGroupDefinition {
   titleKey?: string
   controls: readonly ControlDefinition[]
-}
-
-interface ChartPoint {
-  x: number
-  y: number
 }
 
 const standardControlGroups: readonly ControlGroupDefinition[] = [
@@ -900,37 +895,6 @@ function getWaterfallCount(modelId: ModelId, rows: ModelHistoryRows) {
   return rows.standard.length
 }
 
-function buildKerrTilt(pump: number, yMax: number) {
-  const pumpSquared = Math.max(pump * pump, 1e-6)
-  const rhoMin = Math.max(0.04, pumpSquared * 0.05)
-  const rhoMax = Math.min(pumpSquared, yMax)
-  const lowerBranch: ChartPoint[] = []
-  const upperBranch: ChartPoint[] = []
-  const sampleCount = 180
-
-  for (let index = 0; index <= sampleCount; index += 1) {
-    const rho = rhoMin + ((rhoMax - rhoMin) * index) / sampleCount
-    const rootArg = pumpSquared / rho - 1
-    if (rootArg < 0) {
-      continue
-    }
-    const root = Math.sqrt(rootArg)
-    lowerBranch.push({ x: rho - root, y: rho })
-    upperBranch.push({ x: rho + root, y: rho })
-  }
-
-  return [...lowerBranch, ...upperBranch.reverse()]
-}
-
-function buildTurnkeyLockingLine(currentAlpha: number, currentPower: number, yMin: number, yMax: number) {
-  // Main-text Eq. (1) / Supplementary Eq. S17: alpha = alpha0 + 3P / 2.
-  const intercept = currentAlpha - TURNKEY_LOCKING_SLOPE * currentPower
-  return [
-    { x: intercept + TURNKEY_LOCKING_SLOPE * yMin, y: yMin },
-    { x: intercept + TURNKEY_LOCKING_SLOPE * yMax, y: yMax },
-  ]
-}
-
 function mapStatePoint(
   point: ChartPoint,
   plot: { left: number; top: number; width: number; height: number },
@@ -983,22 +947,11 @@ function TurnkeyStatePanel({
 }) {
   const detuning = snapshot?.lockedDetuning ?? params.laserDetuning
   const power = snapshot?.primaryEnergy ?? 0
-  const pumpSquared = Math.max(params.pump * params.pump, 1e-6)
-  const yMin = 0
-  const yMax = Math.max(0.8, pumpSquared * 1.18, power * 1.35)
-  const kerrTilt = buildKerrTilt(params.pump, yMax)
-  const lockingLine = buildTurnkeyLockingLine(detuning, power, yMin, yMax)
-  const xCandidates = [
-    0,
-    detuning,
-    ...lockingLine.map((point) => point.x),
-    ...kerrTilt.map((point) => point.x),
-  ].filter((value) => Number.isFinite(value))
-  const rawXMin = Math.min(...xCandidates)
-  const rawXMax = Math.max(...xCandidates)
-  const xPadding = Math.max(0.35, (rawXMax - rawXMin) * 0.08)
-  const xMin = rawXMin - xPadding
-  const xMax = rawXMax + xPadding
+  const diagram = buildTurnkeyStateDiagramData(params, detuning, power)
+  const kerrTilt = diagram.kerrTilt
+  const lockingLine = diagram.lockingEquilibrium
+  const [xMin, xMax] = diagram.xRange
+  const [yMin, yMax] = diagram.yRange
   const plot = { left: 82, top: 26, width: 438, height: 292 }
   const plotRight = plot.left + plot.width
   const plotBottom = plot.top + plot.height
@@ -1670,6 +1623,11 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
     const backwardRows = source.historyRows.backward.map((row) => Array.from(row))
     const primaryEnergy = source.trace.map((item) => item.primaryEnergy ?? 0)
     const backwardEnergy = source.trace.map((item) => item.backwardEnergy ?? 0)
+    const stateDiagram = buildTurnkeyStateDiagramData(
+      snapshot.normalizedParams,
+      snapshot.lockedDetuning,
+      snapshot.primaryEnergy,
+    )
     return {
       ...base,
       fields: {
@@ -1721,6 +1679,15 @@ function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
           columnCount: primaryRows[0]?.length ?? backwardRows[0]?.length ?? 0,
           valueLabel: '10 * log10(|psi|^2 + 1e-12)',
           maxRows: HISTORY_LIMIT,
+        },
+        stateDiagram: {
+          state: stateDiagram.state,
+          kerrTilt: stateDiagram.kerrTilt,
+          lockingEquilibrium: stateDiagram.lockingEquilibrium,
+          xRange: stateDiagram.xRange,
+          yRange: stateDiagram.yRange,
+          xLabel: 'Normalized detuning alpha = 2 delta omega / kappa',
+          yLabel: 'Normalized intracavity power',
         },
       },
     }
