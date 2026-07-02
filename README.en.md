@@ -49,14 +49,15 @@ The page currently includes six interactive normalized models. Each model has
 its own equation notes, physical picture, demo workflow, and references:
 
 - [Standard soliton](./docs/models/standard-soliton.en.md): anomalous-dispersion
-  single-field LLE for bright dissipative Kerr soliton simulations.
+  single-field LLE for bright dissipative Kerr soliton simulations, with optional
+  higher-order dispersion and Raman-shock perturbations.
 - [Standard dark pulse (platicon)](./docs/models/standard-dark-pulse-platicon.en.md):
   normal-dispersion single-field LLE with a local mode shift for dark pulse /
   platicon simulations.
 - [Stokes soliton](./docs/models/stokes-soliton.en.md): primary / Stokes
   two-field coupled LLE for Raman-driven Stokes soliton simulations.
 - [Turnkey soliton (self-injection locking)](./docs/models/turnkey-soliton.en.md):
-  a normalized self-injection-locking model with backscattered feedback.
+  a normalized self-injection-locking model for turnkey soliton microcombs.
 - [Multicolor soliton](./docs/models/multicolor-soliton.en.md): primary / signal /
   idler three-field coupled LLE for multicolor interband soliton dynamics.
 - [Raman soliton self-frequency shift](./docs/models/raman-soliton-ssfs.en.md):

@@ -43,13 +43,13 @@ React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 Demo 操作和参考文献：
 
 - [Standard soliton](./docs/models/standard-soliton.md)：反常色散单场 LLE，
-  用于亮耗散 Kerr 孤子仿真。
+  用于亮耗散 Kerr 孤子仿真，并可加入高阶色散和 Raman shock 扰动。
 - [Standard dark pulse (platicon)](./docs/models/standard-dark-pulse-platicon.md)：
   正常色散单场 LLE 加局部模式偏移，用于暗脉冲 / platicon 仿真。
 - [Stokes soliton](./docs/models/stokes-soliton.md)：Primary / Stokes 双场耦合 LLE，
   用于 Raman 驱动的 Stokes soliton 仿真。
 - [Turnkey soliton (self-injection locking)](./docs/models/turnkey-soliton.md)：
-  带后向散射反馈的 self-injection-locking 归一化模型。
+  turnkey soliton microcomb 的 self-injection-locking 归一化模型。
 - [Multicolor soliton](./docs/models/multicolor-soliton.md)：Primary / signal / idler
   三场耦合 LLE，用于 multicolor interband soliton 机制演示。
 - [Raman soliton self-frequency shift](./docs/models/raman-soliton-ssfs.md)：
