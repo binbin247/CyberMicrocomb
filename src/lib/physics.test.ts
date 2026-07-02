@@ -12,8 +12,15 @@ import {
   DEFAULT_TURNKEY_GRID_SIZE,
   DEFAULT_TURNKEY_PARAMS,
 } from './defaults'
+import { copy } from './i18n'
 import { MODEL_IDS } from './models'
 import { clampParamsForModel, clampPlaticonParams, clampStandardParams } from './physics'
+
+describe('localized UI copy', () => {
+  it('does not mix Chinese text into English UI copy', () => {
+    expect(JSON.stringify(copy.en)).not.toMatch(/\p{Script=Han}/u)
+  })
+})
 
 describe('parameter clamping', () => {
   it('keeps finite normalized controls and clamps invalid values', () => {
