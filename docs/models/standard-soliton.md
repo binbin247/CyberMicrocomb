@@ -11,11 +11,15 @@ $\mu$，腔内归一化场为 $\psi(\phi,t)$：
 $$
 \frac{\partial \psi}{\partial t}
 =
-\left[-(1+i\alpha)+iD_{\mathrm{int}}(\mu)+i|\psi|^2\right]\psi
+[-(1+i\alpha)+i|\psi|^2]\psi
+-\frac{i d_2}{2}\frac{\partial^2\psi}{\partial\phi^2}
+-\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
++\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4}
 +F+i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
 $$
 
-频域色散为
+也可以把色散部分写成紧凑算子 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前
+Fourier 约定下，$\partial_\phi\to i\mu$，因此频域 integrated dispersion 为
 
 $$
 D_{\mathrm{int}}(\mu)

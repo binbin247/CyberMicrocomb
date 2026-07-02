@@ -10,10 +10,17 @@ mode shift，不包含 Raman、$d_3$ 或 $d_4$：
 $$
 \frac{\partial \psi}{\partial t}
 =
-\left[-(1+i\alpha)+iD_{\mathrm{int}}(\mu)+i|\psi|^2\right]\psi+F.
+[-(1+i\alpha)+i|\psi|^2]\psi
+-\frac{i d_2}{2}\frac{\partial^2\psi}{\partial\phi^2}
++i\mathcal{F}^{-1}
+\left[
+\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}\hat{\psi}_\mu
+\right]
++F.
 $$
 
-色散写成
+其中 $\mathcal{F}^{-1}[\cdots]$ 表示把单个模式的局部偏移从频域变回时域。等价地，频域
+integrated dispersion 写成
 
 $$
 D_{\mathrm{int}}(\mu)

@@ -19,7 +19,22 @@ $$
 \left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
 $$
 
-当前界面中 $\alpha_S=0$ 固定，不作为可调参数。时域非线性系数为
+当前界面中 $\alpha_S=0$ 固定，不作为可调参数。上述线性项是求解器实际使用的频域形式。
+按 $\partial_\phi\to i\mu$ 的 Fourier 约定，
+它们在时域中等价于
+
+$$
+\left.\frac{\partial P}{\partial t}\right|_{\mathrm{lin}}
+=-(1+i\alpha_P)P+i d_{2P}\frac{\partial^2 P}{\partial\phi^2},
+$$
+
+$$
+\left.\frac{\partial S}{\partial t}\right|_{\mathrm{lin}}
+=-(1+i\alpha_S)S+i d_{2S}\frac{\partial^2 S}{\partial\phi^2}
+-\delta\frac{\partial S}{\partial\phi}.
+$$
+
+时域非线性系数为
 
 $$
 N_P =

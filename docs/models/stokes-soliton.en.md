@@ -22,7 +22,22 @@ $$
 $$
 
 In the current UI, $\alpha_S=0$ is fixed and is not user adjustable. The
-time-domain nonlinear coefficients are
+linear terms above are the frequency-domain form used by the solver. With the
+Fourier convention $\partial_\phi\to i\mu$, the equivalent time-domain linear
+operators are
+
+$$
+\left.\frac{\partial P}{\partial t}\right|_{\mathrm{lin}}
+=-(1+i\alpha_P)P+i d_{2P}\frac{\partial^2 P}{\partial\phi^2},
+$$
+
+$$
+\left.\frac{\partial S}{\partial t}\right|_{\mathrm{lin}}
+=-(1+i\alpha_S)S+i d_{2S}\frac{\partial^2 S}{\partial\phi^2}
+-\delta\frac{\partial S}{\partial\phi}.
+$$
+
+The time-domain nonlinear coefficients are
 
 $$
 N_P =
