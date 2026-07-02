@@ -12,6 +12,10 @@ export const copy = {
       stokes: 'Stokes soliton',
     },
     controlGroups: {
+      drive: 'Drive',
+      dispersion: 'Dispersion',
+      nonlinearRaman: 'Nonlinear / Raman',
+      modePerturbation: 'Mode perturbation',
       primary: 'Primary',
       stokes: 'Stokes',
       coupling: 'Coupling',
@@ -192,6 +196,10 @@ export const copy = {
       stokes: 'Stokes soliton',
     },
     controlGroups: {
+      drive: '驱动',
+      dispersion: '色散',
+      nonlinearRaman: '非线性 / Raman',
+      modePerturbation: '模式扰动',
       primary: 'Primary',
       stokes: 'Stokes',
       coupling: 'Coupling',

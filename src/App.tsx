@@ -86,13 +86,29 @@ interface ControlGroupDefinition {
 
 const standardControlGroups: readonly ControlGroupDefinition[] = [
   {
+    titleKey: 'drive',
     controls: [
       { key: 'alpha', min: -12, max: 20, step: 0.01 },
       { key: 'pump', min: 0, max: 8, step: 0.01 },
+    ],
+  },
+  {
+    titleKey: 'dispersion',
+    controls: [
       { key: 'd2', min: -0.25, max: 0.25, step: 0.0001 },
       { key: 'd3', min: -0.05, max: 0.05, step: 0.0001 },
       { key: 'd4', min: -0.01, max: 0.01, step: 0.00001 },
+    ],
+  },
+  {
+    titleKey: 'nonlinearRaman',
+    controls: [
       { key: 'tauR', min: 0, max: 0.2, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
       { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
       { key: 'stepsPerFrame', min: 1, max: 250, step: 1 },
     ],
@@ -101,12 +117,28 @@ const standardControlGroups: readonly ControlGroupDefinition[] = [
 
 const platiconControlGroups: readonly ControlGroupDefinition[] = [
   {
+    titleKey: 'drive',
     controls: [
       { key: 'alpha', min: -20, max: 40, step: 0.01 },
       { key: 'pump', min: 0, max: 12, step: 0.01 },
+    ],
+  },
+  {
+    titleKey: 'dispersion',
+    controls: [
       { key: 'd2', min: -0.25, max: 0.25, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'modePerturbation',
+    controls: [
       { key: 'modeShiftMu', min: -256, max: 255, step: 1 },
       { key: 'modeShiftStrength', min: -20, max: 20, step: 0.01 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
       { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
       { key: 'stepsPerFrame', min: 1, max: 250, step: 1 },
     ],
