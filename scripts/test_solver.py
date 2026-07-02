@@ -20,7 +20,7 @@ def configure(solver, n=256, **params):
         "d4": 0.0,
         "tauR": 0.0,
         "dt": 8e-4,
-        "stepsPerFrame": 10,
+        "stepsPerFrame": 320,
     }
     base.update(params)
     solver.configure({"n": n, "params": base, "reset": True})
@@ -78,16 +78,16 @@ def test_user_dt_is_preserved_when_aliasing_safe():
 
 def configure_stokes(solver, n=256, **params):
     base = {
-        "alphaP": 40.0,
+        "alphaP": 20.0,
         "alphaS": 0.0,
-        "pump": 10.0,
+        "pump": 12.247,
         "d2P": 0.02,
         "d2S": 0.02,
         "fsrMismatch": 0.0,
         "overlap": 0.8,
         "fR": 0.18,
-        "ramanGainP": 0.2,
-        "ramanGainS": 0.2,
+        "ramanGainP": 0.4,
+        "ramanGainS": 0.4,
         "wavelengthRatio": 1.0,
         "tauR": 3.3e-4,
         "noise": 1e-5,
@@ -145,6 +145,22 @@ def test_stokes_adaptive_dt_satisfies_aliasing_bound():
     assert params["dt"] < 5e-5
 
 
+def test_stokes_default_detuning_scan_reaches_primary_and_stokes_solitons():
+    solver = StokesSolitonSolver()
+    params = configure_stokes(solver, n=128, stepsPerFrame=320)
+    rows = []
+    for alpha in np.linspace(20.0, 80.0, 100):
+        params["alphaP"] = float(alpha)
+        solver.update_params(params)
+        snap = solver.run_steps()
+        rows.append((snap["primaryEnergy"], snap["stokesEnergy"]))
+
+    rows = np.array(rows)
+    assert rows[:, 0].max() > 0.5
+    assert rows[:, 1].max() > 0.1
+    assert rows[-1, 0] < 0.2
+
+
 if __name__ == "__main__":
     test_zero_pump_decay()
     test_grid_rebuild()
@@ -155,4 +171,5 @@ if __name__ == "__main__":
     test_stokes_grid_rebuild_resets_both_fields()
     test_stokes_export_contains_dual_fields()
     test_stokes_adaptive_dt_satisfies_aliasing_bound()
+    test_stokes_default_detuning_scan_reaches_primary_and_stokes_solitons()
     print("solver tests passed")

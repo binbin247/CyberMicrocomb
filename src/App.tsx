@@ -124,7 +124,7 @@ const stokesControlGroups: readonly ControlGroupDefinition[] = [
     controls: [
       { key: 'noise', min: 0, max: 0.001, step: 0.000001 },
       { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
-      { key: 'stepsPerFrame', min: 1, max: 250, step: 1 },
+      { key: 'stepsPerFrame', min: 1, max: 500, step: 1 },
     ],
   },
 ]

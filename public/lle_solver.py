@@ -172,21 +172,21 @@ class StokesSolitonSolver:
         self.step = 0
         self.t = 0.0
         self.params = {
-            "alphaP": 40.0,
+            "alphaP": 20.0,
             "alphaS": 0.0,
-            "pump": 10.0,
+            "pump": 12.247,
             "d2P": 0.02,
             "d2S": 0.02,
             "fsrMismatch": 0.0,
             "overlap": 0.8,
             "fR": 0.18,
-            "ramanGainP": 0.2,
-            "ramanGainS": 0.2,
+            "ramanGainP": 0.4,
+            "ramanGainS": 0.4,
             "wavelengthRatio": 1.0,
             "tauR": 3.3e-4,
             "noise": 1e-5,
             "dt": DEFAULT_STOKES_DT,
-            "stepsPerFrame": 50,
+            "stepsPerFrame": 320,
         }
         self.mu = self._make_mu(self.n)
         self.psi_p = self._initial_primary_state(self.n)
@@ -368,16 +368,16 @@ class StokesSolitonSolver:
     @staticmethod
     def _clean_params(params):
         cleaned = {
-            "alphaP": float(params.get("alphaP", 40.0)),
+            "alphaP": float(params.get("alphaP", 20.0)),
             "alphaS": float(params.get("alphaS", 0.0)),
-            "pump": max(0.0, float(params.get("pump", 10.0))),
+            "pump": max(0.0, float(params.get("pump", 12.247))),
             "d2P": float(params.get("d2P", 0.02)),
             "d2S": float(params.get("d2S", 0.02)),
             "fsrMismatch": float(params.get("fsrMismatch", 0.0)),
             "overlap": max(0.0, float(params.get("overlap", 0.8))),
             "fR": min(1.0, max(0.0, float(params.get("fR", 0.18)))),
-            "ramanGainP": max(0.0, float(params.get("ramanGainP", 0.2))),
-            "ramanGainS": max(0.0, float(params.get("ramanGainS", 0.2))),
+            "ramanGainP": max(0.0, float(params.get("ramanGainP", 0.4))),
+            "ramanGainS": max(0.0, float(params.get("ramanGainS", 0.4))),
             "wavelengthRatio": max(1e-9, float(params.get("wavelengthRatio", 1.0))),
             "tauR": max(0.0, float(params.get("tauR", 3.3e-4))),
             "noise": max(0.0, float(params.get("noise", 1e-5))),
@@ -385,7 +385,7 @@ class StokesSolitonSolver:
                 MAX_REQUESTED_DT,
                 max(MIN_DT, float(params.get("dt", DEFAULT_STOKES_DT))),
             ),
-            "stepsPerFrame": max(1, int(round(float(params.get("stepsPerFrame", 50))))),
+            "stepsPerFrame": max(1, int(round(float(params.get("stepsPerFrame", 320))))),
         }
         for key, value in cleaned.items():
             if not math.isfinite(value):

@@ -49,7 +49,7 @@ export const copy = {
       tauR: 'tauR',
       dt: 'dt',
       stepsPerFrame: 'stepsPerFrame',
-      alphaP: 'Primary detuning',
+      alphaP: 'Pump detuning',
       alphaS: 'Stokes detuning',
       d2P: 'Primary D2',
       d2S: 'Stokes D2',
@@ -103,9 +103,9 @@ export const copy = {
         'Larger values advance simulation time faster per frame but reduce interactive responsiveness.',
       ],
       alphaP: [
-        'Normalized detuning of the primary soliton mode family.',
+        'Normalized pump detuning of the primary soliton mode family.',
         'It appears in the primary linear operator as -1 - i alphaP.',
-        'Large positive values seed a DKS-like primary pulse in the Stokes model.',
+        'With the default Stokes preset, scan this control upward to reproduce a Fig. S1-style primary-to-Stokes transition.',
       ],
       alphaS: [
         'Normalized detuning of the Stokes mode family.',
@@ -216,7 +216,7 @@ export const copy = {
       tauR: 'tauR',
       dt: 'dt',
       stepsPerFrame: 'stepsPerFrame',
-      alphaP: 'Primary detuning',
+      alphaP: '泵浦失谐',
       alphaS: 'Stokes detuning',
       d2P: 'Primary D2',
       d2S: 'Stokes D2',
@@ -270,9 +270,9 @@ export const copy = {
         '数值越大，每帧推进的仿真时间越长，但交互响应可能变慢。',
       ],
       alphaP: [
-        'Primary 模式族的归一化失谐。',
+        'Primary 模式族的归一化泵浦失谐。',
         '它在线性算子中以 -1 - i alphaP 的形式出现。',
-        '较大的正值用于在 Stokes 模型中初始化 DKS-like primary pulse。',
+        '在默认 Stokes preset 下，向上扫描这个参数可得到类似 Fig. S1 的 primary 到 Stokes 转换。',
       ],
       alphaS: [
         'Stokes 模式族的归一化失谐。',
