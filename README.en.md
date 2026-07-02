@@ -21,8 +21,19 @@ compute once the page has loaded.
 - Real-time parameter updates without resetting the current field.
 - Plotly time-domain, spectrum, and intracavity-energy plots.
 - Canvas waterfall history with a fixed 300-frame ring buffer.
-- Simple first-order split-step LLE solver with D2/D3/D4 and optional Raman
-  shock term.
+- In-app documentation panel for the selected model, including equations,
+  physical picture, demo workflows, and references.
+- Time-domain, spectrum, energy, and evolution views for single-field,
+  two-field, and three-field models.
+- Raman self-frequency-shift diagnostics for pulse width and spectral shift;
+  turnkey self-injection-locking diagnostics for locked detuning and state
+  diagrams.
+- JSON export with model ID, parameters, current complex fields, complete data
+  for the four visible plots, waterfall histories, and model-specific
+  diagnostics.
+- First-order split-step LLE solvers for interactive mechanism models including
+  D2/D3/D4, local mode shifts, coupled fields, Raman shock terms, and
+  Raman-response convolution.
 - User-adjustable integration timestep `dt`, with oversized values clamped by
   `max(|Dint|) * dt < pi` to avoid dispersion-phase aliasing.
 - Static deployment target for GitHub Pages.
@@ -48,6 +59,11 @@ its own equation notes, physical picture, demo workflow, and references:
 
 In the web app, the `Docs` button next to the `MODEL` selector opens the
 documentation panel for the currently selected model.
+
+These models are intended for fast physical intuition and interactive
+exploration. Different literature models can use different normalization and
+sign conventions; use each model documentation page as the source of truth for
+its equations, parameter definitions, and scope.
 
 ## Local Development
 

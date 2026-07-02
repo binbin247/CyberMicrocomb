@@ -20,7 +20,14 @@ React、TypeScript、Vite、Pyodide、NumPy 和 Web Worker 构建。
 - 参数实时更新，不重置当前光场。
 - 使用 Plotly 绘制时域、频谱和腔内总能量曲线。
 - 使用 Canvas 绘制 waterfall 历史，并用固定 300 帧 ring buffer 保存。
-- 简单一阶分步傅里叶 LLE 求解器，支持 D2/D3/D4 和可选 Raman shock 项。
+- 侧边文档面板可直接查看当前模型的方程、物理图像、Demo 和参考文献。
+- 支持单场、双场和三场模型的时域/频域/能量/演化可视化。
+- Raman self-frequency-shift 模型实时显示脉宽和自频移估计；Turnkey 模型显示
+  locked detuning 和自注入锁定状态图。
+- 导出 JSON 包含模型 ID、参数、当前复场、四张图的完整数据、waterfall 历史，
+  以及模型相关诊断量。
+- 一阶分步傅里叶 LLE 求解器，支持 D2/D3/D4、mode shift、耦合场、Raman shock
+  和 Raman response 卷积等交互式机制模型。
 - 支持用户调节积分步长 `dt`，并根据 `max(|Dint|)` 自动限制过大的步长，
   使 `max(|Dint|) * dt < pi`，避免色散相位 aliasing。
 - 面向 GitHub Pages 的纯静态部署。
@@ -44,6 +51,9 @@ Demo 操作和参考文献：
   使用 Raman response 卷积的 soliton self-frequency shift 仿真。
 
 在网页中，也可以通过 `MODEL` 区域旁边的 `文档` 按钮直接打开当前模型的说明面板。
+
+这些模型面向快速理解和交互式探索。不同文献模型可能采用不同的归一化和符号约定；
+每个模型的具体方程、参数定义和适用范围请以对应文档页为准。
 
 ## 本地开发
 
