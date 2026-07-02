@@ -8,6 +8,7 @@ namespace = {}
 solver_source = Path(__file__).resolve().parents[1] / "public" / "lle_solver.py"
 exec(solver_source.read_text(encoding="utf-8"), namespace)
 LLESolver = namespace["LLESolver"]
+StokesSolitonSolver = namespace["StokesSolitonSolver"]
 
 
 def configure(solver, n=256, **params):
@@ -75,10 +76,83 @@ def test_user_dt_is_preserved_when_aliasing_safe():
     assert params["dt"] == 2e-4
 
 
+def configure_stokes(solver, n=256, **params):
+    base = {
+        "alphaP": 40.0,
+        "alphaS": 0.0,
+        "pump": 10.0,
+        "d2P": 0.02,
+        "d2S": 0.02,
+        "fsrMismatch": 0.0,
+        "overlap": 0.8,
+        "fR": 0.18,
+        "ramanGainP": 0.2,
+        "ramanGainS": 0.2,
+        "wavelengthRatio": 1.0,
+        "tauR": 3.3e-4,
+        "noise": 1e-5,
+        "dt": 5e-5,
+        "stepsPerFrame": 10,
+    }
+    base.update(params)
+    solver.configure({"n": n, "params": base, "reset": True})
+    return base
+
+
+def test_stokes_solver_snapshot_is_finite():
+    solver = StokesSolitonSolver()
+    configure_stokes(solver)
+    for _ in range(5):
+        snap = solver.run_steps()
+    assert snap["modelId"] == "stokes"
+    assert len(snap["primaryIntensity"]) == 256
+    assert len(snap["stokesIntensity"]) == 256
+    assert np.all(np.isfinite(snap["primaryIntensity"]))
+    assert np.all(np.isfinite(snap["stokesIntensity"]))
+
+
+def test_stokes_grid_rebuild_resets_both_fields():
+    solver = StokesSolitonSolver()
+    configure_stokes(solver, n=256)
+    solver.run_steps()
+    configure_stokes(solver, n=512)
+    snap = solver.snapshot()
+    assert len(snap["primaryIntensity"]) == 512
+    assert len(snap["stokesIntensity"]) == 512
+    assert solver.step == 0
+
+
+def test_stokes_export_contains_dual_fields():
+    solver = StokesSolitonSolver()
+    configure_stokes(solver, n=256)
+    solver.run_steps()
+    state = solver.export_state()
+    assert state["modelId"] == "stokes"
+    assert len(state["psiP_real"]) == 256
+    assert len(state["psiP_imag"]) == 256
+    assert len(state["psiS_real"]) == 256
+    assert len(state["psiS_imag"]) == 256
+
+
+def test_stokes_adaptive_dt_satisfies_aliasing_bound():
+    solver = StokesSolitonSolver()
+    configure_stokes(solver, n=4096, d2P=0.25, d2S=-0.25, fsrMismatch=1.0, dt=0.005)
+    params = solver.snapshot()["normalizedParams"]
+    primary_phase = np.abs(params["d2P"] * solver.mu**2)
+    stokes_phase = np.abs(params["d2S"] * solver.mu**2 + params["fsrMismatch"] * solver.mu)
+    max_phase_per_step = float(max(np.max(primary_phase), np.max(stokes_phase)) * params["dt"])
+    assert max_phase_per_step < math.pi, max_phase_per_step
+    assert params["dt"] < 5e-5
+
+
 if __name__ == "__main__":
     test_zero_pump_decay()
     test_grid_rebuild()
     test_basic_lle_finite_with_raman_toggle()
     test_adaptive_dt_satisfies_dispersion_aliasing_bound()
     test_user_dt_is_preserved_when_aliasing_safe()
+    test_stokes_solver_snapshot_is_finite()
+    test_stokes_grid_rebuild_resets_both_fields()
+    test_stokes_export_contains_dual_fields()
+    test_stokes_adaptive_dt_satisfies_aliasing_bound()
     print("solver tests passed")

@@ -4,8 +4,11 @@ import type {
   GridSize,
   MainToWorkerMessage,
   Metrics,
-  NormalizedParams,
+  ModelId,
+  SimulationParams,
   Snapshot,
+  StandardSnapshot,
+  StokesSnapshot,
   WorkerToMainMessage,
 } from '../types'
 
@@ -30,8 +33,9 @@ let pyodide: PyodideRuntime | null = null
 let configured = false
 let running = false
 let loopActive = false
+let currentModelId: ModelId = 'standard'
 let currentN: GridSize = 512
-let currentParams: NormalizedParams | null = null
+let currentParams: SimulationParams | null = null
 let stepsSinceMetric = 0
 let snapshotsSinceMetric = 0
 let batchesSinceMetric = 0
@@ -56,11 +60,16 @@ self.onmessage = async (event: MessageEvent<MainToWorkerMessage>) => {
       throw new Error('Pyodide is not ready.')
     }
     if (message.type === 'configure') {
-      configure(message.n, message.params, message.reset ?? currentN !== message.n)
+      configure(
+        message.modelId,
+        message.n,
+        message.params,
+        message.reset ?? (currentN !== message.n || currentModelId !== message.modelId),
+      )
       return
     }
     if (message.type === 'updateParams') {
-      updateParams(message.params)
+      updateParams(message.modelId, message.params)
       return
     }
     if (message.type === 'start') {
@@ -109,20 +118,33 @@ async function initPyodide(pyodideUrl: string, solverUrl: string) {
     return response.text()
   })
   pyodide.runPython(solverSource)
-  pyodide.runPython('solver = LLESolver()')
+  pyodide.runPython('solver = SimulationManager()')
   post({ type: 'ready' })
 }
 
-function configure(n: GridSize, params: NormalizedParams, resetState: boolean) {
+function configure(
+  modelId: ModelId,
+  n: GridSize,
+  params: SimulationParams,
+  resetState: boolean,
+) {
+  currentModelId = modelId
   currentN = n
   currentParams = params
-  pyodide!.globals.set('CONFIG_JSON', JSON.stringify({ n, params, reset: resetState }))
+  pyodide!.globals.set(
+    'CONFIG_JSON',
+    JSON.stringify({ modelId, n, params, reset: resetState }),
+  )
   runPythonAsJs('solver.configure(json.loads(CONFIG_JSON))')
   configured = true
   emitSnapshot(snapshotOnly(undefined, false))
 }
 
-function updateParams(params: NormalizedParams) {
+function updateParams(modelId: ModelId, params: SimulationParams) {
+  if (modelId !== currentModelId) {
+    configure(modelId, currentN, params, true)
+    return
+  }
   currentParams = params
   pyodide!.globals.set('PARAMS_JSON', JSON.stringify(params))
   runPythonAsJs('solver.update_params(json.loads(PARAMS_JSON))')
@@ -135,7 +157,7 @@ function reset() {
   if (!configured || !currentParams) {
     return
   }
-  configure(currentN, currentParams, true)
+  configure(currentModelId, currentN, currentParams, true)
 }
 
 async function runLoop() {
@@ -190,11 +212,20 @@ function snapshotOnly(startedAt = performance.now(), recordMetrics = true): Snap
 }
 
 function emitSnapshot(snapshot: Snapshot) {
-  const transfer = [
-    snapshot.intensity.buffer,
-    snapshot.spectrumDb.buffer,
-    snapshot.historyRow.buffer,
-  ]
+  const transfer = snapshot.modelId === 'stokes'
+    ? [
+        snapshot.primaryIntensity.buffer,
+        snapshot.stokesIntensity.buffer,
+        snapshot.primarySpectrumDb.buffer,
+        snapshot.stokesSpectrumDb.buffer,
+        snapshot.primaryHistoryRow.buffer,
+        snapshot.stokesHistoryRow.buffer,
+      ]
+    : [
+        snapshot.intensity.buffer,
+        snapshot.spectrumDb.buffer,
+        snapshot.historyRow.buffer,
+      ]
   post({ type: 'snapshot', snapshot }, transfer)
 }
 
@@ -239,11 +270,24 @@ function runPythonAsJs(code: string): unknown {
 }
 
 function normalizeSnapshot(snapshot: Snapshot): Snapshot {
+  if (snapshot.modelId === 'stokes') {
+    const stokesSnapshot = snapshot as StokesSnapshot
+    return {
+      ...stokesSnapshot,
+      primaryIntensity: toFloat32Array(stokesSnapshot.primaryIntensity),
+      stokesIntensity: toFloat32Array(stokesSnapshot.stokesIntensity),
+      primarySpectrumDb: toFloat32Array(stokesSnapshot.primarySpectrumDb),
+      stokesSpectrumDb: toFloat32Array(stokesSnapshot.stokesSpectrumDb),
+      primaryHistoryRow: toFloat32Array(stokesSnapshot.primaryHistoryRow),
+      stokesHistoryRow: toFloat32Array(stokesSnapshot.stokesHistoryRow),
+    }
+  }
+  const standardSnapshot = snapshot as StandardSnapshot
   return {
-    ...snapshot,
-    intensity: toFloat32Array(snapshot.intensity),
-    spectrumDb: toFloat32Array(snapshot.spectrumDb),
-    historyRow: toFloat32Array(snapshot.historyRow),
+    ...standardSnapshot,
+    intensity: toFloat32Array(standardSnapshot.intensity),
+    spectrumDb: toFloat32Array(standardSnapshot.spectrumDb),
+    historyRow: toFloat32Array(standardSnapshot.historyRow),
   }
 }
 

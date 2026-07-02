@@ -1,6 +1,16 @@
-import type { NormalizedParams } from '../types'
+import type { ModelId, SimulationParams, StandardParams, StokesParams } from '../types'
+import { DEFAULT_STANDARD_PARAMS, DEFAULT_STOKES_PARAMS } from './defaults'
 
-export function clampNormalizedParams(params: NormalizedParams): NormalizedParams {
+export function clampParamsForModel(
+  modelId: ModelId,
+  params: SimulationParams,
+): SimulationParams {
+  return modelId === 'stokes'
+    ? clampStokesParams(params as StokesParams)
+    : clampStandardParams(params as StandardParams)
+}
+
+export function clampStandardParams(params: StandardParams): StandardParams {
   return {
     alpha: finiteOr(params.alpha, 0),
     pump: Math.max(0, finiteOr(params.pump, 0)),
@@ -8,9 +18,51 @@ export function clampNormalizedParams(params: NormalizedParams): NormalizedParam
     d3: finiteOr(params.d3, 0),
     d4: finiteOr(params.d4, 0),
     tauR: finiteOr(params.tauR, 0),
-    dt: Math.min(0.005, Math.max(1e-12, finiteOr(params.dt, 0.0008))),
+    dt: clamp(finiteOr(params.dt, DEFAULT_STANDARD_PARAMS.dt), 1e-12, 0.005),
     stepsPerFrame: Math.max(1, Math.round(finiteOr(params.stepsPerFrame, 50))),
   }
+}
+
+export function clampStokesParams(params: StokesParams): StokesParams {
+  return {
+    alphaP: clamp(finiteOr(params.alphaP, DEFAULT_STOKES_PARAMS.alphaP), -20, 100),
+    alphaS: clamp(finiteOr(params.alphaS, DEFAULT_STOKES_PARAMS.alphaS), -20, 80),
+    pump: clamp(finiteOr(params.pump, DEFAULT_STOKES_PARAMS.pump), 0, 40),
+    d2P: clamp(finiteOr(params.d2P, DEFAULT_STOKES_PARAMS.d2P), -0.25, 0.25),
+    d2S: clamp(finiteOr(params.d2S, DEFAULT_STOKES_PARAMS.d2S), -0.25, 0.25),
+    fsrMismatch: clamp(
+      finiteOr(params.fsrMismatch, DEFAULT_STOKES_PARAMS.fsrMismatch),
+      -1,
+      1,
+    ),
+    overlap: clamp(finiteOr(params.overlap, DEFAULT_STOKES_PARAMS.overlap), 0, 2),
+    fR: clamp(finiteOr(params.fR, DEFAULT_STOKES_PARAMS.fR), 0, 1),
+    ramanGainP: clamp(
+      finiteOr(params.ramanGainP, DEFAULT_STOKES_PARAMS.ramanGainP),
+      0,
+      2,
+    ),
+    ramanGainS: clamp(
+      finiteOr(params.ramanGainS, DEFAULT_STOKES_PARAMS.ramanGainS),
+      0,
+      2,
+    ),
+    wavelengthRatio: clamp(
+      finiteOr(params.wavelengthRatio, DEFAULT_STOKES_PARAMS.wavelengthRatio),
+      0.5,
+      1.5,
+    ),
+    tauR: clamp(finiteOr(params.tauR, DEFAULT_STOKES_PARAMS.tauR), 0, 0.02),
+    noise: clamp(finiteOr(params.noise, DEFAULT_STOKES_PARAMS.noise), 0, 0.001),
+    dt: clamp(finiteOr(params.dt, DEFAULT_STOKES_PARAMS.dt), 1e-12, 0.005),
+    stepsPerFrame: Math.max(1, Math.round(finiteOr(params.stepsPerFrame, 50))),
+  }
+}
+
+export const clampNormalizedParams = clampStandardParams
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
 }
 
 function finiteOr(value: number, fallback: number): number {

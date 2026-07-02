@@ -5,6 +5,7 @@ import type { Config, Data, Layout } from 'plotly.js'
 interface Series {
   name: string
   y: ArrayLike<number>
+  color?: string
 }
 
 export function PlotPanel({
@@ -38,7 +39,7 @@ export function PlotPanel({
       x: Array.from(x),
       y: Array.from(item.y),
       line: {
-        color: index === 0 ? color : '#f28f3b',
+        color: item.color ?? (index === 0 ? color : '#c43b42'),
         width: 2,
       },
     }) as Data)

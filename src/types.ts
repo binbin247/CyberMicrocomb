@@ -2,7 +2,9 @@ export type Language = 'en' | 'zh'
 
 export type GridSize = 256 | 512 | 1024 | 2048 | 4096
 
-export interface NormalizedParams {
+export type ModelId = 'standard' | 'stokes'
+
+export interface StandardParams {
   alpha: number
   pump: number
   d2: number
@@ -12,6 +14,26 @@ export interface NormalizedParams {
   dt: number
   stepsPerFrame: number
 }
+
+export interface StokesParams {
+  alphaP: number
+  alphaS: number
+  pump: number
+  d2P: number
+  d2S: number
+  fsrMismatch: number
+  overlap: number
+  fR: number
+  ramanGainP: number
+  ramanGainS: number
+  wavelengthRatio: number
+  tauR: number
+  noise: number
+  dt: number
+  stepsPerFrame: number
+}
+
+export type SimulationParams = StandardParams | StokesParams
 
 export interface Metrics {
   stepsPerSecond: number
@@ -23,7 +45,8 @@ export interface Metrics {
   n: number
 }
 
-export interface Snapshot {
+export interface StandardSnapshot {
+  modelId: 'standard'
   step: number
   t: number
   intensity: Float32Array
@@ -31,8 +54,27 @@ export interface Snapshot {
   historyRow: Float32Array
   energy: number
   peak: number
-  normalizedParams: NormalizedParams
+  normalizedParams: StandardParams
 }
+
+export interface StokesSnapshot {
+  modelId: 'stokes'
+  step: number
+  t: number
+  primaryIntensity: Float32Array
+  stokesIntensity: Float32Array
+  primarySpectrumDb: Float32Array
+  stokesSpectrumDb: Float32Array
+  primaryHistoryRow: Float32Array
+  stokesHistoryRow: Float32Array
+  primaryEnergy: number
+  stokesEnergy: number
+  primaryPeak: number
+  stokesPeak: number
+  normalizedParams: StokesParams
+}
+
+export type Snapshot = StandardSnapshot | StokesSnapshot
 
 export type WorkerStatus =
   | 'idle'
@@ -50,14 +92,16 @@ export interface WorkerInitMessage {
 
 export interface WorkerConfigureMessage {
   type: 'configure'
+  modelId: ModelId
   n: GridSize
-  params: NormalizedParams
+  params: SimulationParams
   reset?: boolean
 }
 
 export interface WorkerUpdateParamsMessage {
   type: 'updateParams'
-  params: NormalizedParams
+  modelId: ModelId
+  params: SimulationParams
 }
 
 export interface WorkerControlMessage {

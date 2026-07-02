@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { clampNormalizedParams } from './physics'
+import { clampParamsForModel, clampStandardParams } from './physics'
 
-describe('clampNormalizedParams', () => {
+describe('parameter clamping', () => {
   it('keeps finite normalized controls and clamps invalid values', () => {
-    const params = clampNormalizedParams({
+    const params = clampStandardParams({
       alpha: Number.NaN,
       pump: -1,
       d2: -0.0444,
@@ -19,5 +19,43 @@ describe('clampNormalizedParams', () => {
     expect(params.d2).toBe(-0.0444)
     expect(params.dt).toBe(0.0008)
     expect(params.stepsPerFrame).toBe(10)
+  })
+
+  it('keeps Stokes controls finite and inside interactive ranges', () => {
+    const params = clampParamsForModel('stokes', {
+      alphaP: Number.POSITIVE_INFINITY,
+      alphaS: -30,
+      pump: -5,
+      d2P: 1,
+      d2S: -1,
+      fsrMismatch: 4,
+      overlap: 3,
+      fR: Number.NaN,
+      ramanGainP: 4,
+      ramanGainS: -1,
+      wavelengthRatio: 4,
+      tauR: -1,
+      noise: 1,
+      dt: Number.POSITIVE_INFINITY,
+      stepsPerFrame: 9.6,
+    })
+
+    expect(params).toMatchObject({
+      alphaP: 40,
+      alphaS: -20,
+      pump: 0,
+      d2P: 0.25,
+      d2S: -0.25,
+      fsrMismatch: 1,
+      overlap: 2,
+      fR: 0.18,
+      ramanGainP: 2,
+      ramanGainS: 0,
+      wavelengthRatio: 1.5,
+      tauR: 0,
+      noise: 0.001,
+      dt: 0.00005,
+      stepsPerFrame: 10,
+    })
   })
 })

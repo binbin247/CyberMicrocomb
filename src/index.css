@@ -37,7 +37,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -93,6 +94,36 @@ button {
   margin-top: 5px;
 }
 
+.model-selector {
+  display: grid;
+  gap: 5px;
+  margin-top: 12px;
+  max-width: 230px;
+}
+
+.model-selector span,
+.control-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.model-selector select {
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%) right 12px center / 6px 6px no-repeat,
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%) right 8px center / 6px 6px no-repeat,
+    var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 36px;
+  padding: 7px 28px 7px 10px;
+  width: 100%;
+}
+
 .panel-section {
   border-top: 1px solid var(--line);
   padding: 16px 0;
@@ -139,6 +170,18 @@ button {
   color: #123d73;
 }
 
+.segmented.compact {
+  gap: 4px;
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.segmented.compact button {
+  font-size: 12px;
+  min-height: 26px;
+  padding: 4px 8px;
+}
+
 .transport {
   flex-wrap: wrap;
 }
@@ -169,6 +212,16 @@ button {
 .control-grid {
   display: grid;
   gap: 12px;
+}
+
+.control-groups {
+  display: grid;
+  gap: 16px;
+}
+
+.control-group {
+  display: grid;
+  gap: 10px;
 }
 
 .control-row {

@@ -8,21 +8,28 @@ import {
   StepForward,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { PlotPanel } from './components/PlotPanel'
 import { WaterfallCanvas } from './components/WaterfallCanvas'
 import {
   DEFAULT_GRID_SIZE,
-  DEFAULT_NORMALIZED_PARAMS,
+  DEFAULT_STANDARD_PARAMS,
+  DEFAULT_STOKES_PARAMS,
   GRID_SIZES,
 } from './lib/defaults'
 import { t } from './lib/i18n'
-import { clampNormalizedParams } from './lib/physics'
+import { clampParamsForModel } from './lib/physics'
 import type {
   GridSize,
   Language,
   Metrics,
-  NormalizedParams,
+  ModelId,
+  SimulationParams,
   Snapshot,
+  StandardParams,
+  StandardSnapshot,
+  StokesParams,
+  StokesSnapshot,
   WorkerStatus,
   WorkerToMainMessage,
 } from './types'
@@ -31,30 +38,104 @@ const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.28.3/full'
 const BUSUANZI_URL = 'https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'
 const HISTORY_LIMIT = 300
 const ENERGY_MIN_Y_SPAN = 0.05
+const MODEL_IDS: ModelId[] = ['standard', 'stokes']
 
-const normalizedControls = [
-  ['alpha', -12, 20, 0.01, 'alphaTip'],
-  ['pump', 0, 8, 0.01, 'pumpTip'],
-  ['d2', -0.25, 0.25, 0.0001, 'd2Tip'],
-  ['d3', -0.05, 0.05, 0.0001, 'd3Tip'],
-  ['d4', -0.01, 0.01, 0.00001, 'd4Tip'],
-  ['tauR', 0, 0.2, 0.0001, 'tauTip'],
-  ['dt', 1e-12, 0.005, 0.000001, 'dtTip'],
-  ['stepsPerFrame', 1, 250, 1, 'stepsTip'],
-] as const
+type WaterfallField = 'primary' | 'stokes'
+
+interface TracePoint {
+  step: number
+  energy?: number
+  primaryEnergy?: number
+  stokesEnergy?: number
+}
+
+interface ModelHistoryRows {
+  standard: Float32Array[]
+  primary: Float32Array[]
+  stokes: Float32Array[]
+}
 
 interface ExportPlotSource {
+  modelId: ModelId
+  modelLabel: string
   snapshot: Snapshot | null
-  trace: Array<{ step: number; energy: number }>
-  historyRows: Float32Array[]
+  trace: TracePoint[]
+  historyRows: ModelHistoryRows
   metrics: Metrics | null
 }
+
+interface ControlDefinition {
+  key: string
+  min: number
+  max: number
+  step: number
+}
+
+interface ControlGroupDefinition {
+  titleKey?: string
+  controls: readonly ControlDefinition[]
+}
+
+const standardControlGroups: readonly ControlGroupDefinition[] = [
+  {
+    controls: [
+      { key: 'alpha', min: -12, max: 20, step: 0.01 },
+      { key: 'pump', min: 0, max: 8, step: 0.01 },
+      { key: 'd2', min: -0.25, max: 0.25, step: 0.0001 },
+      { key: 'd3', min: -0.05, max: 0.05, step: 0.0001 },
+      { key: 'd4', min: -0.01, max: 0.01, step: 0.00001 },
+      { key: 'tauR', min: 0, max: 0.2, step: 0.0001 },
+      { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
+      { key: 'stepsPerFrame', min: 1, max: 250, step: 1 },
+    ],
+  },
+]
+
+const stokesControlGroups: readonly ControlGroupDefinition[] = [
+  {
+    titleKey: 'primary',
+    controls: [
+      { key: 'alphaP', min: -20, max: 100, step: 0.01 },
+      { key: 'pump', min: 0, max: 40, step: 0.01 },
+      { key: 'd2P', min: -0.25, max: 0.25, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'stokes',
+    controls: [
+      { key: 'alphaS', min: -20, max: 80, step: 0.01 },
+      { key: 'd2S', min: -0.25, max: 0.25, step: 0.0001 },
+      { key: 'fsrMismatch', min: -1, max: 1, step: 0.0001 },
+    ],
+  },
+  {
+    titleKey: 'coupling',
+    controls: [
+      { key: 'overlap', min: 0, max: 2, step: 0.01 },
+      { key: 'fR', min: 0, max: 1, step: 0.01 },
+      { key: 'ramanGainP', min: 0, max: 2, step: 0.001 },
+      { key: 'ramanGainS', min: 0, max: 2, step: 0.001 },
+      { key: 'wavelengthRatio', min: 0.5, max: 1.5, step: 0.001 },
+      { key: 'tauR', min: 0, max: 0.02, step: 0.00001 },
+    ],
+  },
+  {
+    titleKey: 'numerics',
+    controls: [
+      { key: 'noise', min: 0, max: 0.001, step: 0.000001 },
+      { key: 'dt', min: 1e-12, max: 0.005, step: 0.000001 },
+      { key: 'stepsPerFrame', min: 1, max: 250, step: 1 },
+    ],
+  },
+]
 
 function App() {
   const [language, setLanguage] = useState<Language>('en')
   const labels = t(language)
+  const [modelId, setModelId] = useState<ModelId>('standard')
   const [gridSize, setGridSize] = useState<GridSize>(DEFAULT_GRID_SIZE)
-  const [normalized, setNormalized] = useState(DEFAULT_NORMALIZED_PARAMS)
+  const [standardParams, setStandardParams] = useState(DEFAULT_STANDARD_PARAMS)
+  const [stokesParams, setStokesParams] = useState(DEFAULT_STOKES_PARAMS)
   const [status, setStatus] = useState<WorkerStatus>('idle')
   const [loadingMessage, setLoadingMessage] = useState('')
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
@@ -63,31 +144,50 @@ function App() {
   const [isReady, setIsReady] = useState(false)
   const [isRunning, setIsRunning] = useState(false)
   const [livePreview, setLivePreview] = useState(true)
-  const [trace, setTrace] = useState<Array<{ step: number; energy: number }>>([])
-  const [historyRows, setHistoryRows] = useState<Float32Array[]>([])
+  const [trace, setTrace] = useState<TracePoint[]>([])
+  const [historyRows, setHistoryRows] = useState<ModelHistoryRows>(emptyHistoryRows)
+  const [waterfallField, setWaterfallField] = useState<WaterfallField>('stokes')
   const workerRef = useRef<Worker | null>(null)
+  const modelIdRef = useRef<ModelId>('standard')
+  const modelLabelRef = useRef<string>(labels.modelLabels.standard)
   const snapshotRef = useRef<Snapshot | null>(null)
   const metricsRef = useRef<Metrics | null>(null)
-  const traceRef = useRef<Array<{ step: number; energy: number }>>([])
-  const historyRowsRef = useRef<Float32Array[]>([])
+  const traceRef = useRef<TracePoint[]>([])
+  const historyRowsRef = useRef<ModelHistoryRows>(emptyHistoryRows())
   const lastGridRef = useRef<GridSize | null>(null)
+  const lastModelRef = useRef<ModelId | null>(null)
   const didInitialConfigureRef = useRef(false)
   const livePreviewRef = useRef(true)
   const isRunningRef = useRef(false)
   const previewTimerRef = useRef<number | null>(null)
 
   const activeParams = useMemo(
-    () => clampNormalizedParams(normalized),
-    [normalized],
+    () =>
+      modelId === 'stokes'
+        ? (clampParamsForModel('stokes', stokesParams) as StokesParams)
+        : (clampParamsForModel('standard', standardParams) as StandardParams),
+    [modelId, standardParams, stokesParams],
   )
 
+  const activeControlGroups =
+    modelId === 'stokes' ? stokesControlGroups : standardControlGroups
+  const activeHistoryRows =
+    modelId === 'stokes' ? historyRows[waterfallField] : historyRows.standard
+
+  const intensityX = snapshot ? indexArray(getFieldLength(snapshot)) : []
+  const spectrumX = snapshot ? centeredModeArray(getSpectrumLength(snapshot)) : []
+  const temporalSeries = getTemporalSeries(snapshot, labels)
+  const spectrumSeries = getSpectrumSeries(snapshot, labels)
+  const energySeries = getEnergySeries(modelId, trace, labels)
+
   const resetLocalBuffers = useCallback(() => {
+    const emptyRows = emptyHistoryRows()
     setSnapshot(null)
     setTrace([])
-    setHistoryRows([])
+    setHistoryRows(emptyRows)
     snapshotRef.current = null
     traceRef.current = []
-    historyRowsRef.current = []
+    historyRowsRef.current = emptyRows
   }, [])
 
   const clearPreviewTimer = useCallback(() => {
@@ -104,6 +204,11 @@ function App() {
   useEffect(() => {
     isRunningRef.current = isRunning
   }, [isRunning])
+
+  useEffect(() => {
+    modelIdRef.current = modelId
+    modelLabelRef.current = labels.modelLabels[modelId]
+  }, [labels.modelLabels, modelId])
 
   useEffect(() => {
     if (document.getElementById('busuanzi-script')) {
@@ -152,20 +257,14 @@ function App() {
         setError(null)
         setSnapshot(next)
         snapshotRef.current = next
-        setNormalized((current) => {
-          if (next.normalizedParams.dt >= current.dt - 1e-12) {
-            return current
-          }
-          return { ...current, dt: next.normalizedParams.dt }
-        })
+        syncClampedDt(next, setStandardParams, setStokesParams)
         setTrace((items) => {
-          const updated = [...items, { step: next.step, energy: next.energy }]
-          const clipped = updated.slice(-HISTORY_LIMIT)
+          const clipped = [...items, tracePointFromSnapshot(next)].slice(-HISTORY_LIMIT)
           traceRef.current = clipped
           return clipped
         })
         setHistoryRows((rows) => {
-          const clipped = [...rows, next.historyRow].slice(-HISTORY_LIMIT)
+          const clipped = appendHistoryRows(rows, next)
           historyRowsRef.current = clipped
           return clipped
         })
@@ -178,6 +277,8 @@ function App() {
       }
       if (message.type === 'exportState') {
         downloadJson(buildExportPayload(message.payload, {
+          modelId: modelIdRef.current,
+          modelLabel: modelLabelRef.current,
           snapshot: snapshotRef.current,
           trace: traceRef.current,
           historyRows: historyRowsRef.current,
@@ -206,14 +307,24 @@ function App() {
     if (!worker || !isReady) {
       return
     }
-    const reset = lastGridRef.current !== gridSize || !didInitialConfigureRef.current
+    const reset =
+      lastGridRef.current !== gridSize ||
+      lastModelRef.current !== modelId ||
+      !didInitialConfigureRef.current
     if (reset) {
       resetLocalBuffers()
-      worker.postMessage({ type: 'configure', n: gridSize, params: activeParams, reset })
+      worker.postMessage({
+        type: 'configure',
+        modelId,
+        n: gridSize,
+        params: activeParams,
+        reset,
+      })
       lastGridRef.current = gridSize
+      lastModelRef.current = modelId
       didInitialConfigureRef.current = true
     } else {
-      worker.postMessage({ type: 'updateParams', params: activeParams })
+      worker.postMessage({ type: 'updateParams', modelId, params: activeParams })
       if (livePreviewRef.current && !isRunningRef.current) {
         clearPreviewTimer()
         previewTimerRef.current = window.setTimeout(() => {
@@ -223,7 +334,20 @@ function App() {
         }, 35)
       }
     }
-  }, [activeParams, clearPreviewTimer, gridSize, isReady, resetLocalBuffers])
+  }, [activeParams, clearPreviewTimer, gridSize, isReady, modelId, resetLocalBuffers])
+
+  const changeModel = (nextModelId: ModelId) => {
+    if (nextModelId === modelId) {
+      return
+    }
+    clearPreviewTimer()
+    setIsRunning(false)
+    setStatus(isReady ? 'ready' : 'loading')
+    workerRef.current?.postMessage({ type: 'pause' })
+    resetLocalBuffers()
+    setWaterfallField('stokes')
+    setModelId(nextModelId)
+  }
 
   const start = () => {
     if (!isReady) {
@@ -258,9 +382,6 @@ function App() {
 
   const exportState = () => workerRef.current?.postMessage({ type: 'exportState' })
 
-  const intensityX = snapshot ? indexArray(snapshot.intensity.length) : []
-  const spectrumX = snapshot ? centeredModeArray(snapshot.spectrumDb.length) : []
-
   return (
     <div className="app-shell">
       <aside className="control-panel">
@@ -272,6 +393,19 @@ function App() {
               {labels.usageCount}
               <span id="busuanzi_value_site_pv">--</span>
             </p>
+            <label className="model-selector">
+              <span>{labels.model}</span>
+              <select
+                value={modelId}
+                onChange={(event) => changeModel(event.target.value as ModelId)}
+              >
+                {MODEL_IDS.map((id) => (
+                  <option key={id} value={id}>
+                    {labels.modelLabels[id]}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           <button
             type="button"
@@ -303,15 +437,18 @@ function App() {
         <section className="panel-section">
           <div className="section-title">{labels.params}</div>
           <ControlGrid
-            controls={normalizedControls}
+            groups={activeControlGroups}
             labels={labels}
-            displayLabels={labels.parameterLabels}
-            values={normalized}
-            onChange={(key, value) =>
-              setNormalized(
-                (current) => ({ ...current, [key]: value }) as NormalizedParams,
-              )
-            }
+            values={activeParams}
+            onChange={(key, value) => {
+              if (modelId === 'stokes') {
+                setStokesParams((current) => ({ ...current, [key]: value }) as StokesParams)
+              } else {
+                setStandardParams(
+                  (current) => ({ ...current, [key]: value }) as StandardParams,
+                )
+              }
+            }}
           />
         </section>
 
@@ -367,21 +504,21 @@ function App() {
           <PlotPanel
             title={labels.timeDomain}
             x={intensityX}
-            series={[{ name: labels.intensity, y: snapshot?.intensity ?? [] }]}
+            series={temporalSeries}
             yTitle={labels.intensity}
             color="#2364aa"
           />
           <PlotPanel
             title={labels.spectrum}
             x={spectrumX}
-            series={[{ name: labels.spectrumDb, y: snapshot?.spectrumDb ?? [] }]}
+            series={spectrumSeries}
             yTitle={labels.spectrumDb}
             color="#c43b42"
           />
           <PlotPanel
             title={labels.traces}
             x={trace.map((item) => item.step)}
-            series={[{ name: labels.energy, y: trace.map((item) => item.energy) }]}
+            series={energySeries}
             yTitle={labels.energy}
             color="#287d5a"
             yMinSpan={ENERGY_MIN_Y_SPAN}
@@ -390,9 +527,27 @@ function App() {
           <section className="visual-panel waterfall-panel">
             <div className="visual-header">
               <h2>{labels.waterfall}</h2>
-              <span>{historyRows.length}/{HISTORY_LIMIT}</span>
+              {modelId === 'stokes' && (
+                <div className="segmented compact">
+                  <button
+                    type="button"
+                    className={waterfallField === 'primary' ? 'active' : ''}
+                    onClick={() => setWaterfallField('primary')}
+                  >
+                    {labels.primary}
+                  </button>
+                  <button
+                    type="button"
+                    className={waterfallField === 'stokes' ? 'active' : ''}
+                    onClick={() => setWaterfallField('stokes')}
+                  >
+                    {labels.stokes}
+                  </button>
+                </div>
+              )}
+              <span>{activeHistoryRows.length}/{HISTORY_LIMIT}</span>
             </div>
-            <WaterfallCanvas rows={historyRows} />
+            <WaterfallCanvas rows={activeHistoryRows} />
           </section>
         </section>
 
@@ -405,64 +560,199 @@ function App() {
 }
 
 function ControlGrid({
-  controls,
+  groups,
   labels,
-  displayLabels,
   values,
   onChange,
 }: {
-  controls: readonly (readonly [string, number, number, number, string?])[]
+  groups: readonly ControlGroupDefinition[]
   labels: ReturnType<typeof t>
-  displayLabels: Partial<Record<string, string>>
-  values: NormalizedParams
+  values: SimulationParams
   onChange: (key: string, value: number) => void
 }) {
   const valuesByKey = values as unknown as Record<string, number>
   return (
-    <div className="control-grid">
-      {controls.map(([key, min, max, step]) => {
-        const value = valuesByKey[key] ?? 0
-        const help = labels.parameterHelp[key as keyof typeof labels.parameterHelp]
-        const helpId = `parameter-help-${key}`
-        return (
-          <label key={key} className="control-row">
-            <span className="control-label">
-              <span className="control-label-text">{displayLabels[key] ?? key}</span>
-              {help && (
-                <span id={helpId} className="parameter-tooltip" role="tooltip">
-                  {help.map((line) => (
-                    <span key={line}>{line}</span>
-                  ))}
-                </span>
-              )}
-            </span>
-            <input
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={value}
-              aria-describedby={help ? helpId : undefined}
-              onChange={(event) =>
-                onChange(key, clampControlValue(Number(event.target.value), min, max))
-              }
-            />
-            <input
-              type="number"
-              min={min}
-              max={max}
-              step={step}
-              value={value}
-              aria-describedby={help ? helpId : undefined}
-              onChange={(event) =>
-                onChange(key, clampControlValue(Number(event.target.value), min, max))
-              }
-            />
-          </label>
-        )
-      })}
+    <div className="control-groups">
+      {groups.map((group, groupIndex) => (
+        <div key={group.titleKey ?? groupIndex} className="control-group">
+          {group.titleKey && (
+            <div className="control-subtitle">
+              {labels.controlGroups[group.titleKey as keyof typeof labels.controlGroups]}
+            </div>
+          )}
+          <div className="control-grid">
+            {group.controls.map(({ key, min, max, step }) => {
+              const value = valuesByKey[key] ?? 0
+              const help = labels.parameterHelp[key as keyof typeof labels.parameterHelp]
+              const helpId = `parameter-help-${key}`
+              return (
+                <label key={key} className="control-row">
+                  <span className="control-label">
+                    <span className="control-label-text">
+                      {labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key}
+                    </span>
+                    {help && (
+                      <span id={helpId} className="parameter-tooltip" role="tooltip">
+                        {help.map((line) => (
+                          <span key={line}>{line}</span>
+                        ))}
+                      </span>
+                    )}
+                  </span>
+                  <input
+                    type="range"
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={value}
+                    aria-label={
+                      labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key
+                    }
+                    aria-describedby={help ? helpId : undefined}
+                    onChange={(event) =>
+                      onChange(key, clampControlValue(Number(event.target.value), min, max))
+                    }
+                  />
+                  <input
+                    type="number"
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={value}
+                    aria-label={
+                      labels.parameterLabels[key as keyof typeof labels.parameterLabels] ?? key
+                    }
+                    aria-describedby={help ? helpId : undefined}
+                    onChange={(event) =>
+                      onChange(key, clampControlValue(Number(event.target.value), min, max))
+                    }
+                  />
+                </label>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   )
+}
+
+function syncClampedDt(
+  snapshot: Snapshot,
+  setStandardParams: Dispatch<SetStateAction<StandardParams>>,
+  setStokesParams: Dispatch<SetStateAction<StokesParams>>,
+) {
+  if (snapshot.modelId === 'stokes') {
+    setStokesParams((current) =>
+      snapshot.normalizedParams.dt < current.dt - 1e-12
+        ? { ...current, dt: snapshot.normalizedParams.dt }
+        : current,
+    )
+    return
+  }
+  setStandardParams((current) =>
+    snapshot.normalizedParams.dt < current.dt - 1e-12
+      ? { ...current, dt: snapshot.normalizedParams.dt }
+      : current,
+  )
+}
+
+function tracePointFromSnapshot(snapshot: Snapshot): TracePoint {
+  if (snapshot.modelId === 'stokes') {
+    return {
+      step: snapshot.step,
+      primaryEnergy: snapshot.primaryEnergy,
+      stokesEnergy: snapshot.stokesEnergy,
+    }
+  }
+  return { step: snapshot.step, energy: snapshot.energy }
+}
+
+function appendHistoryRows(rows: ModelHistoryRows, snapshot: Snapshot): ModelHistoryRows {
+  if (snapshot.modelId === 'stokes') {
+    return {
+      standard: [],
+      primary: [...rows.primary, snapshot.primaryHistoryRow].slice(-HISTORY_LIMIT),
+      stokes: [...rows.stokes, snapshot.stokesHistoryRow].slice(-HISTORY_LIMIT),
+    }
+  }
+  return {
+    standard: [...rows.standard, snapshot.historyRow].slice(-HISTORY_LIMIT),
+    primary: [],
+    stokes: [],
+  }
+}
+
+function emptyHistoryRows(): ModelHistoryRows {
+  return { standard: [], primary: [], stokes: [] }
+}
+
+function getFieldLength(snapshot: Snapshot) {
+  return snapshot.modelId === 'stokes'
+    ? snapshot.primaryIntensity.length
+    : snapshot.intensity.length
+}
+
+function getSpectrumLength(snapshot: Snapshot) {
+  return snapshot.modelId === 'stokes'
+    ? snapshot.primarySpectrumDb.length
+    : snapshot.spectrumDb.length
+}
+
+function getTemporalSeries(snapshot: Snapshot | null, labels: ReturnType<typeof t>) {
+  if (!snapshot) {
+    return [{ name: labels.intensity, y: [] }]
+  }
+  if (snapshot.modelId === 'stokes') {
+    return [
+      { name: `${labels.primary} |P|^2`, y: snapshot.primaryIntensity, color: '#2364aa' },
+      { name: `${labels.stokes} |S|^2`, y: snapshot.stokesIntensity, color: '#c43b42' },
+    ]
+  }
+  return [{ name: labels.intensity, y: snapshot.intensity }]
+}
+
+function getSpectrumSeries(snapshot: Snapshot | null, labels: ReturnType<typeof t>) {
+  if (!snapshot) {
+    return [{ name: labels.spectrumDb, y: [] }]
+  }
+  if (snapshot.modelId === 'stokes') {
+    return [
+      { name: labels.primary, y: snapshot.primarySpectrumDb, color: '#2364aa' },
+      { name: labels.stokes, y: snapshot.stokesSpectrumDb, color: '#c43b42' },
+    ]
+  }
+  return [{ name: labels.spectrumDb, y: snapshot.spectrumDb }]
+}
+
+function getEnergySeries(
+  modelId: ModelId,
+  trace: TracePoint[],
+  labels: ReturnType<typeof t>,
+) {
+  if (modelId === 'stokes') {
+    return [
+      {
+        name: labels.primary,
+        y: trace.map((item) => item.primaryEnergy ?? 0),
+        color: '#287d5a',
+      },
+      {
+        name: labels.stokes,
+        y: trace.map((item) => item.stokesEnergy ?? 0),
+        color: '#c43b42',
+      },
+    ]
+  }
+  return [{ name: labels.energy, y: trace.map((item) => item.energy ?? 0) }]
+}
+
+function isStokesSnapshot(snapshot: Snapshot | null): snapshot is StokesSnapshot {
+  return snapshot?.modelId === 'stokes'
+}
+
+function isStandardSnapshot(snapshot: Snapshot | null): snapshot is StandardSnapshot {
+  return snapshot?.modelId === 'standard'
 }
 
 function clampControlValue(value: number, min: number, max: number) {
@@ -515,57 +805,124 @@ function centeredModeArray(length: number) {
 
 function buildExportPayload(solverState: unknown, source: ExportPlotSource) {
   const snapshot = source.snapshot
-  const intensity = snapshot ? Array.from(snapshot.intensity) : []
-  const spectrumDb = snapshot ? Array.from(snapshot.spectrumDb) : []
-  const waterfallRows = source.historyRows.map((row) => Array.from(row))
   const solverStateObject = isObjectRecord(solverState) ? solverState : { solverState }
-
-  return {
+  const base = {
     ...solverStateObject,
-    exportSchemaVersion: 2,
+    exportSchemaVersion: 3,
     exportedAt: new Date().toISOString(),
-    currentSnapshot: snapshot
-      ? {
-          step: snapshot.step,
-          t: snapshot.t,
-          energy: snapshot.energy,
-          peak: snapshot.peak,
-          normalizedParams: snapshot.normalizedParams,
-        }
-      : null,
+    modelId: source.modelId,
+    modelLabel: source.modelLabel,
     metrics: source.metrics,
-    plots: {
-      temporalField: {
-        x: snapshot ? indexArray(snapshot.intensity.length) : [],
-        intensity,
-        xLabel: 'sample index',
-        yLabel: '|psi|^2',
-      },
-      combSpectrum: {
-        mode: snapshot ? centeredModeArray(snapshot.spectrumDb.length) : [],
-        spectrumDb,
-        xLabel: 'mode index mu',
-        yLabel: 'Spectrum (dB)',
-      },
-      intracavityEnergy: {
-        step: source.trace.map((item) => item.step),
-        energy: source.trace.map((item) => item.energy),
-        xLabel: 'solver step',
-        yLabel: 'Energy',
-      },
-      temporalEvolution: {
-        rows: waterfallRows,
-        rowCount: waterfallRows.length,
-        columnCount: waterfallRows[0]?.length ?? 0,
-        valueLabel: '10 * log10(|psi|^2 + 1e-12)',
-        maxRows: HISTORY_LIMIT,
-      },
-    },
   }
+
+  if (isStokesSnapshot(snapshot)) {
+    const primaryRows = source.historyRows.primary.map((row) => Array.from(row))
+    const stokesRows = source.historyRows.stokes.map((row) => Array.from(row))
+    const primaryEnergy = source.trace.map((item) => item.primaryEnergy ?? 0)
+    const stokesEnergy = source.trace.map((item) => item.stokesEnergy ?? 0)
+    return {
+      ...base,
+      fields: {
+        psiP_real: asNumberArray(solverStateObject.psiP_real),
+        psiP_imag: asNumberArray(solverStateObject.psiP_imag),
+        psiS_real: asNumberArray(solverStateObject.psiS_real),
+        psiS_imag: asNumberArray(solverStateObject.psiS_imag),
+      },
+      currentSnapshot: {
+        step: snapshot.step,
+        t: snapshot.t,
+        primaryEnergy: snapshot.primaryEnergy,
+        stokesEnergy: snapshot.stokesEnergy,
+        primaryPeak: snapshot.primaryPeak,
+        stokesPeak: snapshot.stokesPeak,
+        normalizedParams: snapshot.normalizedParams,
+      },
+      plots: {
+        temporalField: {
+          x: indexArray(snapshot.primaryIntensity.length),
+          primaryIntensity: Array.from(snapshot.primaryIntensity),
+          stokesIntensity: Array.from(snapshot.stokesIntensity),
+          xLabel: 'sample index',
+          yLabel: '|psi|^2',
+        },
+        combSpectrum: {
+          mode: centeredModeArray(snapshot.primarySpectrumDb.length),
+          primarySpectrumDb: Array.from(snapshot.primarySpectrumDb),
+          stokesSpectrumDb: Array.from(snapshot.stokesSpectrumDb),
+          xLabel: 'mode index mu',
+          yLabel: 'Spectrum (dB)',
+        },
+        intracavityEnergy: {
+          step: source.trace.map((item) => item.step),
+          primary: primaryEnergy,
+          stokes: stokesEnergy,
+          primaryEnergy,
+          stokesEnergy,
+          xLabel: 'solver step',
+          yLabel: 'Energy',
+        },
+        temporalEvolution: {
+          primaryRows,
+          stokesRows,
+          rowCount: Math.max(primaryRows.length, stokesRows.length),
+          columnCount: primaryRows[0]?.length ?? stokesRows[0]?.length ?? 0,
+          valueLabel: '10 * log10(|psi|^2 + 1e-12)',
+          maxRows: HISTORY_LIMIT,
+        },
+      },
+    }
+  }
+
+  if (isStandardSnapshot(snapshot)) {
+    const waterfallRows = source.historyRows.standard.map((row) => Array.from(row))
+    return {
+      ...base,
+      currentSnapshot: {
+        step: snapshot.step,
+        t: snapshot.t,
+        energy: snapshot.energy,
+        peak: snapshot.peak,
+        normalizedParams: snapshot.normalizedParams,
+      },
+      plots: {
+        temporalField: {
+          x: indexArray(snapshot.intensity.length),
+          intensity: Array.from(snapshot.intensity),
+          xLabel: 'sample index',
+          yLabel: '|psi|^2',
+        },
+        combSpectrum: {
+          mode: centeredModeArray(snapshot.spectrumDb.length),
+          spectrumDb: Array.from(snapshot.spectrumDb),
+          xLabel: 'mode index mu',
+          yLabel: 'Spectrum (dB)',
+        },
+        intracavityEnergy: {
+          step: source.trace.map((item) => item.step),
+          energy: source.trace.map((item) => item.energy ?? 0),
+          xLabel: 'solver step',
+          yLabel: 'Energy',
+        },
+        temporalEvolution: {
+          rows: waterfallRows,
+          rowCount: waterfallRows.length,
+          columnCount: waterfallRows[0]?.length ?? 0,
+          valueLabel: '10 * log10(|psi|^2 + 1e-12)',
+          maxRows: HISTORY_LIMIT,
+        },
+      },
+    }
+  }
+
+  return { ...base, currentSnapshot: null, plots: null }
 }
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function asNumberArray(value: unknown) {
+  return Array.isArray(value) ? value.filter((item) => typeof item === 'number') : []
 }
 
 function formatNumber(value: number) {
@@ -585,7 +942,7 @@ function downloadJson(payload: unknown) {
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = `lle-state-${Date.now()}.json`
+  anchor.download = `cybermicrocomb-state-${Date.now()}.json`
   anchor.click()
   URL.revokeObjectURL(url)
 }
