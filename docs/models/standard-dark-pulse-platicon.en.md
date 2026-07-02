@@ -23,11 +23,11 @@ D_{\mathrm{int}}(\mu)
 +\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
 $$
 
-Here \(d_2>0\) is normal dispersion in the current normalized convention,
-\(\mu_{\mathrm{shift}}\) is the shifted relative mode number, and
-\(\Delta_{\mathrm{shift}}\) is the mode-shift strength normalized to
-\(\kappa/2\). The implementation shifts one integer mode only; it does not
-automatically apply a symmetric shift to \(\pm\mu\).
+Here $d_2>0$ is normal dispersion in the current normalized convention,
+$\mu_{\mathrm{shift}}$ is the shifted relative mode number, and
+$\Delta_{\mathrm{shift}}$ is the mode-shift strength normalized to
+$\kappa/2$. The implementation shifts one integer mode only; it does not
+automatically apply a symmetric shift to $\pm\mu$.
 
 ## Physical picture
 
@@ -56,7 +56,7 @@ produce irregular spectra or temporal patterns.
 6. Change `Mode shift position` to see how the perturbed mode affects the comb
    spectrum.
 
-This model intentionally omits Raman, \(d_3\), and \(d_4\) terms so the role of
+This model intentionally omits Raman, $d_3$, and $d_4$ terms so the role of
 normal dispersion and local mode perturbation is clear.
 
 ## References

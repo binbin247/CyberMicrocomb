@@ -5,7 +5,7 @@
 ## Simulation equations
 
 This model uses a normalized two-field coupled LLE for the primary field
-\(P(\phi,t)\) and the Stokes field \(S(\phi,t)\). The linear operators are
+$P(\phi,t)$ and the Stokes field $S(\phi,t)$. The linear operators are
 applied in the frequency domain:
 
 $$
@@ -20,7 +20,7 @@ $$
 \left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
 $$
 
-In the current UI, \(\alpha_S=0\) is fixed and is not user adjustable. The nonlinear
+In the current UI, $\alpha_S=0$ is fixed and is not user adjustable. The nonlinear
 and Raman-coupling terms are applied in the time domain:
 
 $$
@@ -37,9 +37,9 @@ ir_w|S|^2
 +\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
 $$
 
-Here \(\eta\) is the mode overlap, \(f_R\) is the Raman fraction, \(g_P\) is the
-primary Raman loss, \(g_S\) is the Stokes Raman gain, and \(r_w\) is the wavelength
-ratio. The primary field receives the external pump \(F\). The Stokes field starts
+Here $\eta$ is the mode overlap, $f_R$ is the Raman fraction, $g_P$ is the
+primary Raman loss, $g_S$ is the Stokes Raman gain, and $r_w$ is the wavelength
+ratio. The primary field receives the external pump $F$. The Stokes field starts
 from a weak complex-noise seed and is amplified by Raman gain.
 
 ## Physical picture

@@ -22,10 +22,10 @@ D_{\mathrm{int}}(\mu)
 +\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
 $$
 
-其中 \(d_2>0\) 对应当前归一化约定下的 normal dispersion，
-\(\mu_{\mathrm{shift}}\) 是被扰动的相对模式编号，
-\(\Delta_{\mathrm{shift}}\) 是归一化到 \(\kappa/2\) 的模式偏移强度。当前实现只移动
-一个整数模式，不自动同时移动 \(\pm\mu\) 两个模式。
+其中 $d_2>0$ 对应当前归一化约定下的 normal dispersion，
+$\mu_{\mathrm{shift}}$ 是被扰动的相对模式编号，
+$\Delta_{\mathrm{shift}}$ 是归一化到 $\kappa/2$ 的模式偏移强度。当前实现只移动
+一个整数模式，不自动同时移动 $\pm\mu$ 两个模式。
 
 ## 物理图像
 
@@ -49,7 +49,7 @@ dark pulse，过强的扰动可能导致频谱或时域结构变得不规则。
 5. 保持 `D2 > 0`，扫描 `Mode shift strength`，比较 dark pulse 的深度和稳定性。
 6. 改变 `Mode shift position`，观察被扰动模式位置对频谱形状的影响。
 
-该模型不包含 Raman、\(d_3\) 或 \(d_4\) 项，目的是突出 normal dispersion 与局部
+该模型不包含 Raman、$d_3$ 或 $d_4$ 项，目的是突出 normal dispersion 与局部
 mode perturbation 对 platicon 形成的作用。
 
 ## 参考文献

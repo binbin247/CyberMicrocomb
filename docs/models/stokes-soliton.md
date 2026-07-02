@@ -4,7 +4,7 @@
 
 ## 仿真的方程
 
-该模型使用 Primary 场 \(P(\phi,t)\) 和 Stokes 场 \(S(\phi,t)\) 的双场归一化
+该模型使用 Primary 场 $P(\phi,t)$ 和 Stokes 场 $S(\phi,t)$ 的双场归一化
 coupled LLE。线性项在频域中更新：
 
 $$
@@ -19,7 +19,7 @@ $$
 \left(-1-i\alpha_S-id_{2S}\mu^2-i\delta\mu\right)\hat S_\mu.
 $$
 
-当前界面中 \(\alpha_S=0\) 固定，不作为用户可调参数。非线性和 Raman 耦合在时域中更新：
+当前界面中 $\alpha_S=0$ 固定，不作为用户可调参数。非线性和 Raman 耦合在时域中更新：
 
 $$
 N_P =
@@ -35,9 +35,9 @@ ir_w|S|^2
 +\eta r_w\left[i(2-f_R)+\frac{g_S}{2}\right]|P|^2.
 $$
 
-其中 \(\eta\) 是 mode overlap，\(f_R\) 是 Raman 分数，\(g_P\) 是 Primary
-Raman loss，\(g_S\) 是 Stokes Raman gain，\(r_w\) 是 wavelength ratio。
-Primary 场额外受到外部泵浦 \(F\) 驱动；Stokes 场由弱复噪声 seed 和 Raman gain
+其中 $\eta$ 是 mode overlap，$f_R$ 是 Raman 分数，$g_P$ 是 Primary
+Raman loss，$g_S$ 是 Stokes Raman gain，$r_w$ 是 wavelength ratio。
+Primary 场额外受到外部泵浦 $F$ 驱动；Stokes 场由弱复噪声 seed 和 Raman gain
 放大。
 
 ## 物理图像

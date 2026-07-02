@@ -86,12 +86,16 @@ export function ModelDocsPanel({
               },
             }}
           >
-            {modelDocs[language][modelId]}
+            {normalizeInlineMath(modelDocs[language][modelId])}
           </ReactMarkdown>
         </div>
       </aside>
     </div>
   )
+}
+
+function normalizeInlineMath(markdown: string) {
+  return markdown.replace(/\\\(([\s\S]*?)\\\)/g, (_match, math) => `$${math}$`)
 }
 
 function languageFromDocsHref(href: string | undefined): Language | null {

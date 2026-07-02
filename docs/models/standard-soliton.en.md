@@ -5,8 +5,8 @@
 ## Simulation equations
 
 This model is a single-field normalized Lugiato-Lefever equation (LLE). The slow
-time is \(t\), the azimuthal coordinate is \(\phi \in [-\pi,\pi)\), and the
-relative mode number is \(\mu\). The simulated variable \(\psi(\phi,t)\) is the
+time is $t$, the azimuthal coordinate is $\phi \in [-\pi,\pi)$, and the
+relative mode number is $\mu$. The simulated variable $\psi(\phi,t)$ is the
 normalized intracavity field envelope.
 
 $$
@@ -26,9 +26,9 @@ D_{\mathrm{int}}(\mu)
 +\frac{d_4\mu^4}{24}.
 $$
 
-Here \(\alpha\) is the normalized pump-resonance detuning, \(F\) is the normalized
-pump amplitude, \(d_2,d_3,d_4\) are normalized integrated-dispersion coefficients,
-and \(\tau_R\) is the Raman shock coefficient. The current implementation uses a
+Here $\alpha$ is the normalized pump-resonance detuning, $F$ is the normalized
+pump amplitude, $d_2,d_3,d_4$ are normalized integrated-dispersion coefficients,
+and $\tau_R$ is the Raman shock coefficient. The current implementation uses a
 first-order split-step update: time-domain Kerr/Raman update, frequency-domain
 linear propagation, and explicit pump injection.
 
@@ -43,10 +43,10 @@ bright pulse.
 
 In the temporal plot, the soliton appears as a localized intensity peak. In the
 spectrum, it appears as a broad coherent comb around the pumped mode. Increasing
-detuning usually changes the pulse width and peak intensity. Nonzero \(d_3\) or
-\(d_4\) goes beyond the simple quadratic dispersion approximation and can create
-asymmetric spectra or dispersive-wave features. Nonzero \(\tau_R\) changes the
-nonlinear phase through \(i\tau_R\psi\partial_\phi|\psi|^2\), enabling interactive
+detuning usually changes the pulse width and peak intensity. Nonzero $d_3$ or
+$d_4$ goes beyond the simple quadratic dispersion approximation and can create
+asymmetric spectra or dispersive-wave features. Nonzero $\tau_R$ changes the
+nonlinear phase through $i\tau_R\psi\partial_\phi|\psi|^2$, enabling interactive
 exploration of Raman self-frequency-shift-like behavior.
 
 ## Demo
@@ -63,7 +63,7 @@ exploration of Raman self-frequency-shift-like behavior.
 
 If the state diverges or the spectrum becomes numerically noisy, reduce `dt` or
 lower `Pump power`. The solver clamps oversized timesteps using
-\(\max |D_{\mathrm{int}}|\,dt < \pi\) to reduce dispersion-phase aliasing.
+$\max |D_{\mathrm{int}}|\,dt < \pi$ to reduce dispersion-phase aliasing.
 
 ## References
 
