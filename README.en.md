@@ -73,6 +73,16 @@ its equations, parameter definitions, and scope.
 
 ## Local Development
 
+To extend CyberMicrocomb with your own models, UI changes, or documentation,
+first fork the repository to your GitHub account, then clone your fork:
+
+```bash
+git clone https://github.com/<your-github-name>/CyberMicrocomb.git
+cd CyberMicrocomb
+```
+
+Install dependencies and start the local development server:
+
 ```bash
 npm install
 npm run dev
@@ -87,6 +97,13 @@ http://127.0.0.1:5173/
 The first page load needs network access to fetch Pyodide and NumPy from the
 Pyodide CDN. After the runtime is loaded, the current session keeps computing
 locally in the browser.
+
+For secondary development, you can use your own coding agent directly inside the
+local repository, such as Claude Code, Codex, or another code assistant. Let the
+agent inspect the project structure, then modify model equations, default
+parameters, documentation, export data, or frontend visualizations. Commit the
+changes to your fork; if you want to contribute them back, open a pull request
+from your fork.
 
 ## GitHub Pages
 

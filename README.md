@@ -62,6 +62,16 @@ Demo 操作和参考文献：
 
 ## 本地开发
 
+如果想基于 CyberMicrocomb 做自己的模型、界面或文档扩展，可以先把仓库 fork
+到自己的 GitHub 账号，然后 clone 自己的 fork：
+
+```bash
+git clone https://github.com/<your-github-name>/CyberMicrocomb.git
+cd CyberMicrocomb
+```
+
+安装依赖并启动本地开发服务器：
+
 ```bash
 npm install
 npm run dev
@@ -75,6 +85,11 @@ http://127.0.0.1:5173/
 
 首次加载页面需要联网，从 Pyodide CDN 获取 Pyodide 和 NumPy。运行时加载完成后，
 当前会话的计算会继续在浏览器本地执行。
+
+二次开发时，可以直接在本地仓库中使用自己的 coding agent，例如 Claude Code、
+Codex 或其他代码助手，让它读取项目结构后修改模型方程、默认参数、文档、导出数据
+或前端可视化。改完后提交到自己的 fork；如果希望贡献回主仓库，可以从 fork 发起
+pull request。
 
 ## GitHub Pages
 
