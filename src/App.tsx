@@ -394,18 +394,29 @@ function ControlGrid({
   const valuesByKey = values as unknown as Record<string, number>
   return (
     <div className="control-grid">
-      {controls.map(([key, min, max, step, tipKey]) => {
+      {controls.map(([key, min, max, step]) => {
         const value = valuesByKey[key] ?? 0
-        const tooltip = tipKey ? labels[tipKey as keyof typeof labels] : undefined
+        const help = labels.parameterHelp[key as keyof typeof labels.parameterHelp]
+        const helpId = `parameter-help-${key}`
         return (
-          <label key={key} title={typeof tooltip === 'string' ? tooltip : undefined}>
-            <span>{displayLabels[key] ?? key}</span>
+          <label key={key} className="control-row">
+            <span className="control-label">
+              <span className="control-label-text">{displayLabels[key] ?? key}</span>
+              {help && (
+                <span id={helpId} className="parameter-tooltip" role="tooltip">
+                  {help.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))}
+                </span>
+              )}
+            </span>
             <input
               type="range"
               min={min}
               max={max}
               step={step}
               value={value}
+              aria-describedby={help ? helpId : undefined}
               onChange={(event) =>
                 onChange(key, clampControlValue(Number(event.target.value), min, max))
               }
@@ -416,6 +427,7 @@ function ControlGrid({
               max={max}
               step={step}
               value={value}
+              aria-describedby={help ? helpId : undefined}
               onChange={(event) =>
                 onChange(key, clampControlValue(Number(event.target.value), min, max))
               }

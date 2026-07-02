@@ -171,16 +171,59 @@ button {
   gap: 12px;
 }
 
-.control-grid label {
+.control-row {
+  position: relative;
   display: grid;
   grid-template-columns: 86px minmax(96px, 1fr) 92px;
   align-items: center;
   gap: 10px;
 }
 
-.control-grid span {
+.control-label {
+  align-items: center;
   color: var(--muted);
+  cursor: help;
+  display: inline-flex;
   font-size: 13px;
+  min-width: 0;
+}
+
+.control-label-text {
+  overflow-wrap: anywhere;
+}
+
+.parameter-tooltip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 16px 42px rgba(31, 41, 55, 0.2);
+  color: var(--ink);
+  display: grid;
+  font-size: 12px;
+  gap: 6px;
+  left: 0;
+  line-height: 1.45;
+  opacity: 0;
+  padding: 10px 12px;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  transform: translateY(-4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 120ms ease;
+  visibility: hidden;
+  width: min(330px, calc(100vw - 32px));
+  z-index: 30;
+}
+
+.control-row:hover .parameter-tooltip,
+.control-row:focus-within .parameter-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  visibility: visible;
 }
 
 .control-grid input[type="range"] {
@@ -388,8 +431,12 @@ button {
     padding: 14px;
   }
 
-  .control-grid label {
+  .control-row {
     grid-template-columns: 1fr;
+  }
+
+  .parameter-tooltip {
+    width: min(300px, calc(100vw - 44px));
   }
 
   .metric-strip {

@@ -33,7 +33,51 @@ export const copy = {
       d2: 'D2',
       d3: 'D3',
       d4: 'D4',
+      tauR: 'tauR',
       dt: 'dt',
+      stepsPerFrame: 'stepsPerFrame',
+    },
+    parameterHelp: {
+      alpha: [
+        'Normalized pump-resonance detuning alpha.',
+        'It appears in the linear term as -(1 + i alpha).',
+        'A common convention is alpha = 2(omega0 - omegap) / kappa, so it is measured in cavity half-linewidth units.',
+      ],
+      pump: [
+        'Normalized pump amplitude F, not optical power in watts.',
+        'F^2 is proportional to input power after scaling by coupling, nonlinear strength, photon energy, and cavity loss.',
+        'Increasing F raises the intracavity drive and can move the system from modulation instability to soliton-like states.',
+      ],
+      d2: [
+        'Normalized second-order integrated dispersion.',
+        'It contributes D2 * mu^2 / 2 to Dint(mu), where mu is the relative mode index.',
+        'It is commonly scaled from physical D2 by the cavity linewidth, approximately 2 * D2_physical / kappa.',
+      ],
+      d3: [
+        'Normalized third-order integrated dispersion.',
+        'It contributes D3 * mu^3 / 6 to Dint(mu).',
+        'Nonzero D3 breaks spectral symmetry and can shift dispersive-wave features.',
+      ],
+      d4: [
+        'Normalized fourth-order integrated dispersion.',
+        'It contributes D4 * mu^4 / 24 to Dint(mu).',
+        'It helps model higher-order dispersion curvature at large mode numbers.',
+      ],
+      tauR: [
+        'Normalized Raman shock coefficient.',
+        'It enters as i * tauR * psi * d_theta |psi|^2, so it changes the nonlinear phase rather than directly changing amplitude.',
+        'Set tauR = 0 to disable the Raman shock term.',
+      ],
+      dt: [
+        'Normalized slow-time integration step.',
+        'The solver uses this requested value unless it is too large for dispersion-phase sampling.',
+        'Oversized values are clamped so max(|Dint|) * dt < pi, which prevents aliasing of the frequency-domain phase rotation.',
+      ],
+      stepsPerFrame: [
+        'Number of solver integration steps between visual updates.',
+        'This is a performance and display-control setting, not a physical LLE parameter.',
+        'Larger values advance simulation time faster per frame but reduce interactive responsiveness.',
+      ],
     },
     warning:
       'This v1 uses a simple first-order split-step update for real-time exploration, not final publication-grade integration.',
@@ -79,7 +123,51 @@ export const copy = {
       d2: 'D2',
       d3: 'D3',
       d4: 'D4',
+      tauR: 'tauR',
       dt: 'dt',
+      stepsPerFrame: 'stepsPerFrame',
+    },
+    parameterHelp: {
+      alpha: [
+        '归一化泵浦-谐振失谐 alpha。',
+        '它出现在 LLE 线性项 -(1 + i alpha) 中。',
+        '常见约定为 alpha = 2(omega0 - omegap) / kappa，也就是用腔半线宽归一化后的失谐量。',
+      ],
+      pump: [
+        '归一化泵浦幅度 F，不是以 W 为单位的实际光功率。',
+        'F^2 与输入功率成正比，但已经吸收了耦合率、非线性强度、光子能量和腔损耗等因子。',
+        '增大 F 会增强腔内驱动，可能使系统从调制不稳定区域进入类孤子状态。',
+      ],
+      d2: [
+        '归一化二阶 integrated dispersion。',
+        '它在 Dint(mu) 中贡献 D2 * mu^2 / 2，其中 mu 是相对泵浦模式编号。',
+        '通常由物理 D2 除以腔线宽得到，近似为 2 * D2_physical / kappa。',
+      ],
+      d3: [
+        '归一化三阶 integrated dispersion。',
+        '它在 Dint(mu) 中贡献 D3 * mu^3 / 6。',
+        '非零 D3 会打破频谱对称性，并可能移动 dispersive wave 特征。',
+      ],
+      d4: [
+        '归一化四阶 integrated dispersion。',
+        '它在 Dint(mu) 中贡献 D4 * mu^4 / 24。',
+        '用于描述大模式编号处更高阶的色散曲率。',
+      ],
+      tauR: [
+        '归一化 Raman shock 系数。',
+        '它以 i * tauR * psi * d_theta |psi|^2 的形式进入方程，因此主要改变非线性相位，而不是直接改变幅度。',
+        'tauR = 0 表示关闭 Raman shock 项。',
+      ],
+      dt: [
+        '归一化慢时间积分步长。',
+        'solver 会优先使用用户设置的 dt。',
+        '如果 dt 太大，会被自动限制到满足 max(|Dint|) * dt < pi 的安全值，避免频域色散相位旋转发生 aliasing。',
+      ],
+      stepsPerFrame: [
+        '每次图像刷新前推进的积分步数。',
+        '这是性能和显示设置，不是 LLE 的物理参数。',
+        '数值越大，每帧推进的仿真时间越长，但交互响应可能变慢。',
+      ],
     },
     warning:
       '第一版使用简单一阶分步傅里叶更新，适合实时探索，不作为最终论文级积分结果。',
