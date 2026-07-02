@@ -67,8 +67,7 @@ const TEMPORAL_X_TITLE = 'Azimuthal coordinate φ'
 const SPECTRUM_X_TITLE = 'Mode number μ'
 const TEMPORAL_Y_TITLE = 'Field intensity |ψ|<sup>2</sup>'
 const TEMPORAL_Y_LABEL = 'Field intensity |ψ|^2'
-const TURNKEY_LOCKING_ROOT_MIN = -50
-const TURNKEY_LOCKING_ROOT_MAX = 80
+const TURNKEY_LOCKING_SLOPE = 1.5
 
 interface TracePoint {
   step: number
@@ -923,62 +922,13 @@ function buildKerrTilt(pump: number, yMax: number) {
   return [...lowerBranch, ...upperBranch.reverse()]
 }
 
-function turnkeyLockingResponse(power: number, alpha: number, phase: number) {
-  // Supplementary Eq. S13 for the CW self-injection-locking response.
-  const denominator = (1 + (alpha - power) ** 2) * (1 + (alpha - 2 * power) ** 2)
-  if (denominator <= 0) {
-    return 0
-  }
-  const numerator =
-    (3 * power - 2 * alpha) * Math.cos(phase)
-    + (1 - 2 * power ** 2 + 3 * power * alpha - alpha ** 2) * Math.sin(phase)
-  return numerator / denominator
-}
-
-function turnkeyLockingEquation(alpha: number, power: number, params: TurnkeyParams) {
-  return (
-    alpha
-    - params.laserDetuning
-    - params.lockingBandwidth * turnkeyLockingResponse(power, alpha, params.feedbackPhase)
-  )
-}
-
-function solveTurnkeyLockingAlpha(power: number, params: TurnkeyParams, initialAlpha: number) {
-  if (params.lockingBandwidth <= 1e-12) {
-    return params.laserDetuning
-  }
-
-  let alpha = Math.min(TURNKEY_LOCKING_ROOT_MAX, Math.max(TURNKEY_LOCKING_ROOT_MIN, initialAlpha))
-  for (let iteration = 0; iteration < 12; iteration += 1) {
-    const value = turnkeyLockingEquation(alpha, power, params)
-    if (Math.abs(value) < 1e-8) {
-      return alpha
-    }
-    const eps = 1e-4 * Math.max(1, Math.abs(alpha))
-    const slope =
-      (turnkeyLockingEquation(alpha + eps, power, params) - turnkeyLockingEquation(alpha - eps, power, params))
-      / (2 * eps)
-    if (!Number.isFinite(slope) || Math.abs(slope) < 1e-8) {
-      break
-    }
-    const step = Math.min(2, Math.max(-2, value / slope))
-    alpha = Math.min(TURNKEY_LOCKING_ROOT_MAX, Math.max(TURNKEY_LOCKING_ROOT_MIN, alpha - step))
-  }
-  return alpha
-}
-
-function buildTurnkeyLockingCurve(params: TurnkeyParams, yMin: number, yMax: number, currentAlpha: number) {
-  const sampleCount = 120
-  const points: ChartPoint[] = []
-  let alpha = currentAlpha
-  for (let index = 0; index <= sampleCount; index += 1) {
-    const power = yMin + ((yMax - yMin) * index) / sampleCount
-    alpha = solveTurnkeyLockingAlpha(power, params, alpha)
-    if (Number.isFinite(alpha)) {
-      points.push({ x: alpha, y: power })
-    }
-  }
-  return points
+function buildTurnkeyLockingLine(currentAlpha: number, currentPower: number, yMin: number, yMax: number) {
+  // Main-text Eq. (1) / Supplementary Eq. S17: alpha = alpha0 + 3P / 2.
+  const intercept = currentAlpha - TURNKEY_LOCKING_SLOPE * currentPower
+  return [
+    { x: intercept + TURNKEY_LOCKING_SLOPE * yMin, y: yMin },
+    { x: intercept + TURNKEY_LOCKING_SLOPE * yMax, y: yMax },
+  ]
 }
 
 function mapStatePoint(
@@ -1037,11 +987,11 @@ function TurnkeyStatePanel({
   const yMin = 0
   const yMax = Math.max(0.8, pumpSquared * 1.18, power * 1.35)
   const kerrTilt = buildKerrTilt(params.pump, yMax)
-  const lockingCurve = buildTurnkeyLockingCurve(params, yMin, yMax, detuning)
+  const lockingLine = buildTurnkeyLockingLine(detuning, power, yMin, yMax)
   const xCandidates = [
     0,
     detuning,
-    ...lockingCurve.map((point) => point.x),
+    ...lockingLine.map((point) => point.x),
     ...kerrTilt.map((point) => point.x),
   ].filter((value) => Number.isFinite(value))
   const rawXMin = Math.min(...xCandidates)
@@ -1054,7 +1004,7 @@ function TurnkeyStatePanel({
   const plotBottom = plot.top + plot.height
   const statePoint = mapStatePoint({ x: detuning, y: power }, plot, xMin, xMax, yMin, yMax)
   const kerrPoints = kerrTilt.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
-  const lockPoints = lockingCurve.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
+  const lockPoints = lockingLine.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
   const xTicks = buildLinearTicks(xMin, xMax, 5)
   const yTicks = buildLinearTicks(yMin, yMax, 4)
 
@@ -1099,13 +1049,6 @@ function TurnkeyStatePanel({
           const mapped = mapStatePoint({ x: tick, y: yMin }, plot, xMin, xMax, yMin, yMax)
           return (
             <g key={`x-${tick}`}>
-              <line
-                className="state-diagram-grid-line"
-                x1={mapped.x}
-                x2={mapped.x}
-                y1={plot.top}
-                y2={plotBottom}
-              />
               <line className="state-diagram-tick" x1={mapped.x} x2={mapped.x} y1={plotBottom} y2={plotBottom + 5} />
               <text className="state-diagram-tick-label" x={mapped.x} y={plotBottom + 19} textAnchor="middle">
                 {formatAxisTick(tick)}
@@ -1117,13 +1060,6 @@ function TurnkeyStatePanel({
           const mapped = mapStatePoint({ x: xMin, y: tick }, plot, xMin, xMax, yMin, yMax)
           return (
             <g key={`y-${tick}`}>
-              <line
-                className="state-diagram-grid-line"
-                x1={plot.left}
-                x2={plotRight}
-                y1={mapped.y}
-                y2={mapped.y}
-              />
               <line className="state-diagram-tick" x1={plot.left - 5} x2={plot.left} y1={mapped.y} y2={mapped.y} />
               <text className="state-diagram-tick-label" x={plot.left - 10} y={mapped.y + 4} textAnchor="end">
                 {formatAxisTick(tick)}
@@ -1149,11 +1085,13 @@ function TurnkeyStatePanel({
           r="7.5"
         />
 
-        <g className="state-diagram-legend" transform={`translate(${plot.left + 12} ${plot.top + 18})`}>
+        <g className="state-diagram-legend" transform={`translate(${plot.left + 14} ${plot.top + 20})`}>
           <line className="state-diagram-kerr" x1="0" x2="28" y1="0" y2="0" />
           <text x="36" y="4">{labels.kerrTilt}</text>
-          <line className="state-diagram-locking" x1="128" x2="156" y1="0" y2="0" />
-          <text x="164" y="4">{labels.lockingLine}</text>
+        </g>
+        <g className="state-diagram-legend" transform={`translate(${plot.left + 14} ${plot.top + 42})`}>
+          <line className="state-diagram-locking" x1="0" x2="28" y1="0" y2="0" />
+          <text x="36" y="4">{labels.lockingLine}</text>
         </g>
 
         <text className="state-diagram-axis" x={plot.left + plot.width / 2} y="388" textAnchor="middle">
