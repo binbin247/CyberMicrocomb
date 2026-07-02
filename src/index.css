@@ -415,6 +415,29 @@ button {
   min-height: 0;
 }
 
+.waterfall-pair {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.waterfall-subpanel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  min-width: 0;
+}
+
+.waterfall-subheader {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 2px 6px;
+}
+
 .waterfall-canvas {
   background: #f4f6f8;
   border: 1px solid var(--line);
@@ -494,5 +517,9 @@ button {
 
   .metric-strip {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .waterfall-pair {
+    grid-template-columns: 1fr;
   }
 }

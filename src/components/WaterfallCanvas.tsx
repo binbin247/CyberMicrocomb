@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react'
 
-export function WaterfallCanvas({ rows }: { rows: Float32Array[] }) {
+export function WaterfallCanvas({
+  rows,
+  label = 'waterfall',
+}: {
+  rows: Float32Array[]
+  label?: string
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
@@ -57,7 +63,7 @@ export function WaterfallCanvas({ rows }: { rows: Float32Array[] }) {
     ctx.putImageData(image, 0, 0)
   }, [rows])
 
-  return <canvas ref={canvasRef} className="waterfall-canvas" aria-label="waterfall" />
+  return <canvas ref={canvasRef} className="waterfall-canvas" aria-label={label} />
 }
 
 function colorMap(input: number): [number, number, number] {

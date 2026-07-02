@@ -40,8 +40,6 @@ const HISTORY_LIMIT = 300
 const ENERGY_MIN_Y_SPAN = 0.05
 const MODEL_IDS: ModelId[] = ['standard', 'stokes']
 
-type WaterfallField = 'primary' | 'stokes'
-
 interface TracePoint {
   step: number
   energy?: number
@@ -146,7 +144,6 @@ function App() {
   const [livePreview, setLivePreview] = useState(true)
   const [trace, setTrace] = useState<TracePoint[]>([])
   const [historyRows, setHistoryRows] = useState<ModelHistoryRows>(emptyHistoryRows)
-  const [waterfallField, setWaterfallField] = useState<WaterfallField>('stokes')
   const workerRef = useRef<Worker | null>(null)
   const modelIdRef = useRef<ModelId>('standard')
   const modelLabelRef = useRef<string>(labels.modelLabels.standard)
@@ -171,8 +168,11 @@ function App() {
 
   const activeControlGroups =
     modelId === 'stokes' ? stokesControlGroups : standardControlGroups
-  const activeHistoryRows =
-    modelId === 'stokes' ? historyRows[waterfallField] : historyRows.standard
+  const activeHistoryRows = historyRows.standard
+  const activeWaterfallCount =
+    modelId === 'stokes'
+      ? Math.max(historyRows.primary.length, historyRows.stokes.length)
+      : historyRows.standard.length
 
   const intensityX = snapshot ? indexArray(getFieldLength(snapshot)) : []
   const spectrumX = snapshot ? centeredModeArray(getSpectrumLength(snapshot)) : []
@@ -345,7 +345,6 @@ function App() {
     setStatus(isReady ? 'ready' : 'loading')
     workerRef.current?.postMessage({ type: 'pause' })
     resetLocalBuffers()
-    setWaterfallField('stokes')
     setModelId(nextModelId)
   }
 
@@ -527,27 +526,22 @@ function App() {
           <section className="visual-panel waterfall-panel">
             <div className="visual-header">
               <h2>{labels.waterfall}</h2>
-              {modelId === 'stokes' && (
-                <div className="segmented compact">
-                  <button
-                    type="button"
-                    className={waterfallField === 'primary' ? 'active' : ''}
-                    onClick={() => setWaterfallField('primary')}
-                  >
-                    {labels.primary}
-                  </button>
-                  <button
-                    type="button"
-                    className={waterfallField === 'stokes' ? 'active' : ''}
-                    onClick={() => setWaterfallField('stokes')}
-                  >
-                    {labels.stokes}
-                  </button>
-                </div>
-              )}
-              <span>{activeHistoryRows.length}/{HISTORY_LIMIT}</span>
+              <span>{activeWaterfallCount}/{HISTORY_LIMIT}</span>
             </div>
-            <WaterfallCanvas rows={activeHistoryRows} />
+            {modelId === 'stokes' ? (
+              <div className="waterfall-pair">
+                <div className="waterfall-subpanel">
+                  <div className="waterfall-subheader">{labels.primary}</div>
+                  <WaterfallCanvas rows={historyRows.primary} label={labels.primary} />
+                </div>
+                <div className="waterfall-subpanel">
+                  <div className="waterfall-subheader">{labels.stokes}</div>
+                  <WaterfallCanvas rows={historyRows.stokes} label={labels.stokes} />
+                </div>
+              </div>
+            ) : (
+              <WaterfallCanvas rows={activeHistoryRows} />
+            )}
           </section>
         </section>
 
