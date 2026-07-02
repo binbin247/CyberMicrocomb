@@ -4,11 +4,86 @@
 
 ## 仿真的方程
 
-这是单场、归一化的 Lugiato-Lefever equation (LLE)，用于描述反常色散微腔中的亮耗散 Kerr
-孤子。慢时间为 $t$，环向坐标为 $\phi\in[-\pi,\pi)$，相对模式编号为
-$\mu$，腔内归一化场为 $\psi(\phi,t)$：
+下面先写真实物理量方程，再写页面实际求解的归一化方程。$T$ 是真实慢时间，
+$\phi\in[-\pi,\pi)$ 是环向坐标，$\mu$ 是相对模式编号。
 
-最经典的二阶 LLE 只保留损耗、失谐、二阶色散、Kerr 非线性和连续波泵浦：
+### 真实物理量方程
+
+令 $A(\phi,T)$ 为腔内慢变场，$|A|^2$ 表示腔内光子数。单场微腔 LLE 可写为
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
++iD_{\mathrm{int}}^{\mathrm{phys}}(-i\partial_\phi)A
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+其中 $\kappa$ 是总损耗率，$\delta_0=\omega_p-\omega_0$ 是泵浦相对冷腔共振的失谐，
+$g$ 是单光子 Kerr 频移，$s_{\mathrm{in}}=\sqrt{P_{\mathrm{in}}/\hbar\omega_p}$。
+最经典的二阶 LLE 只保留 $D_2$：
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
+-\frac{iD_2}{2}\frac{\partial^2A}{\partial\phi^2}
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+如果考虑高阶色散和 Raman shock，物理量方程中再加入
+
+$$
+\mathcal{P}_{\mathrm{HOD}}^{\mathrm{phys}}
+=
+-\frac{D_3}{6}\frac{\partial^3A}{\partial\phi^3}
++\frac{iD_4}{24}\frac{\partial^4A}{\partial\phi^4},
+$$
+
+$$
+\mathcal{P}_{\mathrm{Raman}}^{\mathrm{phys}}
+=
+i g D_1 T_R\,A\frac{\partial |A|^2}{\partial\phi}.
+$$
+
+这里 $D_1$ 是角频率 FSR，$T_R$ 是 Raman shock 时间。物理量 integrated dispersion 为
+
+$$
+D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
+=
+\frac{D_2\mu^2}{2}
++\frac{D_3\mu^3}{6}
++\frac{D_4\mu^4}{24}.
+$$
+
+### 归一化
+
+页面使用损耗半宽 $\kappa/2$ 归一化时间，用 Kerr 非线性归一化场：
+
+$$
+t=\frac{\kappa T}{2},\qquad
+\psi=\sqrt{\frac{2g}{\kappa}}\,A .
+$$
+
+对应的无量纲参数是
+
+$$
+\alpha=\frac{2\delta_0}{\kappa},\qquad
+d_m=\frac{2D_m}{\kappa}\quad(m=2,3,4),
+$$
+
+$$
+F=\sqrt{\frac{8g\kappa_{\mathrm{ex}}P_{\mathrm{in}}}
+{\hbar\omega_p\kappa^3}},\qquad
+\tau_R=D_1T_R .
+$$
+
+在这个约定下，$\tau_R$ 的符号也依赖 $\phi$ 的正方向；本页面采用
+$+i\tau_R\psi\partial_\phi|\psi|^2$。
+
+### 页面求解的归一化方程
+
+纯二阶、无 Raman 的经典 LLE 为
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -18,35 +93,20 @@ $$
 +F.
 $$
 
-当需要考虑高阶色散或 Raman 效应时，可以在经典 LLE 上加入微扰项：
+高阶色散和 Raman 作为微扰加入：
 
 $$
 \frac{\partial \psi}{\partial t}
 =
 \left.\frac{\partial \psi}{\partial t}\right|_{\mathrm{classic}}
-+\mathcal{P}_{\mathrm{HOD}}
-+\mathcal{P}_{\mathrm{Raman}},
-$$
-
-其中
-
-$$
-\mathcal{P}_{\mathrm{HOD}}
-=
 -\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
-+\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4},
-$$
-
-$$
-\mathcal{P}_{\mathrm{Raman}}
-=
-i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
++\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4}
++i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
 $$
 
 因此令 $d_3=d_4=\tau_R=0$ 时，模型回到纯二阶、无 Raman 的经典 LLE。
-
-色散项也可以写成紧凑算子 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前
-Fourier 约定下，$\partial_\phi\to i\mu$，对应的频域积分色散为
+色散项也可以写成 $iD_{\mathrm{int}}(-i\partial_\phi)\psi$。在当前 Fourier
+约定下，$\partial_\phi\to i\mu$，频域 integrated dispersion 为
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -56,9 +116,8 @@ D_{\mathrm{int}}(\mu)
 +\frac{d_4\mu^4}{24}.
 $$
 
-其中 $\alpha$ 是泵浦-腔模失谐，$F$ 是泵浦幅度，$d_2,d_3,d_4$ 是归一化积分色散系数，
-$\tau_R$ 是 Raman shock 系数。当前求解器采用一阶分步傅里叶方法：时域更新 Kerr/Raman
-项，频域更新损耗、失谐和色散项，最后显式加入泵浦。
+当前求解器采用一阶分步傅里叶方法：时域更新 Kerr/Raman 项，频域更新损耗、失谐和色散项，
+最后显式加入泵浦。
 
 ## 物理图像
 

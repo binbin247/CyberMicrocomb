@@ -4,13 +4,92 @@
 
 ## Simulation equations
 
-This is a single-field normalized Lugiato-Lefever equation (LLE) for bright
-dissipative Kerr solitons in an anomalous-dispersion microresonator. The slow
-time is $t$, the azimuthal coordinate is $\phi\in[-\pi,\pi)$, the relative mode
-number is $\mu$, and the normalized intracavity field is $\psi(\phi,t)$:
+This section separates the dimensional physical equation from the normalized
+equation solved by the page. $T$ is the physical slow time,
+$\phi\in[-\pi,\pi)$ is the azimuthal coordinate, and $\mu$ is the relative mode
+number.
 
-The classic second-order LLE keeps only loss, detuning, second-order dispersion,
-Kerr nonlinearity, and continuous-wave pumping:
+### Dimensional physical equation
+
+Let $A(\phi,T)$ be the slowly varying intracavity field, with $|A|^2$ measured as
+intracavity photon number. A single-field microresonator LLE can be written as
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
++iD_{\mathrm{int}}^{\mathrm{phys}}(-i\partial_\phi)A
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+Here $\kappa$ is the total loss rate, $\delta_0=\omega_p-\omega_0$ is the pump
+detuning from the cold-cavity resonance, $g$ is the single-photon Kerr shift, and
+$s_{\mathrm{in}}=\sqrt{P_{\mathrm{in}}/\hbar\omega_p}$. The classic
+second-order LLE keeps only $D_2$:
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
+-\frac{iD_2}{2}\frac{\partial^2A}{\partial\phi^2}
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+Higher-order dispersion and Raman shock add the perturbations
+
+$$
+\mathcal{P}_{\mathrm{HOD}}^{\mathrm{phys}}
+=
+-\frac{D_3}{6}\frac{\partial^3A}{\partial\phi^3}
++\frac{iD_4}{24}\frac{\partial^4A}{\partial\phi^4},
+$$
+
+$$
+\mathcal{P}_{\mathrm{Raman}}^{\mathrm{phys}}
+=
+i g D_1 T_R\,A\frac{\partial |A|^2}{\partial\phi}.
+$$
+
+Here $D_1$ is the angular-frequency FSR and $T_R$ is the Raman shock time. The
+dimensional integrated dispersion is
+
+$$
+D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
+=
+\frac{D_2\mu^2}{2}
++\frac{D_3\mu^3}{6}
++\frac{D_4\mu^4}{24}.
+$$
+
+### Normalization
+
+The page normalizes time by the loss half-linewidth and field amplitude by the
+Kerr nonlinearity:
+
+$$
+t=\frac{\kappa T}{2},\qquad
+\psi=\sqrt{\frac{2g}{\kappa}}\,A .
+$$
+
+The dimensionless parameters are
+
+$$
+\alpha=\frac{2\delta_0}{\kappa},\qquad
+d_m=\frac{2D_m}{\kappa}\quad(m=2,3,4),
+$$
+
+$$
+F=\sqrt{\frac{8g\kappa_{\mathrm{ex}}P_{\mathrm{in}}}
+{\hbar\omega_p\kappa^3}},\qquad
+\tau_R=D_1T_R .
+$$
+
+The sign of $\tau_R$ also depends on the positive direction of $\phi$; this page
+uses $+i\tau_R\psi\partial_\phi|\psi|^2$.
+
+### Normalized equation solved by the page
+
+The pure second-order LLE without Raman response is
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -20,38 +99,21 @@ $$
 +F.
 $$
 
-Higher-order dispersion and Raman effects can be added as perturbations to the
-classic equation:
+Higher-order dispersion and Raman are added as perturbations:
 
 $$
 \frac{\partial \psi}{\partial t}
 =
 \left.\frac{\partial \psi}{\partial t}\right|_{\mathrm{classic}}
-+\mathcal{P}_{\mathrm{HOD}}
-+\mathcal{P}_{\mathrm{Raman}},
-$$
-
-with
-
-$$
-\mathcal{P}_{\mathrm{HOD}}
-=
 -\frac{d_3}{6}\frac{\partial^3\psi}{\partial\phi^3}
-+\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4},
++\frac{i d_4}{24}\frac{\partial^4\psi}{\partial\phi^4}
++i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
 $$
 
-$$
-\mathcal{P}_{\mathrm{Raman}}
-=
-i\tau_R\psi\frac{\partial |\psi|^2}{\partial \phi}.
-$$
-
-Setting $d_3=d_4=\tau_R=0$ recovers the pure second-order LLE without Raman
-response.
-
-Equivalently, the dispersion operator is $iD_{\mathrm{int}}(-i\partial_\phi)\psi$.
-With the Fourier convention $\partial_\phi\to i\mu$, the frequency-domain
-integrated dispersion is
+Setting $d_3=d_4=\tau_R=0$ recovers the classic second-order LLE. Equivalently,
+the dispersion operator is $iD_{\mathrm{int}}(-i\partial_\phi)\psi$. With the
+Fourier convention $\partial_\phi\to i\mu$, the frequency-domain integrated
+dispersion is
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -61,11 +123,9 @@ D_{\mathrm{int}}(\mu)
 +\frac{d_4\mu^4}{24}.
 $$
 
-Here $\alpha$ is the pump-resonance detuning, $F$ is the pump amplitude,
-$d_2,d_3,d_4$ are normalized integrated-dispersion coefficients, and $\tau_R$ is
-the Raman shock coefficient. The solver uses a first-order split-step update:
-Kerr/Raman terms in the time domain, loss-detuning-dispersion terms in the
-frequency domain, and explicit pump injection.
+The solver uses a first-order split-step update: Kerr/Raman terms in the time
+domain, loss-detuning-dispersion terms in the frequency domain, and explicit pump
+injection.
 
 ## Physical picture
 

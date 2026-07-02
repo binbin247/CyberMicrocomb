@@ -4,8 +4,54 @@
 
 ## 仿真的方程
 
-这是正常色散单场 LLE，用于演示暗脉冲 / platicon。它保留二阶色散和一个局部模式偏移，
-不包含 Raman、$d_3$ 或 $d_4$：
+这是正常色散单场 LLE，用于演示暗脉冲 / platicon。它与 `Standard soliton` 使用同一套
+单场归一化，但只保留二阶色散和一个局部模式偏移，不包含 Raman、$d_3$ 或 $d_4$。
+
+### 真实物理量方程
+
+令 $A(\phi,T)$ 为腔内慢变场。物理量方程为
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
+-\frac{iD_2}{2}\frac{\partial^2A}{\partial\phi^2}
++i\mathcal{F}^{-1}
+\left[
+\Delta\Omega_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}\hat{A}_\mu
+\right]
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+其中 $\Delta\Omega_{\mathrm{shift}}$ 是被扰动模式的物理频率偏移。等价地，物理量
+integrated dispersion 为
+
+$$
+D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
+=
+\frac{D_2\mu^2}{2}
++\Delta\Omega_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
+$$
+
+### 归一化
+
+归一化方式与 `Standard soliton` 相同：
+
+$$
+t=\frac{\kappa T}{2},\qquad
+\psi=\sqrt{\frac{2g}{\kappa}}\,A,\qquad
+\alpha=\frac{2\delta_0}{\kappa},
+$$
+
+$$
+d_2=\frac{2D_2}{\kappa},\qquad
+\Delta_{\mathrm{shift}}=\frac{2\Delta\Omega_{\mathrm{shift}}}{\kappa},\qquad
+F=\sqrt{\frac{8g\kappa_{\mathrm{ex}}P_{\mathrm{in}}}{\hbar\omega_p\kappa^3}} .
+$$
+
+### 页面求解的归一化方程
+
+页面求解
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -19,8 +65,7 @@ $$
 +F.
 $$
 
-其中 $\mathcal{F}^{-1}[\cdots]$ 表示把单个模式的局部偏移从频域变回时域。等价地，
-频域积分色散写成
+频域中这等价于
 
 $$
 D_{\mathrm{int}}(\mu)
@@ -29,10 +74,10 @@ D_{\mathrm{int}}(\mu)
 +\Delta_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
 $$
 
-这里 $d_2>0$ 表示当前归一化约定下的正常色散。
-$\mu_{\mathrm{shift}}$ 是被扰动的整数模式，$\Delta_{\mathrm{shift}}$ 是归一化到
-$\kappa/2$ 的模式偏移强度。正的 `Mode shift strength` 表示增大该模式的
-$D_{\mathrm{int}}$。当前实现只移动一个模式，不自动同时移动 $\pm\mu$。
+$d_2>0$ 表示当前归一化约定下的正常色散。$\mu_{\mathrm{shift}}$ 是被扰动的整数模式，
+$\Delta_{\mathrm{shift}}$ 是归一化到 $\kappa/2$ 的模式偏移强度。正的
+`Mode shift strength` 表示增大该模式的 $D_{\mathrm{int}}$。当前实现只移动一个模式，
+不自动同时移动 $\pm\mu$。
 
 ## 物理图像
 

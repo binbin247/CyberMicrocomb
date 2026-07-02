@@ -5,13 +5,17 @@
 ## 仿真的方程
 
 该模型对应 Yang *et al.* 的 Stokes soliton 文献中给出的双场 coupled
-Lugiato-Lefever equation。Primary 场 $E_p(\phi,t)$ 被外部连续波泵浦驱动，
-Stokes 场 $E_s(\phi,t)$ 通过 Raman 增益从噪声中增长。补充材料 Eq. S7/S8
-在 Raman 绝热近似下写为
+Lugiato-Lefever equation。Primary 场被外部连续波泵浦驱动，Stokes 场通过 Raman
+增益从噪声中增长。
+
+### 真实物理量方程
+
+令 $E_p(\phi,T)$ 和 $E_s(\phi,T)$ 分别为 Primary 和 Stokes 腔内慢变场。补充材料
+Eq. S7/S8 在 Raman 绝热近似下写为
 
 $$
 \begin{aligned}
-\frac{\partial E_p}{\partial t}
+\frac{\partial E_p}{\partial T}
 &=
 i\frac{D_{2p}}{2}\frac{\partial^2 E_p}{\partial\phi^2}
 +i\left[g_p|E_p|^2+(2-f_R)G_p|E_s|^2\right]E_p \\
@@ -27,7 +31,7 @@ $$
 
 $$
 \begin{aligned}
-\frac{\partial E_s}{\partial t}
+\frac{\partial E_s}{\partial T}
 &=
 -\delta\frac{\partial E_s}{\partial\phi}
 +i\frac{D_{2s}}{2}\frac{\partial^2 E_s}{\partial\phi^2}
@@ -40,18 +44,83 @@ $$
 \end{aligned}
 $$
 
-$E_p,E_s$ 是 Primary 和 Stokes 腔内慢变场，并按文献归一化到 optical energy。
-$D_{1j}$ 和 $D_{2j}$ 分别是模式族 $j=p,s$ 的 FSR 和二阶色散；
-$\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR mismatch；
-$\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐；
-$g_j$ 和 $G_j$ 是 self- 与 cross-phase modulation 系数；
-$R$ 是 Raman gain 系数；$\tau_R$ 是 Raman shock time。
+文献中 $E_p,E_s$ 按 optical energy 归一化。$D_{1j}$ 和 $D_{2j}$ 分别是模式族
+$j=p,s$ 的 FSR 和二阶色散；$\delta=D_{1s}-D_{1p}$ 是 Primary/Stokes FSR
+mismatch；$\kappa_j$ 和 $\Delta\omega_j$ 是损耗率与冷腔失谐；$g_j$ 和 $G_j$
+是 self- 与 cross-phase modulation 系数；$R$ 是 Raman gain 系数；$\tau_R$
+是 Raman shock time。
 
-当前浏览器求解器使用 Eq. S7/S8 的归一化交互版本。界面中的 `Pump detuning`,
+### 归一化
+
+页面的交互模型把时间按 Primary 损耗半宽归一化，并把两路场幅重写为无量纲变量：
+
+$$
+t=\frac{\kappa_p T}{2},\qquad
+P=\sqrt{\frac{2g_p}{\kappa_p}}\,E_p,\qquad
+S=\sqrt{\frac{2g_s}{\kappa_s}}\,E_s .
+$$
+
+主要无量纲参数为
+
+$$
+\alpha_p=\frac{2\Delta\omega_p}{\kappa_p},\qquad
+\alpha_s=\frac{2\Delta\omega_s}{\kappa_s},\qquad
+d_{2p}=\frac{D_{2p}}{\kappa_p},\qquad
+d_{2s}\approx\frac{D_{2s}}{\kappa_s},
+$$
+
+$$
+\Delta_{\mathrm{FSR}}\propto\frac{2(D_{1s}-D_{1p})}{\kappa_p},\qquad
+F=\sqrt{\frac{8g_p\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}}
+{\hbar\omega_p\kappa_p^3}} .
+$$
+
+`Overlap` 记作 $\eta$，`Wavelength ratio` 记作 $\rho$，`Primary Raman loss` 和
+`Stokes Raman gain` 分别记作 $g_{Rp}$ 和 $g_{Rs}$。当前页面把 Stokes 失谐
+$\alpha_s$ 固定为 0，并把 Stokes 损耗也写成同样的归一化损耗 `-1`，这是为了保持交互模型简洁。
+`FSR mismatch` 的符号按页面方程定义：它是 $-\Delta_{\mathrm{FSR}}\partial_\phi S$
+前的系数。$\rho$ 对应 Stokes 与 Primary 的频率比，近似等于 $\lambda_p/\lambda_s$。
+
+### 页面求解的归一化方程
+
+当前 `public/lle_solver.py` 实际求解的双场方程为
+
+$$
+\begin{aligned}
+\frac{\partial P}{\partial t}
+&=
+\left[-(1+i\alpha_p)+i d_{2p}\partial_\phi^2\right]P \\
+&\quad+
+\left[
+i|P|^2
+-i\tau_R\partial_\phi\left(|P|^2+\eta |S|^2\right)
++\eta\left(i(2-f_R)-\frac{g_{Rp}}{2}\right)|S|^2
+\right]P
++F ,
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\frac{\partial S}{\partial t}
+&=
+\left[-(1+i\alpha_s)-\Delta_{\mathrm{FSR}}\partial_\phi
++i d_{2s}\partial_\phi^2\right]S \\
+&\quad+
+\left[
+i\rho |S|^2
+-i\rho\tau_R\partial_\phi\left(\eta |P|^2+|S|^2\right)
++\eta\rho\left(i(2-f_R)+\frac{g_{Rs}}{2}\right)|P|^2
+\right]S
++\xi_s .
+\end{aligned}
+$$
+
+$\xi_s$ 是由 `Noise seed` 控制的弱随机 Stokes 种子。界面中的 `Pump detuning`,
 `FSR mismatch`, `Primary/Stokes D2`, `Overlap`, `Primary Raman loss`,
-`Stokes Raman gain` 和 `tauR` 分别控制上式中的失谐、FSR mismatch、二阶色散、
-空间模式重叠、Raman 损耗/增益以及 Raman shock 项。当前界面中 Stokes 失谐固定为
-0，不作为用户可调参数。
+`Stokes Raman gain`, `Wavelength ratio` 和 `tauR` 分别对应上式中的
+$\alpha_p$、$\Delta_{\mathrm{FSR}}$、$d_{2p/s}$、$\eta$、$g_{Rp}$、$g_{Rs}$、
+$\rho$ 和 $\tau_R$。
 
 ## 物理图像
 
@@ -95,7 +164,7 @@ Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
    `Temporal evolution` 的两张子图应分别显示 Primary 和 Stokes 的演化过程。
 
 如果仿真变慢，优先降低 `stepsPerFrame` 或网格点数。该模型用于交互式理解 Stokes soliton
-机制，不包含热动力学、真实材料单位换算或完整多模族耦合。
+机制，不包含热动力学或完整多模族耦合。
 
 ## 参考文献
 

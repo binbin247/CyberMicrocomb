@@ -5,8 +5,56 @@
 ## Simulation equations
 
 This is a normal-dispersion single-field LLE for dark-pulse / platicon dynamics.
-It keeps second-order dispersion and one local mode shift, and intentionally
-omits Raman, $d_3$, and $d_4$:
+It uses the same single-field normalization as `Standard soliton`, keeps
+second-order dispersion and one local mode shift, and intentionally omits Raman,
+$d_3$, and $d_4$.
+
+### Dimensional physical equation
+
+Let $A(\phi,T)$ be the slowly varying intracavity field. The dimensional equation
+is
+
+$$
+\frac{\partial A}{\partial T}
+=
+\left[-\frac{\kappa}{2}-i\delta_0+i g|A|^2\right]A
+-\frac{iD_2}{2}\frac{\partial^2A}{\partial\phi^2}
++i\mathcal{F}^{-1}
+\left[
+\Delta\Omega_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}\hat{A}_\mu
+\right]
++\sqrt{\kappa_{\mathrm{ex}}}\,s_{\mathrm{in}} .
+$$
+
+Here $\Delta\Omega_{\mathrm{shift}}$ is the physical frequency shift of the
+perturbed mode. Equivalently, the dimensional integrated dispersion is
+
+$$
+D_{\mathrm{int}}^{\mathrm{phys}}(\mu)
+=
+\frac{D_2\mu^2}{2}
++\Delta\Omega_{\mathrm{shift}}\delta_{\mu,\mu_{\mathrm{shift}}}.
+$$
+
+### Normalization
+
+The normalization is the same as for `Standard soliton`:
+
+$$
+t=\frac{\kappa T}{2},\qquad
+\psi=\sqrt{\frac{2g}{\kappa}}\,A,\qquad
+\alpha=\frac{2\delta_0}{\kappa},
+$$
+
+$$
+d_2=\frac{2D_2}{\kappa},\qquad
+\Delta_{\mathrm{shift}}=\frac{2\Delta\Omega_{\mathrm{shift}}}{\kappa},\qquad
+F=\sqrt{\frac{8g\kappa_{\mathrm{ex}}P_{\mathrm{in}}}{\hbar\omega_p\kappa^3}} .
+$$
+
+### Normalized equation solved by the page
+
+The page solves
 
 $$
 \frac{\partial \psi}{\partial t}
@@ -20,8 +68,7 @@ $$
 +F.
 $$
 
-Here $\mathcal{F}^{-1}[\cdots]$ maps the single shifted spectral mode back to the
-time domain. Equivalently, the frequency-domain integrated dispersion is
+In the frequency domain this is equivalent to
 
 $$
 D_{\mathrm{int}}(\mu)

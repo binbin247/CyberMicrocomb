@@ -5,14 +5,19 @@
 ## Simulation equations
 
 This model follows the two-field coupled Lugiato-Lefever equations given in
-Yang *et al.* for Stokes solitons. The primary field $E_p(\phi,t)$ is driven by
-an external continuous-wave pump. The Stokes field $E_s(\phi,t)$ grows from noise
-through Raman gain. After the adiabatic Raman approximation, Supplementary
-Eqs. S7/S8 read
+Yang *et al.* for Stokes solitons. The primary field $E_p(\phi,T)$ is driven by
+an external continuous-wave pump. The Stokes field $E_s(\phi,T)$ grows from noise
+through Raman gain.
+
+### Dimensional physical equation
+
+Let $E_p(\phi,T)$ and $E_s(\phi,T)$ be the slowly varying intracavity fields for
+the primary and Stokes families. After the adiabatic Raman approximation,
+Supplementary Eqs. S7/S8 read
 
 $$
 \begin{aligned}
-\frac{\partial E_p}{\partial t}
+\frac{\partial E_p}{\partial T}
 &=
 i\frac{D_{2p}}{2}\frac{\partial^2 E_p}{\partial\phi^2}
 +i\left[g_p|E_p|^2+(2-f_R)G_p|E_s|^2\right]E_p \\
@@ -28,7 +33,7 @@ $$
 
 $$
 \begin{aligned}
-\frac{\partial E_s}{\partial t}
+\frac{\partial E_s}{\partial T}
 &=
 -\delta\frac{\partial E_s}{\partial\phi}
 +i\frac{D_{2s}}{2}\frac{\partial^2 E_s}{\partial\phi^2}
@@ -41,20 +46,87 @@ $$
 \end{aligned}
 $$
 
-$E_p$ and $E_s$ are the intracavity slowly varying fields for the primary and
-Stokes solitons, normalized to optical energy in the paper. $D_{1j}$ and
+In the paper, $E_p$ and $E_s$ are normalized to optical energy. $D_{1j}$ and
 $D_{2j}$ are the FSR and second-order dispersion of mode family $j=p,s$;
 $\delta=D_{1s}-D_{1p}$ is the primary/Stokes FSR mismatch; $\kappa_j$ and
 $\Delta\omega_j$ are the loss rate and cold-cavity detuning; $g_j$ and $G_j$ are
 self- and cross-phase modulation coefficients; $R$ is the Raman gain coefficient;
 and $\tau_R$ is the Raman shock time.
 
-The browser solver uses a normalized interactive version of Eqs. S7/S8. The UI
+### Normalization
+
+The interactive model normalizes time by the primary loss half-linewidth and
+rewrites the two fields as dimensionless amplitudes:
+
+$$
+t=\frac{\kappa_p T}{2},\qquad
+P=\sqrt{\frac{2g_p}{\kappa_p}}\,E_p,\qquad
+S=\sqrt{\frac{2g_s}{\kappa_s}}\,E_s .
+$$
+
+The main dimensionless parameters are
+
+$$
+\alpha_p=\frac{2\Delta\omega_p}{\kappa_p},\qquad
+\alpha_s=\frac{2\Delta\omega_s}{\kappa_s},\qquad
+d_{2p}=\frac{D_{2p}}{\kappa_p},\qquad
+d_{2s}\approx\frac{D_{2s}}{\kappa_s},
+$$
+
+$$
+\Delta_{\mathrm{FSR}}\propto\frac{2(D_{1s}-D_{1p})}{\kappa_p},\qquad
+F=\sqrt{\frac{8g_p\kappa_p^{\mathrm{ext}}P_{\mathrm{in}}}
+{\hbar\omega_p\kappa_p^3}} .
+$$
+
+`Overlap` is denoted by $\eta$, `Wavelength ratio` by $\rho$, and
+`Primary Raman loss` / `Stokes Raman gain` by $g_{Rp}$ / $g_{Rs}$. The current
+page fixes the Stokes detuning $\alpha_s$ to 0 and also writes the Stokes loss as
+the same normalized loss `-1`, which keeps the interactive model compact.
+The sign of `FSR mismatch` is defined by the page equation: it is the coefficient
+in front of $-\Delta_{\mathrm{FSR}}\partial_\phi S$. $\rho$ is the Stokes/primary
+frequency ratio, approximately $\lambda_p/\lambda_s$.
+
+### Normalized equation solved by the page
+
+The equations actually solved in `public/lle_solver.py` are
+
+$$
+\begin{aligned}
+\frac{\partial P}{\partial t}
+&=
+\left[-(1+i\alpha_p)+i d_{2p}\partial_\phi^2\right]P \\
+&\quad+
+\left[
+i|P|^2
+-i\tau_R\partial_\phi\left(|P|^2+\eta |S|^2\right)
++\eta\left(i(2-f_R)-\frac{g_{Rp}}{2}\right)|S|^2
+\right]P
++F ,
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\frac{\partial S}{\partial t}
+&=
+\left[-(1+i\alpha_s)-\Delta_{\mathrm{FSR}}\partial_\phi
++i d_{2s}\partial_\phi^2\right]S \\
+&\quad+
+\left[
+i\rho |S|^2
+-i\rho\tau_R\partial_\phi\left(\eta |P|^2+|S|^2\right)
++\eta\rho\left(i(2-f_R)+\frac{g_{Rs}}{2}\right)|P|^2
+\right]S
++\xi_s .
+\end{aligned}
+$$
+
+$\xi_s$ is the weak random Stokes seed controlled by `Noise seed`. The UI
 controls `Pump detuning`, `FSR mismatch`, `Primary/Stokes D2`, `Overlap`,
-`Primary Raman loss`, `Stokes Raman gain`, and `tauR` correspond to the detuning,
-FSR mismatch, second-order dispersion, spatial-mode overlap, Raman loss/gain, and
-Raman-shock terms above. The Stokes detuning is fixed to 0 in the current UI and
-is not user adjustable.
+`Primary Raman loss`, `Stokes Raman gain`, `Wavelength ratio`, and `tauR`
+correspond to $\alpha_p$, $\Delta_{\mathrm{FSR}}$, $d_{2p/s}$, $\eta$,
+$g_{Rp}$, $g_{Rs}$, $\rho$, and $\tau_R$.
 
 ## Physical picture
 
@@ -113,8 +185,8 @@ Stokes-soliton growth from noise.
 
 If the simulation becomes slow, reduce `stepsPerFrame` or the grid size first.
 This model is intended for interactive understanding of the Stokes-soliton
-mechanism; it does not include thermal dynamics, dimensional material-unit
-conversion, or full multimode-family coupling.
+mechanism; it does not include thermal dynamics or full multimode-family
+coupling.
 
 ## References
 
