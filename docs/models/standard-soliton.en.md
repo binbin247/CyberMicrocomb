@@ -89,6 +89,8 @@ exploration of Raman self-frequency-shift-like behavior.
 
 ## Demo
 
+### Demo 1: run the default preset
+
 1. Select `Standard soliton` in `MODEL`.
 2. Keep the defaults: `grid = 512`, `Detuning = 10`, `Pump power = 3.94`,
    `D2 = -0.0444`, `D3 = 0`, `D4 = 0`, `tauR = 0`.
@@ -100,6 +102,16 @@ exploration of Raman self-frequency-shift-like behavior.
    dispersive-wave-like features.
 6. Increase `tauR` slightly from 0 to inspect Raman-induced pulse and spectral
    shifts.
+
+### Demo 2: detuning scan from noise to a bright soliton
+
+1. Keep every default parameter except `Detuning`.
+2. Set `Detuning` to a smaller value, for example `-5`.
+3. Click `Reset` so the field returns to a noise or low-intensity initial state.
+4. Click `Play`, then slowly scan `Detuning` upward to the default target value
+   `10`.
+5. Watch a bright soliton form from the noisy background in `Temporal field`, and
+   check that `Intracavity energy` settles onto a stable plateau.
 
 If the state diverges or the spectrum becomes numerically noisy, reduce `dt` or
 lower `Pump power` first. The solver clamps oversized timesteps using

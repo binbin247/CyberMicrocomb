@@ -74,6 +74,8 @@ Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
 
 ## Demo
 
+### Demo 1：默认参数直接运行
+
 1. 在 `MODEL` 中选择 `Stokes soliton`。
 2. 保持默认值：`grid = 1024`, `Pump detuning = 39.1`,
    `Pump power = 12.247`, `Primary D2 = 0.02`, `Stokes D2 = 0.02`,
@@ -85,6 +87,15 @@ Primary soliton 建立以及 Stokes soliton 从噪声中增长的过程。
 4. 继续运行，观察 Stokes 是否从噪声背景中增长并被时间俘获。
 5. 主要扫描 `Pump detuning`，寻找 Primary-only、Stokes-growth 和双孤子稳定区。
 6. 如果 Stokes 始终很弱，先延长运行时间；再小幅增加 `Stokes Raman gain` 或 `Overlap`。
+
+### Demo 2：扫描 detuning，从噪声演化到 Stokes soliton
+
+1. 保持除 `Pump detuning` 外的默认参数不变。
+2. 先把 `Pump detuning` 调到较小值，例如 `0`。
+3. 点击 `Reset`，让 Primary 和 Stokes 场从噪声/低强度初态重新开始。
+4. 点击 `Play`，然后缓慢把 `Pump detuning` 从小值扫到默认目标值 `39.1`。
+5. 观察 Primary soliton 先形成，再看 Stokes 场是否从噪声中增长并被时间俘获；
+   `Temporal evolution` 的两张子图应分别显示 Primary 和 Stokes 的演化过程。
 
 如果仿真变慢，优先降低 `stepsPerFrame` 或网格点数。该模型用于交互式理解 Stokes soliton
 机制，不包含热动力学、真实材料单位换算或完整多模族耦合。

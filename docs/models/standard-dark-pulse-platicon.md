@@ -51,6 +51,8 @@ $D_{\mathrm{int}}$。当前实现只移动一个模式，不自动同时移动 $
 
 ## Demo
 
+### Demo 1：默认参数直接运行
+
 1. 在 `MODEL` 中选择 `Standard dark pulse (platicon)`。
 2. 保持默认值：`grid = 512`, `Detuning = 4`, `Pump power = 3.94`,
    `D2 = 0.02`, `Mode shift position = 0`, `Mode shift strength = 4`。
@@ -58,6 +60,15 @@ $D_{\mathrm{int}}$。当前实现只移动一个模式，不自动同时移动 $
 4. 扫描 `Mode shift strength`：太弱可能无法触发稳定暗脉冲，太强可能引入不规则谱。
 5. 改变 `Mode shift position`，观察不同局部模式扰动对光梳频谱的影响。
 6. 扫描 `Detuning`，比较 platicon 宽度、能量和频谱带宽的变化。
+
+### Demo 2：扫描 detuning，从噪声演化到 dark pulse / platicon
+
+1. 保持除 `Detuning` 外的默认参数不变。
+2. 先把 `Detuning` 调到较小值，例如 `0`。
+3. 点击 `Reset`，让场重新从噪声/低强度初态开始。
+4. 点击 `Play`，然后缓慢把 `Detuning` 从小值扫到默认目标值 `4`。
+5. 观察 `Temporal field` 中高背景上的暗缺口如何形成，并用 `Intracavity energy`
+   判断是否进入稳定 dark-pulse 状态。
 
 本模型突出正常色散与局部模式扰动的作用，不包含热效应、多模族动力学或完整 avoided-crossing 耦合。
 

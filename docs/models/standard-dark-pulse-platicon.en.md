@@ -60,6 +60,8 @@ Read the four plots as follows:
 
 ## Demo
 
+### Demo 1: run the default preset
+
 1. Select `Standard dark pulse (platicon)` in `MODEL`.
 2. Keep the defaults: `grid = 512`, `Detuning = 4`, `Pump power = 3.94`,
    `D2 = 0.02`, `Mode shift position = 0`, `Mode shift strength = 4`.
@@ -69,6 +71,17 @@ Read the four plots as follows:
 5. Change `Mode shift position` to see how the local perturbation reshapes the
    comb spectrum.
 6. Scan `Detuning` and compare the platicon width, energy, and spectral bandwidth.
+
+### Demo 2: detuning scan from noise to a dark pulse / platicon
+
+1. Keep every default parameter except `Detuning`.
+2. Set `Detuning` to a smaller value, for example `0`.
+3. Click `Reset` so the field restarts from a noise or low-intensity initial
+   state.
+4. Click `Play`, then slowly scan `Detuning` upward to the default target value
+   `4`.
+5. Watch the dark notch form on the high background in `Temporal field`, and use
+   `Intracavity energy` to check whether the dark-pulse state has stabilized.
 
 This model is for teaching and fast exploration. It isolates the role of normal
 dispersion and a local mode perturbation; it does not include thermal dynamics,

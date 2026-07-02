@@ -79,6 +79,8 @@ self-frequency-shift 类效应。
 
 ## Demo
 
+### Demo 1：默认参数直接运行
+
 1. 在 `MODEL` 中选择 `Standard soliton`。
 2. 保持默认值：`grid = 512`, `Detuning = 10`, `Pump power = 3.94`,
    `D2 = -0.0444`, `D3 = 0`, `D4 = 0`, `tauR = 0`。
@@ -86,6 +88,15 @@ self-frequency-shift 类效应。
 4. 缓慢扫描 `Detuning`，观察脉冲变窄、峰值变化以及能量曲线的响应。
 5. 将 `D3` 或 `D4` 调成非零，观察频谱不对称和可能的窄峰结构。
 6. 将 `tauR` 从 0 小幅增加，观察脉冲和频谱的偏移趋势。
+
+### Demo 2：扫描 detuning，从噪声演化到亮孤子
+
+1. 保持除 `Detuning` 外的默认参数不变。
+2. 先把 `Detuning` 调到较小值，例如 `-5`。
+3. 点击 `Reset`，让场回到噪声/低强度初态。
+4. 点击 `Play`，然后缓慢把 `Detuning` 从小值扫到默认目标值 `10`。
+5. 观察 `Temporal field` 中亮孤子从噪声背景中形成，并确认 `Intracavity energy`
+   最终进入稳定平台。
 
 如果结果发散或频谱出现明显数值噪声，先减小 `dt` 或降低 `Pump power`。求解器会用
 $\max |D_{\mathrm{int}}|\,dt < \pi$ 的 aliasing 条件自动限制过大的积分步长；最终定量研究仍应使用更高阶、更精确的积分器。

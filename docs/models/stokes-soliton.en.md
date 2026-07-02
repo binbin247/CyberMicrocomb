@@ -86,6 +86,8 @@ Stokes-soliton growth from noise.
 
 ## Demo
 
+### Demo 1: run the default preset
+
 1. Select `Stokes soliton` in `MODEL`.
 2. Keep the defaults: `grid = 1024`, `Pump detuning = 39.1`,
    `Pump power = 12.247`, `Primary D2 = 0.02`, `Stokes D2 = 0.02`,
@@ -100,6 +102,18 @@ Stokes-soliton growth from noise.
    two-soliton regimes.
 6. If the Stokes field remains weak, first run longer; then slightly increase
    `Stokes Raman gain` or `Overlap`.
+
+### Demo 2: detuning scan from noise to a Stokes soliton
+
+1. Keep every default parameter except `Pump detuning`.
+2. Set `Pump detuning` to a smaller value, for example `0`.
+3. Click `Reset` so both primary and Stokes fields restart from a noise or
+   low-intensity initial state.
+4. Click `Play`, then slowly scan `Pump detuning` upward to the default target
+   value `39.1`.
+5. Watch the primary soliton form first, then check whether the Stokes field
+   grows from noise and becomes temporally trapped. The two `Temporal evolution`
+   panels should show the primary and Stokes dynamics separately.
 
 If the simulation becomes slow, reduce `stepsPerFrame` or the grid size first.
 This model is intended for interactive understanding of the Stokes-soliton
