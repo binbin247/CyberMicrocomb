@@ -182,7 +182,7 @@ export const copy = {
       d2P: [
         'Normalized second-order dispersion for the primary mode family.',
         'It enters the primary linear operator as -i D2p mu^2.',
-        'Positive values follow the normalized MATLAB Stokes-soliton scripts.',
+        'Positive values follow the normalized Stokes-soliton convention used by this model.',
       ],
       d2S: [
         'Normalized second-order dispersion for the Stokes mode family.',
@@ -197,7 +197,7 @@ export const copy = {
       overlap: [
         'Spatial-mode overlap factor between primary and Stokes families.',
         'It scales cross-phase modulation and Raman coupling terms.',
-        'The default value follows Ramansoliton_scan.m.',
+        'The default 0.5 represents moderate primary-Stokes spatial overlap.',
       ],
       fR: [
         'Fractional Raman contribution used in the coupled normalized model.',
@@ -207,17 +207,17 @@ export const copy = {
       ramanGainP: [
         'Raman-mediated loss term applied to the primary field from Stokes growth.',
         'It enters the primary nonlinear coefficient with a negative real part.',
-        'The default value follows gs = gp = 0.35 * 0.18 * 2 in Ramansoliton_scan.m.',
+        'The default equals 0.35 * 0.18 * 2 in the normalized Stokes-soliton parameterization.',
       ],
       ramanGainS: [
         'Raman gain term applied to the Stokes field from the primary pulse.',
         'It provides the thresholded Stokes amplification described in the paper.',
-        'The default value follows gs = gp = 0.35 * 0.18 * 2 in Ramansoliton_scan.m.',
+        'The default equals 0.35 * 0.18 * 2 in the normalized Stokes-soliton parameterization.',
       ],
       wavelengthRatio: [
         'Frequency or wavelength scaling factor between the primary and Stokes families.',
         'It scales the Stokes nonlinear and Raman-coupling terms.',
-        'The default value follows wsp = 1550 / 1630 in Ramansoliton_scan.m.',
+        'The default uses 1550 / 1630 for the primary and Stokes wavelength ratio.',
       ],
       noise: [
         'Complex noise seed added to the Stokes field.',
@@ -280,9 +280,9 @@ export const copy = {
         'Nonzero values let you explore a complex FWM coefficient.',
       ],
       dtnNorm: [
-        'Normalized detuning used by the LN SSFS reference simulation.',
-        'It corresponds to dtn_norm in simulation2026 and is measured in cavity half-linewidth units.',
-        'The default D4Q4 point is chosen from an existing stable SSFS sweep.',
+        'Normalized detuning used by the Raman SSFS model.',
+        'It is measured in cavity half-linewidth units.',
+        'The default is chosen to produce a stable sub-35 fs SSFS soliton.',
       ],
       ffNorm: [
         'Pump power ratio Pin / Pth from the SSFS reference simulation.',
@@ -296,12 +296,12 @@ export const copy = {
       ],
       tau1Fs: [
         'Raman response oscillation time tau1 in femtoseconds.',
-        'The default follows the LN SSFS simulation2026 dataset.',
+        'The default is 11.1 fs for the damped-oscillator Raman response.',
         'It sets the sinusoidal part of the causal Raman response.',
       ],
       tau2Fs: [
         'Raman response decay time tau2 in femtoseconds.',
-        'The default follows the LN SSFS simulation2026 dataset.',
+        'The default is 35 fs for the damped-oscillator Raman response.',
         'It sets how long the delayed Raman response persists.',
       ],
       fsrGHz: [
@@ -525,7 +525,7 @@ export const copy = {
       d2P: [
         'Primary 模式族的归一化二阶色散。',
         '它在线性算子中以 -i D2p mu^2 的形式出现。',
-        '正值对应 MATLAB Stokes-soliton 脚本中的归一化约定。',
+        '正值对应当前 Stokes soliton 模型使用的归一化约定。',
       ],
       d2S: [
         'Stokes 模式族的归一化二阶色散。',
@@ -540,7 +540,7 @@ export const copy = {
       overlap: [
         'Primary 与 Stokes 空间模式的重叠因子。',
         '它同时缩放 cross-phase modulation 和 Raman coupling 项。',
-        '默认值沿用 Ramansoliton_scan.m。',
+        '默认值 0.5 表示中等强度的 Primary-Stokes 空间模式重叠。',
       ],
       fR: [
         '耦合归一化模型中的 Raman 分数。',
@@ -550,17 +550,17 @@ export const copy = {
       ramanGainP: [
         'Stokes 增长对 Primary 场造成的 Raman-mediated loss 项。',
         '它以负实部形式进入 Primary 非线性系数。',
-        '默认值沿用 Ramansoliton_scan.m 中的 gs = gp = 0.35 * 0.18 * 2。',
+        '默认值等于归一化 Stokes soliton 参数化中的 0.35 * 0.18 * 2。',
       ],
       ramanGainS: [
         'Primary pulse 给 Stokes 场提供的 Raman gain 项。',
         '它对应论文中 Stokes soliton 的阈值放大机制。',
-        '默认值沿用 Ramansoliton_scan.m 中的 gs = gp = 0.35 * 0.18 * 2。',
+        '默认值等于归一化 Stokes soliton 参数化中的 0.35 * 0.18 * 2。',
       ],
       wavelengthRatio: [
         'Primary 与 Stokes 模式族之间的频率或波长缩放因子。',
         '它缩放 Stokes 非线性和 Raman coupling 项。',
-        '默认值沿用 Ramansoliton_scan.m 中的 wsp = 1550 / 1630。',
+        '默认值使用 1550 / 1630，表示 Primary 与 Stokes 的波长比。',
       ],
       noise: [
         '加入到 Stokes 场中的复噪声种子。',
@@ -623,9 +623,9 @@ export const copy = {
         '非零值用于探索复 FWM 系数。',
       ],
       dtnNorm: [
-        'LN SSFS 参考仿真中的归一化失谐 dtn_norm。',
+        'Raman SSFS 模型中的归一化失谐。',
         '单位为腔半线宽。',
-        '默认 D4Q4 点来自已有稳定 SSFS sweep。',
+        '默认值用于产生稳定的 35 fs 以下 SSFS 孤子。',
       ],
       ffNorm: [
         'SSFS 参考仿真中的泵浦功率比 Pin / Pth。',
@@ -639,12 +639,12 @@ export const copy = {
       ],
       tau1Fs: [
         'Raman response 的振荡时间 tau1，单位 fs。',
-        '默认沿用 simulation2026 数据集。',
+        '默认值为 11.1 fs，对应阻尼振荡 Raman response。',
         '它决定因果 Raman response 中的正弦振荡部分。',
       ],
       tau2Fs: [
         'Raman response 的衰减时间 tau2，单位 fs。',
-        '默认沿用 simulation2026 数据集。',
+        '默认值为 35 fs，对应阻尼振荡 Raman response。',
         '它决定延迟 Raman response 持续的时间。',
       ],
       fsrGHz: [

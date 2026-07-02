@@ -192,4 +192,4 @@ coupling.
 
 - Q.-F. Yang, X. Yi, K. Y. Yang, and K. Vahala, "Stokes solitons in optical microcavities," *Nature Physics* **13**, 53-57 (2017). <https://doi.org/10.1038/nphys3875>
 - Supplementary information for "Stokes solitons in optical microcavities," *Nature Physics* (2017).
-- The default Stokes parameters in this implementation follow the normalized settings inspected during development from `Ramansoliton_scan.m` and `Ramansoliton_splitstep.m`.
+- The default Stokes parameters are chosen so scanning `Pump detuning` demonstrates primary soliton formation followed by Stokes soliton growth.
