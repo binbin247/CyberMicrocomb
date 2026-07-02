@@ -597,6 +597,22 @@ button {
   font-weight: 700;
 }
 
+.state-diagram-region {
+  font-size: 20px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 3px;
+}
+
+.state-diagram-mi {
+  fill: #1d67b5;
+}
+
+.state-diagram-soliton {
+  fill: #e9272f;
+}
+
 .state-diagram-tick-label {
   fill: #667386;
   font-size: 11px;

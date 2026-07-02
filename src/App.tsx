@@ -67,7 +67,8 @@ const TEMPORAL_X_TITLE = 'Azimuthal coordinate φ'
 const SPECTRUM_X_TITLE = 'Mode number μ'
 const TEMPORAL_Y_TITLE = 'Field intensity |ψ|<sup>2</sup>'
 const TEMPORAL_Y_LABEL = 'Field intensity |ψ|^2'
-const TURNKEY_LOCKING_POWER_COEFFICIENT = 0.35
+const TURNKEY_LOCKING_ROOT_MIN = -50
+const TURNKEY_LOCKING_ROOT_MAX = 80
 
 interface TracePoint {
   step: number
@@ -922,6 +923,64 @@ function buildKerrTilt(pump: number, yMax: number) {
   return [...lowerBranch, ...upperBranch.reverse()]
 }
 
+function turnkeyLockingResponse(power: number, alpha: number, phase: number) {
+  // Supplementary Eq. S13 for the CW self-injection-locking response.
+  const denominator = (1 + (alpha - power) ** 2) * (1 + (alpha - 2 * power) ** 2)
+  if (denominator <= 0) {
+    return 0
+  }
+  const numerator =
+    (3 * power - 2 * alpha) * Math.cos(phase)
+    + (1 - 2 * power ** 2 + 3 * power * alpha - alpha ** 2) * Math.sin(phase)
+  return numerator / denominator
+}
+
+function turnkeyLockingEquation(alpha: number, power: number, params: TurnkeyParams) {
+  return (
+    alpha
+    - params.laserDetuning
+    - params.lockingBandwidth * turnkeyLockingResponse(power, alpha, params.feedbackPhase)
+  )
+}
+
+function solveTurnkeyLockingAlpha(power: number, params: TurnkeyParams, initialAlpha: number) {
+  if (params.lockingBandwidth <= 1e-12) {
+    return params.laserDetuning
+  }
+
+  let alpha = Math.min(TURNKEY_LOCKING_ROOT_MAX, Math.max(TURNKEY_LOCKING_ROOT_MIN, initialAlpha))
+  for (let iteration = 0; iteration < 12; iteration += 1) {
+    const value = turnkeyLockingEquation(alpha, power, params)
+    if (Math.abs(value) < 1e-8) {
+      return alpha
+    }
+    const eps = 1e-4 * Math.max(1, Math.abs(alpha))
+    const slope =
+      (turnkeyLockingEquation(alpha + eps, power, params) - turnkeyLockingEquation(alpha - eps, power, params))
+      / (2 * eps)
+    if (!Number.isFinite(slope) || Math.abs(slope) < 1e-8) {
+      break
+    }
+    const step = Math.min(2, Math.max(-2, value / slope))
+    alpha = Math.min(TURNKEY_LOCKING_ROOT_MAX, Math.max(TURNKEY_LOCKING_ROOT_MIN, alpha - step))
+  }
+  return alpha
+}
+
+function buildTurnkeyLockingCurve(params: TurnkeyParams, yMin: number, yMax: number, currentAlpha: number) {
+  const sampleCount = 120
+  const points: ChartPoint[] = []
+  let alpha = currentAlpha
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const power = yMin + ((yMax - yMin) * index) / sampleCount
+    alpha = solveTurnkeyLockingAlpha(power, params, alpha)
+    if (Number.isFinite(alpha)) {
+      points.push({ x: alpha, y: power })
+    }
+  }
+  return points
+}
+
 function mapStatePoint(
   point: ChartPoint,
   plot: { left: number; top: number; width: number; height: number },
@@ -978,21 +1037,11 @@ function TurnkeyStatePanel({
   const yMin = 0
   const yMax = Math.max(0.8, pumpSquared * 1.18, power * 1.35)
   const kerrTilt = buildKerrTilt(params.pump, yMax)
-  const lockingOffset = snapshot
-    ? detuning + TURNKEY_LOCKING_POWER_COEFFICIENT * power
-    : params.laserDetuning
-  const lockingLine = [
-    { x: lockingOffset, y: yMin },
-    {
-      x: lockingOffset - TURNKEY_LOCKING_POWER_COEFFICIENT * yMax,
-      y: yMax,
-    },
-  ]
+  const lockingCurve = buildTurnkeyLockingCurve(params, yMin, yMax, detuning)
   const xCandidates = [
     0,
     detuning,
-    lockingLine[0].x,
-    lockingLine[1].x,
+    ...lockingCurve.map((point) => point.x),
     ...kerrTilt.map((point) => point.x),
   ].filter((value) => Number.isFinite(value))
   const rawXMin = Math.min(...xCandidates)
@@ -1005,7 +1054,7 @@ function TurnkeyStatePanel({
   const plotBottom = plot.top + plot.height
   const statePoint = mapStatePoint({ x: detuning, y: power }, plot, xMin, xMax, yMin, yMax)
   const kerrPoints = kerrTilt.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
-  const lockPoints = lockingLine.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
+  const lockPoints = lockingCurve.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
   const xTicks = buildLinearTicks(xMin, xMax, 5)
   const yTicks = buildLinearTicks(yMin, yMax, 4)
 
@@ -1087,6 +1136,12 @@ function TurnkeyStatePanel({
           <polyline className="state-diagram-kerr" points={svgPoints(kerrPoints)} />
           <polyline className="state-diagram-locking" points={svgPoints(lockPoints)} />
         </g>
+        <text className="state-diagram-region state-diagram-mi" x={plot.left + plot.width * 0.54} y={plot.top + 54}>
+          {labels.miComb}
+        </text>
+        <text className="state-diagram-region state-diagram-soliton" x={plotRight - 22} y={plot.top + 54} textAnchor="end">
+          {labels.soliton}
+        </text>
         <circle
           className="state-diagram-dot"
           cx={statePoint.x}

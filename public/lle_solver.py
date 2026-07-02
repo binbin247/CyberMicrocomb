@@ -693,14 +693,7 @@ class TurnkeySolitonSolver:
         dt = p["dt"]
         power = float(np.mean(np.abs(self.psi) ** 2))
         beta = max(abs(p["beta"]), 1e-9)
-        feedback = float(
-            np.imag(
-                np.exp(1j * p["feedbackPhase"])
-                * self.rho_b
-                / (1j * beta * max(p["pump"], 1e-9))
-            )
-        )
-        target_detuning = p["laserDetuning"] + p["lockingBandwidth"] * feedback - 0.35 * power
+        target_detuning = self._solve_locking_equilibrium(power)
         self.locked_detuning += 0.05 * (target_detuning - self.locked_detuning)
         self.locked_detuning = float(np.clip(self.locked_detuning, -50.0, 80.0))
         self._refresh_linear()
@@ -729,6 +722,47 @@ class TurnkeySolitonSolver:
 
         self.step += 1
         self.t += dt
+
+    @staticmethod
+    def _locking_response(power, alpha, phase):
+        # Supplementary Eq. S13 for the CW self-injection-locking response.
+        denominator = (1.0 + (alpha - power) ** 2) * (1.0 + (alpha - 2.0 * power) ** 2)
+        if denominator <= 0.0:
+            return 0.0
+        numerator = (
+            (3.0 * power - 2.0 * alpha) * math.cos(phase)
+            + (1.0 - 2.0 * power**2 + 3.0 * power * alpha - alpha**2) * math.sin(phase)
+        )
+        return numerator / denominator
+
+    def _locking_equation(self, alpha, power):
+        p = self.params
+        return alpha - p["laserDetuning"] - p["lockingBandwidth"] * self._locking_response(
+            power,
+            alpha,
+            p["feedbackPhase"],
+        )
+
+    def _solve_locking_equilibrium(self, power):
+        p = self.params
+        if p["lockingBandwidth"] <= 1e-12:
+            return p["laserDetuning"]
+
+        alpha = float(np.clip(self.locked_detuning, -50.0, 80.0))
+        for _ in range(10):
+            value = self._locking_equation(alpha, power)
+            if abs(value) < 1e-8:
+                break
+            eps = 1e-4 * max(1.0, abs(alpha))
+            slope = (
+                self._locking_equation(alpha + eps, power)
+                - self._locking_equation(alpha - eps, power)
+            ) / (2.0 * eps)
+            if not math.isfinite(slope) or abs(slope) < 1e-8:
+                break
+            alpha -= float(np.clip(value / slope, -2.0, 2.0))
+            alpha = float(np.clip(alpha, -50.0, 80.0))
+        return alpha
 
     def _refresh_linear(self):
         self._refresh_adaptive_dt()
