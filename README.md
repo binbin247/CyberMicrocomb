@@ -2,6 +2,8 @@
 
 **直接开始使用：** [点击打开 CyberMicrocomb](https://binbin247.github.io/CyberMicrocomb/)
 
+网址：https://binbin247.github.io/CyberMicrocomb/
+
 无需下载、无需安装、无需配置环境。打开上面的链接后，即可直接在浏览器中开始
 microcomb 仿真。
 
