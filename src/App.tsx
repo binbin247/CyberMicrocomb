@@ -67,8 +67,7 @@ const TEMPORAL_X_TITLE = 'Azimuthal coordinate φ'
 const SPECTRUM_X_TITLE = 'Mode number μ'
 const TEMPORAL_Y_TITLE = 'Field intensity |ψ|<sup>2</sup>'
 const TEMPORAL_Y_LABEL = 'Field intensity |ψ|^2'
-const TURNKEY_STATE_DETUNING_RANGE: [number, number] = [-10, 40]
-const TURNKEY_STATE_POWER_RANGE: [number, number] = [0, 0.08]
+const TURNKEY_LOCKING_POWER_COEFFICIENT = 0.35
 
 interface TracePoint {
   step: number
@@ -110,6 +109,11 @@ interface ControlDefinition {
 interface ControlGroupDefinition {
   titleKey?: string
   controls: readonly ControlDefinition[]
+}
+
+interface ChartPoint {
+  x: number
+  y: number
 }
 
 const standardControlGroups: readonly ControlGroupDefinition[] = [
@@ -896,6 +900,69 @@ function getWaterfallCount(modelId: ModelId, rows: ModelHistoryRows) {
   return rows.standard.length
 }
 
+function buildKerrTilt(pump: number, yMax: number) {
+  const pumpSquared = Math.max(pump * pump, 1e-6)
+  const rhoMin = Math.max(0.04, pumpSquared * 0.05)
+  const rhoMax = Math.min(pumpSquared, yMax)
+  const lowerBranch: ChartPoint[] = []
+  const upperBranch: ChartPoint[] = []
+  const sampleCount = 180
+
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const rho = rhoMin + ((rhoMax - rhoMin) * index) / sampleCount
+    const rootArg = pumpSquared / rho - 1
+    if (rootArg < 0) {
+      continue
+    }
+    const root = Math.sqrt(rootArg)
+    lowerBranch.push({ x: rho - root, y: rho })
+    upperBranch.push({ x: rho + root, y: rho })
+  }
+
+  return [...lowerBranch, ...upperBranch.reverse()]
+}
+
+function mapStatePoint(
+  point: ChartPoint,
+  plot: { left: number; top: number; width: number; height: number },
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number,
+) {
+  const x = plot.left + ((point.x - xMin) / (xMax - xMin)) * plot.width
+  const y = plot.top + plot.height - ((point.y - yMin) / (yMax - yMin)) * plot.height
+  return { x, y }
+}
+
+function svgPoints(points: ChartPoint[]) {
+  return points
+    .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
+    .map((point) => `${point.x.toFixed(2)},${point.y.toFixed(2)}`)
+    .join(' ')
+}
+
+function buildLinearTicks(min: number, max: number, count: number) {
+  if (count <= 1 || max <= min) {
+    return [min]
+  }
+  const step = (max - min) / (count - 1)
+  return Array.from({ length: count }, (_, index) => min + step * index)
+}
+
+function formatAxisTick(value: number) {
+  if (Math.abs(value) < 1e-9) {
+    return '0'
+  }
+  if (Math.abs(value) >= 10) {
+    return value.toFixed(0)
+  }
+  if (Math.abs(value) >= 1) {
+    return value.toFixed(1).replace(/\.0$/, '')
+  }
+  return value.toFixed(2).replace(/0$/, '')
+}
+
 function TurnkeyStatePanel({
   snapshot,
   params,
@@ -907,15 +974,40 @@ function TurnkeyStatePanel({
 }) {
   const detuning = snapshot?.lockedDetuning ?? params.laserDetuning
   const power = snapshot?.primaryEnergy ?? 0
-  const [xMin, xMax] = TURNKEY_STATE_DETUNING_RANGE
-  const [yMin, yMax] = TURNKEY_STATE_POWER_RANGE
-  const xNorm = clamp01((detuning - xMin) / (xMax - xMin))
-  const yNorm = clamp01((power - yMin) / (yMax - yMin))
-  const plot = { left: 78, top: 34, width: 460, height: 312 }
+  const pumpSquared = Math.max(params.pump * params.pump, 1e-6)
+  const yMin = 0
+  const yMax = Math.max(0.8, pumpSquared * 1.18, power * 1.35)
+  const kerrTilt = buildKerrTilt(params.pump, yMax)
+  const lockingOffset = snapshot
+    ? detuning + TURNKEY_LOCKING_POWER_COEFFICIENT * power
+    : params.laserDetuning
+  const lockingLine = [
+    { x: lockingOffset, y: yMin },
+    {
+      x: lockingOffset - TURNKEY_LOCKING_POWER_COEFFICIENT * yMax,
+      y: yMax,
+    },
+  ]
+  const xCandidates = [
+    0,
+    detuning,
+    lockingLine[0].x,
+    lockingLine[1].x,
+    ...kerrTilt.map((point) => point.x),
+  ].filter((value) => Number.isFinite(value))
+  const rawXMin = Math.min(...xCandidates)
+  const rawXMax = Math.max(...xCandidates)
+  const xPadding = Math.max(0.35, (rawXMax - rawXMin) * 0.08)
+  const xMin = rawXMin - xPadding
+  const xMax = rawXMax + xPadding
+  const plot = { left: 82, top: 26, width: 438, height: 292 }
   const plotRight = plot.left + plot.width
   const plotBottom = plot.top + plot.height
-  const dotX = plot.left + xNorm * plot.width
-  const dotY = plotBottom - yNorm * plot.height
+  const statePoint = mapStatePoint({ x: detuning, y: power }, plot, xMin, xMax, yMin, yMax)
+  const kerrPoints = kerrTilt.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
+  const lockPoints = lockingLine.map((point) => mapStatePoint(point, plot, xMin, xMax, yMin, yMax))
+  const xTicks = buildLinearTicks(xMin, xMax, 5)
+  const yTicks = buildLinearTicks(yMin, yMax, 4)
 
   return (
     <section className="visual-panel state-diagram-panel">
@@ -927,7 +1019,7 @@ function TurnkeyStatePanel({
             <strong>{formatNumber(detuning)}</strong>
           </span>
           <span className="visual-header-stat">
-            <span>{labels.energy}</span>
+            <span>{labels.intracavityPower}</span>
             <strong>{formatNumber(power)}</strong>
           </span>
         </div>
@@ -936,28 +1028,12 @@ function TurnkeyStatePanel({
         className="state-diagram"
         viewBox="0 0 620 410"
         role="img"
-        aria-label={`${labels.solitonState}: ${labels.lockedDetuning} ${formatNumber(detuning)}, ${labels.energy} ${formatNumber(power)}`}
+        aria-label={`${labels.solitonState}: ${labels.lockedDetuning} ${formatNumber(detuning)}, ${labels.intracavityPower} ${formatNumber(power)}`}
       >
         <defs>
-          <linearGradient id="miRegion" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#8fd2cc" />
-            <stop offset="100%" stopColor="#eef8f7" />
-          </linearGradient>
-          <linearGradient id="solitonRegion" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#efb8aa" />
-            <stop offset="100%" stopColor="#fff8f5" />
-          </linearGradient>
-          <marker
-            id="stateArrow"
-            markerHeight="8"
-            markerWidth="8"
-            orient="auto"
-            refX="7"
-            refY="4"
-            viewBox="0 0 8 8"
-          >
-            <path d="M 0 0 L 8 4 L 0 8 z" fill="#111827" />
-          </marker>
+          <clipPath id="turnkeyStateClip">
+            <rect x={plot.left} y={plot.top} width={plot.width} height={plot.height} />
+          </clipPath>
         </defs>
 
         <rect
@@ -966,95 +1042,76 @@ function TurnkeyStatePanel({
           width={plot.width}
           height={plot.height}
           fill="#fbfcfd"
-          stroke="#111827"
-          strokeWidth="2.5"
-        />
-        <path
-          d={`M ${plot.left} ${plot.top} H ${plot.left + 325} C ${plot.left + 290} ${plot.top + 95} ${plot.left + 250} ${plotBottom - 80} ${plot.left + 215} ${plotBottom} H ${plot.left} Z`}
-          fill="url(#miRegion)"
-        />
-        <path
-          d={`M ${plot.left + 325} ${plot.top} H ${plotRight} V ${plotBottom} H ${plot.left + 215} C ${plot.left + 245} ${plotBottom - 120} ${plot.left + 285} ${plot.top + 120} ${plot.left + 325} ${plot.top} Z`}
-          fill="url(#solitonRegion)"
-        />
-        <path
-          d={`M ${plot.left + 210} ${plot.top} V ${plotBottom}`}
-          stroke="#777"
-          strokeDasharray="15 14"
-          strokeWidth="2"
-        />
-        <line
-          x1={plot.left + 210}
-          y1={plotBottom}
-          x2={plotRight}
-          y2={plot.top + 46}
-          stroke="#ff2633"
-          strokeDasharray="12 8"
-          strokeWidth="4"
-        />
-        <path
-          d={`M ${plot.left + 4} ${plotBottom - 52} C ${plot.left + 132} ${plotBottom - 5} ${plot.left + 298} ${plot.top + 86} ${plot.left + 370} ${plot.top + 46} C ${plot.left + 405} ${plot.top + 28} ${plot.left + 376} ${plot.top + 118} ${plot.left + 340} ${plot.top + 185} C ${plot.left + 293} ${plot.top + 270} ${plot.left + 344} ${plotBottom - 28} ${plotRight - 4} ${plotBottom - 10}`}
-          fill="none"
-          stroke="#293a95"
-          strokeWidth="5"
-        />
-        <path
-          d={`M ${plot.left} ${plotBottom - 92} C ${plot.left + 145} ${plotBottom - 92} ${plot.left + 208} ${plotBottom - 90} ${plot.left + 240} ${plotBottom - 92} C ${plot.left + 268} ${plotBottom - 95} ${plot.left + 310} ${plotBottom - 70} ${plotRight} ${plotBottom - 95}`}
-          fill="none"
-          stroke="#a5abb2"
-          strokeWidth="2.5"
-        />
-        <path
-          d={`M ${plot.left + 125} ${plotBottom - 28} C ${plot.left + 205} ${plotBottom - 74} ${plot.left + 285} ${plotBottom - 140} ${plot.left + 340} ${plotBottom - 178}`}
-          fill="none"
-          markerEnd="url(#stateArrow)"
-          stroke="#111827"
-          strokeWidth="2.5"
-        />
-        <path
-          d={`M ${plot.left + 348} ${plotBottom - 178} C ${plot.left + 300} ${plotBottom - 126} ${plot.left + 228} ${plotBottom - 88} ${plot.left + 188} ${plotBottom - 80}`}
-          fill="none"
-          markerEnd="url(#stateArrow)"
-          stroke="#111827"
-          strokeWidth="2.5"
-        />
-        <path
-          d={`M ${plot.left + 188} ${plotBottom - 80} C ${plot.left + 130} ${plotBottom - 70} ${plot.left + 110} ${plotBottom - 58} ${plot.left + 175} ${plotBottom - 50} C ${plot.left + 265} ${plotBottom - 39} ${plot.left + 375} ${plotBottom - 15} ${plotRight - 42} ${plotBottom}`}
-          fill="none"
-          markerEnd="url(#stateArrow)"
-          stroke="#111827"
-          strokeWidth="2.5"
-        />
-        <circle
-          className="state-diagram-dot"
-          cx={dotX}
-          cy={dotY}
-          r="9"
-          fill="#050505"
-          stroke="#ffffff"
-          strokeWidth="2"
+          stroke="#1f2937"
+          strokeWidth="1.8"
         />
 
-        <text className="state-diagram-region-label state-diagram-mi" x={plot.left + 255} y={plot.top + 42}>
-          {labels.miComb}
-        </text>
-        <text className="state-diagram-region-label state-diagram-soliton" x={plotRight - 116} y={plot.top + 42}>
-          {labels.soliton}
-        </text>
-        <text className="state-diagram-axis" x={plot.left + plot.width / 2} y="394" textAnchor="middle">
+        {xTicks.map((tick) => {
+          const mapped = mapStatePoint({ x: tick, y: yMin }, plot, xMin, xMax, yMin, yMax)
+          return (
+            <g key={`x-${tick}`}>
+              <line
+                className="state-diagram-grid-line"
+                x1={mapped.x}
+                x2={mapped.x}
+                y1={plot.top}
+                y2={plotBottom}
+              />
+              <line className="state-diagram-tick" x1={mapped.x} x2={mapped.x} y1={plotBottom} y2={plotBottom + 5} />
+              <text className="state-diagram-tick-label" x={mapped.x} y={plotBottom + 19} textAnchor="middle">
+                {formatAxisTick(tick)}
+              </text>
+            </g>
+          )
+        })}
+        {yTicks.map((tick) => {
+          const mapped = mapStatePoint({ x: xMin, y: tick }, plot, xMin, xMax, yMin, yMax)
+          return (
+            <g key={`y-${tick}`}>
+              <line
+                className="state-diagram-grid-line"
+                x1={plot.left}
+                x2={plotRight}
+                y1={mapped.y}
+                y2={mapped.y}
+              />
+              <line className="state-diagram-tick" x1={plot.left - 5} x2={plot.left} y1={mapped.y} y2={mapped.y} />
+              <text className="state-diagram-tick-label" x={plot.left - 10} y={mapped.y + 4} textAnchor="end">
+                {formatAxisTick(tick)}
+              </text>
+            </g>
+          )
+        })}
+
+        <g clipPath="url(#turnkeyStateClip)">
+          <polyline className="state-diagram-kerr" points={svgPoints(kerrPoints)} />
+          <polyline className="state-diagram-locking" points={svgPoints(lockPoints)} />
+        </g>
+        <circle
+          className="state-diagram-dot"
+          cx={statePoint.x}
+          cy={statePoint.y}
+          r="7.5"
+        />
+
+        <g className="state-diagram-legend" transform={`translate(${plot.left + 12} ${plot.top + 18})`}>
+          <line className="state-diagram-kerr" x1="0" x2="28" y1="0" y2="0" />
+          <text x="36" y="4">{labels.kerrTilt}</text>
+          <line className="state-diagram-locking" x1="128" x2="156" y1="0" y2="0" />
+          <text x="164" y="4">{labels.lockingLine}</text>
+        </g>
+
+        <text className="state-diagram-axis" x={plot.left + plot.width / 2} y="388" textAnchor="middle">
           {labels.frequencyDetuning}
         </text>
         <text
           className="state-diagram-axis"
           textAnchor="middle"
-          transform="rotate(-90 26 190)"
-          x="26"
-          y="190"
+          transform="rotate(-90 24 172)"
+          x="24"
+          y="172"
         >
           {labels.intracavityPower}
-        </text>
-        <text className="state-diagram-tick-label" x={plot.left + 210} y={plotBottom + 32} textAnchor="middle">
-          0
         </text>
       </svg>
     </section>
@@ -1491,13 +1548,6 @@ function clampControlValue(value: number, min: number, max: number) {
     return min
   }
   return Math.min(max, Math.max(min, value))
-}
-
-function clamp01(value: number) {
-  if (!Number.isFinite(value)) {
-    return 0
-  }
-  return Math.min(1, Math.max(0, value))
 }
 
 function controlRange(control: ControlDefinition, gridSize: GridSize) {

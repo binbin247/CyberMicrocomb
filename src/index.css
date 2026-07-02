@@ -559,33 +559,55 @@ button {
   font-family: Inter, system-ui, sans-serif;
 }
 
-.state-diagram-region-label {
-  font-size: 26px;
-  font-weight: 800;
+.state-diagram-grid-line {
+  stroke: #e4e9ef;
+  stroke-width: 1;
 }
 
-.state-diagram-mi {
-  fill: #1269b6;
+.state-diagram-tick {
+  stroke: #1f2937;
+  stroke-width: 1.2;
 }
 
-.state-diagram-soliton {
-  fill: #e9272f;
+.state-diagram-kerr {
+  fill: none;
+  stroke: #111827;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.state-diagram-locking {
+  fill: none;
+  stroke: #e9272f;
+  stroke-dasharray: 8 7;
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.state-diagram-legend text {
+  fill: #28313d;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .state-diagram-axis {
   fill: #111827;
-  font-size: 21px;
+  font-size: 16px;
   font-weight: 700;
 }
 
 .state-diagram-tick-label {
-  fill: #111827;
-  font-size: 18px;
-  font-weight: 700;
+  fill: #667386;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .state-diagram-dot {
+  fill: #050505;
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+  stroke: #ffffff;
+  stroke-width: 2;
 }
 
 .waterfall-canvas {
